@@ -15,6 +15,12 @@ export default defineNuxtConfig({
   ],
   // @ts-ignore
   vite: {
+    server: {
+      host: true,
+      hmr: {
+        // clientPort: 80  // 当暴露给外网的端口和启动端口不一致时，需要这里设置为外网的端口
+      }
+    },
     plugins: [
       VueI18nVitePlugin({
         include: [

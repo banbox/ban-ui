@@ -21,9 +21,10 @@
 
 <script setup lang="ts">
 import {
-  ActionType, Chart, DomPosition, FormatDateType, init, Nullable, PaneOptions, Styles, utils,
-  Indicator, dispose, TooltipIconPosition, registerOverlay
+  ActionType, Chart, DomPosition, FormatDateType, init, Nullable, PaneOptions, Styles,
+  Indicator
 } from 'klinecharts'
+import kc from 'klinecharts'
 import _ from "lodash"
 
 import {
@@ -43,7 +44,7 @@ import {getDefStyles, getThemeStyles, adjustFromTo, makeFormatDate} from "~/comp
 import {def} from "@vue/shared";
 import overlays from '~/composables/kline/overlays'
 
-overlays.forEach(o => { registerOverlay(o) })
+overlays.forEach(o => { kc.registerOverlay(o) })
 
 type Props = {
   theme?: string,
@@ -230,7 +231,7 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('resize', documentResize)
   if(chartRef.value){
-    dispose(chartRef.value!)
+    kc.dispose(chartRef.value!)
   }
 })
 

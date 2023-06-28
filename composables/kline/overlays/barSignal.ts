@@ -12,7 +12,8 @@
  * limitations under the License.
  */
 
-import {OverlayFigure, OverlayTemplate, LineType} from 'klinecharts'
+import {OverlayFigure, OverlayTemplate} from 'klinecharts'
+import kc from 'klinecharts'
 
 const barSignal: OverlayTemplate = {
   name: 'barSignal',
@@ -39,7 +40,7 @@ const barSignal: OverlayTemplate = {
           type: 'line',
           attrs: { coordinates: [{ x: startX, y: coord.y }, { x: horzEndX, y: coord.y }] },
           ignoreEvent: true,
-          styles: {...styles, style: LineType.Dashed}
+          styles: {...styles, style: kc.LineType.Dashed}
         },
         {
           type: 'polygon',

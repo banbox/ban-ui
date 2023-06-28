@@ -46,7 +46,7 @@ export default class MyDatafeed implements Datafeed{
         price = s.price ?? s.low
       }
       extendData.text = s.action + ':' + price
-      return {name: 'barSignal', extendData, points: [{timestamp: s.time, value: price}]}
+      return {name: 'barSignal', extendData, points: [{timestamp: s.bar_ms ?? s.time, value: price}]}
     })
     return await {data: kline_data, lays: all_sigs}
   }

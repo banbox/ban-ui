@@ -1,5 +1,5 @@
 
-import { KLineData, Styles, DeepPartial } from 'klinecharts'
+import {KLineData, Styles, DeepPartial, OverlayCreate} from 'klinecharts'
 
 export interface SymbolInfo {
   ticker: string
@@ -26,11 +26,16 @@ export type PaneInds = {
   inds: string[]
 }
 
+export type KData = {
+  data: KLineData[],
+  lays?: OverlayCreate[]
+}
+
 export type DatafeedSubscribeCallback = (data: KLineData) => void
 
 export interface Datafeed {
   searchSymbols (search?: string): Promise<SymbolInfo[]>
-  getHistoryKLineData (symbol: SymbolInfo, period: Period, from: number, to: number): Promise<KLineData[]>
+  getHistoryKLineData (symbol: SymbolInfo, period: Period, from: number, to: number): Promise<KData>
   subscribe (symbol: SymbolInfo, period: Period, callback: DatafeedSubscribeCallback): void
   unsubscribe (symbol: SymbolInfo, period: Period): void
 }

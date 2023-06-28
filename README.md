@@ -7,7 +7,8 @@
 
 
 # K线图
-主要UI从[KLineChart Pro](https://pro.klinecharts.com/getting-started.html)改写(KLineChart Pro使用Solid-js，本项目改写为vue)
+主要UI从[KLineChart Pro](https://pro.klinecharts.com/getting-started.html)改写(KLineChart Pro使用Solid-js，本项目改写为vue)  
+K线UI工具栏可参考：[AICoin](https://www.aicoin.com/chart/okcoinfutures_btcquarter)  
 
 # 其他注意
  **多语言i18n**  

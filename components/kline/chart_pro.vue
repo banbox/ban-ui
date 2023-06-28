@@ -178,6 +178,8 @@ onMounted(() => {
     priceUnitDom = document.createElement('span')
     priceUnitDom.className = 'klinecharts-pro-price-unit'
     priceUnitContainer?.appendChild(priceUnitDom)
+
+    chart.value?.setTimezone('Africa/Abidjan')
   }
 
   _panes.forEach(pane => {
@@ -193,8 +195,9 @@ onMounted(() => {
     const get = async () => {
       const [to] = adjustFromTo(_period, timestamp!, 1)
       const [from] = adjustFromTo(_period, to, 500)
-      const kLineDataList = await props.datafeed.getHistoryKLineData(_symbol.value, _period, from, to)
-      chart.value?.applyMoreData(kLineDataList, kLineDataList.length > 0)
+      const kdata = await props.datafeed.getHistoryKLineData(_symbol.value, _period, from, to)
+      chart.value?.applyMoreData(kdata.data, kdata.data.length > 0)
+      kdata.lays?.forEach(o => chart.value?.createOverlay(o))
       loading = false
     }
     get()
@@ -258,8 +261,9 @@ watch([_period, _symbol], ([period, symbol], [prev_period, prev_symbol]) => {
     loadingChart.value = true
     const get = async () => {
       const [from, to] = adjustFromTo(p, new Date().getTime(), 500)
-      const kLineDataList = await props.datafeed.getHistoryKLineData(s, p, from, to)
-      chart.value?.applyNewData(kLineDataList, kLineDataList.length > 0)
+      const kdata = await props.datafeed.getHistoryKLineData(s, p, from, to)
+      chart.value?.applyNewData(kdata.data, kdata.data.length > 0)
+      kdata.lays?.forEach(o => chart.value?.createOverlay(o))
       props.datafeed.subscribe(s, p, data => {
         chart.value?.updateData(data)
       })

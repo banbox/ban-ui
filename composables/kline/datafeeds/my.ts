@@ -1,5 +1,5 @@
 import {KLineData} from "klinecharts";
-import {Datafeed, SymbolInfo, Period, DatafeedSubscribeCallback} from "~/components/kline/types";
+import {Datafeed, SymbolInfo, Period, DatafeedSubscribeCallback, KData} from "~/components/kline/types";
 import {$fetch} from "ofetch";
 
 export default class MyDatafeed implements Datafeed{
@@ -24,10 +24,10 @@ export default class MyDatafeed implements Datafeed{
     ]
   }
 
-  async getHistoryKLineData(symbol: SymbolInfo, period: Period, from: number, to: number): Promise<KLineData[]> {
+  async getHistoryKLineData(symbol: SymbolInfo, period: Period, from: number, to: number): Promise<KData> {
     const query = {symbol: symbol.ticker, timeframe: period.timeframe, exchange: symbol.exchange, from, to}
     const rsp = await $fetch('/api/kline/hist', {query})
-    return await (rsp.data || []).map((data: any) => ({
+    const kline_data = (rsp.data || []).map((data: any) => ({
       timestamp: data[0],
       open: data[1],
       high: data[2],
@@ -35,6 +35,20 @@ export default class MyDatafeed implements Datafeed{
       close: data[4],
       volume: data[5]
     }))
+    const all_sigs = (rsp.signals || []).map((s: any) => {
+      let extendData: any, price: number
+      if(s.action == 'sell'){
+        extendData = {postion: 'top', bgColor: 'red'}
+        price = s.price ?? s.high
+      }
+      else{
+        extendData = {postion: 'bottom', bgColor: 'green'}
+        price = s.price ?? s.low
+      }
+      extendData.text = s.action + ':' + price
+      return {name: 'barSignal', extendData, points: [{timestamp: s.time, value: price}]}
+    })
+    return await {data: kline_data, lays: all_sigs}
   }
 
   async searchSymbols(search?: string): Promise<SymbolInfo[]> {

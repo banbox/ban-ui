@@ -16,13 +16,15 @@ import eightWaves from './eightWaves'
 import anyWaves from './anyWaves'
 import abcd from './abcd'
 import xabcd from './xabcd'
+import barSignal from "./barSignal";
 
 const overlays = [
   arrow,
   circle, rect, triangle, parallelogram,
   fibonacciCircle, fibonacciSegment, fibonacciSpiral,
   fibonacciSpeedResistanceFan, fibonacciExtension, gannBox,
-  threeWaves, fiveWaves, eightWaves, anyWaves, abcd, xabcd
+  threeWaves, fiveWaves, eightWaves, anyWaves, abcd, xabcd,
+  barSignal
 ]
 
 export default overlays

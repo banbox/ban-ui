@@ -5,7 +5,7 @@ import {$fetch} from "ofetch";
 export default class MyDatafeed implements Datafeed{
 
   getDefaultSymbol(): SymbolInfo {
-    return {ticker: 'BTC/USDT', exchange: 'binance'}
+    return {ticker: 'BTC/USDT.P', exchange: 'binance'}
   }
 
   canSymbolSearch(): boolean {

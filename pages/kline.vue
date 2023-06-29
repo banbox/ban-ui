@@ -7,7 +7,7 @@ import KLineCharPro from "~/components/kline/chart_pro.vue"
 import {MyDatafeed} from "~/composables/kline/datafeeds"
 import {reactive, ref} from "vue"
 
-const watermark = ref('<img width="504" src="/digo_chain.png"/>')
+const watermark = ref('<img width="504" src="/watermark.png"/>')
 
 const datafeed = ref(new MyDatafeed())
 

@@ -53,7 +53,8 @@ type Props = {
   periods?: Period[],
   panes?: PaneInds[],
   styles?: Styles,
-  datafeed: Datafeed
+  datafeed: Datafeed,
+  watermark?: string | Node
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -68,9 +69,10 @@ const props = withDefaults(defineProps<Props>(), {
     { multiplier: 2, timespan: 'hour', text: '2H', timeframe: '2h' },
     { multiplier: 4, timespan: 'hour', text: '4H', timeframe: '4h' },
     { multiplier: 1, timespan: 'day', text: 'D', timeframe: '1d' },
-    // { multiplier: 1, timespan: 'week', text: 'W', timeframe: '1w' },
-    // { multiplier: 1, timespan: 'month', text: 'M', timeframe: '1M' },
-    // { multiplier: 1, timespan: 'year', text: 'Y', timeframe: '1y' }
+    { multiplier: 3, timespan: 'day', text: 'D', timeframe: '3d' },
+    { multiplier: 1, timespan: 'week', text: 'W', timeframe: '1w' },
+    { multiplier: 1, timespan: 'month', text: 'M', timeframe: '1M' },
+    //{ multiplier: 1, timespan: 'year', text: 'Y', timeframe: '1y' }
   ]),
   panes: () => ([
       {name: 'candle_pane', inds: []},
@@ -174,6 +176,18 @@ onMounted(() => {
     }
   })
   if (chart) {
+    const watermarkContainer = chart.value?.getDom('candle_pane', DomPosition.Main)
+    if (watermarkContainer) {
+      let watermark = document.createElement('div')
+      watermark.className = 'klinecharts-pro-watermark'
+      if (kc.utils.isString(props.watermark)) {
+        const str = (props.watermark as string).replace(/(^\s*)|(\s*$)/g, '')
+        watermark.innerHTML = str
+      } else {
+        watermark.appendChild(props.watermark as Node)
+      }
+      watermarkContainer.appendChild(watermark)
+    }
     const priceUnitContainer = chart.value?.getDom('candle_pane', DomPosition.YAxis)
     priceUnitDom = document.createElement('span')
     priceUnitDom.className = 'klinecharts-pro-price-unit'

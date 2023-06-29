@@ -262,6 +262,7 @@ watch([_period, _symbol], ([period, symbol], [prev_period, prev_symbol]) => {
     const get = async () => {
       const [from, to] = adjustFromTo(p, new Date().getTime(), 500)
       const kdata = await props.datafeed.getHistoryKLineData(s, p, from, to)
+      chart.value?.removeOverlay()
       chart.value?.applyNewData(kdata.data, kdata.data.length > 0)
       kdata.lays?.forEach(o => chart.value?.createOverlay(o))
       props.datafeed.subscribe(s, p, data => {

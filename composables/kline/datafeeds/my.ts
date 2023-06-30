@@ -59,7 +59,7 @@ export default class MyDatafeed implements Datafeed{
     return await (rsp.data || []).map((data: any) => ({
       ticker: data.symbol,
       name: data.symbol,
-      shortName: data.symbol,
+      shortName: data.short_name,
       market: 'spot',
       exchange: data.exchange,
       priceCurrency: 'USDT',

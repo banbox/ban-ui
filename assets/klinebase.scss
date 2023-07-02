@@ -22,3 +22,26 @@ $c-popover-background-dark: #1c1c1f;
 $c-text-dark: #f8f8f8;
 $c-text-second-dark: #929AA5;
 $c-border-dark: #292929;
+
+/* 自定义样式 */
+$c-bar-up-color: rgb(14, 203, 129);
+$c-bar-down-color: rgb(246, 70, 93);
+
+/*滚动条*/
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #777 #ddd;
+}
+
+/* Works on Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 7px;
+}
+*::-webkit-scrollbar-track {
+  background: #ddd;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: #777;
+  border-radius: 20px;
+  border: none;
+}

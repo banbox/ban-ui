@@ -9,18 +9,12 @@ const backendHost = process.env.inter_aipp_host || 'http://127.0.0.1:8000'
 export default defineNuxtConfig({
   // @ts-ignore
   modules: [
-    //'@sidebase/nuxt-auth',
+    '@element-plus/nuxt',
     '@pinia/nuxt',
     'nuxt-lodash'
   ],
   // @ts-ignore
   vite: {
-    server: {
-      host: true,
-      hmr: {
-        // clientPort: 80  // 当暴露给外网的端口和启动端口不一致时，需要这里设置为外网的端口
-      }
-    },
     plugins: [
       VueI18nVitePlugin({
         include: [
@@ -37,6 +31,9 @@ export default defineNuxtConfig({
         changeOrigin: true
       }
     }
+  },
+  elementPlus: {
+    importStyle: 'scss'
   },
   lodash: {
     prefix: "_",

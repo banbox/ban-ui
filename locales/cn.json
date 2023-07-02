@@ -1,4 +1,8 @@
 {
+  "symbol": "交易对",
+  "price": "价格",
+  "up_down": "涨跌",
+
   "indicator": "指标",
   "main_indicator": "主图指标",
   "sub_indicator": "副图指标",

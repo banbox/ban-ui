@@ -1,11 +1,17 @@
 <template>
-  <KLineCharPro ref="chart" :datafeed="datafeed" :watermark="watermark" :symbol="symbol" :periods="periods"/>
+  <el-container class="kline-body">
+    <KLineCharPro ref="chart" :datafeed="datafeed" :watermark="watermark" :symbol="symbol" :periods="periods"/>
+    <el-aside class="slide">
+      <TopChange/>
+    </el-aside>
+  </el-container>
 </template>
 
 <script setup lang="ts">
 import KLineCharPro from "~/components/kline/chart_pro.vue"
 import {MyDatafeed} from "~/composables/kline/datafeeds"
 import {reactive, ref} from "vue"
+import TopChange from "~/components/topChange.vue";
 
 const watermark = ref('<img width="504" src="/watermark.png"/>')
 
@@ -28,5 +34,11 @@ body{
 }
 .#{$prefix-cls}{
   height: 100%;
+}
+.kline-body{
+  height: 100%;
+  .klinecharts-pro{
+    flex-grow: 1;
+  }
 }
 </style>

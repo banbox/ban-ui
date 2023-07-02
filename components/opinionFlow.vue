@@ -1,11 +1,11 @@
 <template>
   <div class="opinion-box">
     <div class="item" v-for="(item, index) in data_list" :key="index">
-      <div class="head">
+      <div class="op-head">
         <span class="nick">{{item.nick_name}}</span>
         <span class="date">{{item.create_at}}</span>
       </div>
-      <div class="content">{{item.content}}</div>
+      <div class="op-content" v-html="item.content"></div>
     </div>
   </div>
 </template>
@@ -34,7 +34,7 @@ onMounted(()=>{
 
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 @import "~/assets/klinebase.scss";
 
 .opinion-box{
@@ -44,23 +44,26 @@ onMounted(()=>{
   .item{
     padding: 5px 15px;
     border-bottom: 1px solid #eee;
-    .head{
-      font-size: 12px;
-      height: 30px;
-      line-height: 30px;
-      .nick{
-        color: #{$c-active-color};
-      }
-      .date{
-        color: #888;
-        margin-left: 10px;
-      }
-    }
+  }
+}
+.op-head{
+  font-size: 12px;
+  height: 30px;
+  line-height: 30px;
+  .nick{
+    color: #{$c-active-color};
+  }
+  .date{
+    color: #888;
+    margin-left: 10px;
+  }
+}
 
-    .content{
-      font-size: 14px;
-      color: #444;
-    }
+.op-content{
+  font-size: 14px;
+  color: #444;
+  img{
+    width: 100%;
   }
 }
 </style>

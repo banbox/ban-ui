@@ -1,3 +1,6 @@
+# 项目配置
+/public/img
+
 node_modules
 *.log*
 .nuxt

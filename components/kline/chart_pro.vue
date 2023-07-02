@@ -1,7 +1,7 @@
 <template>
   <div class="klinecharts-pro">
     <i class="icon-close klinecharts-pro-load-icon"/>
-    <KlineSymbolModal v-model="showSymbolModal" :datafeed="datafeed" @select="_symbol = $event"/>
+    <KlineSymbolModal v-model="showSymbolModal" :datafeed="datafeed" @select="Object.assign(_symbol, $event)"/>
     <KlineIndSearchModal v-model="showIndSearchModal" :panes="_panes" @change="setIndicator"/>
     <KlineSettingModal v-model="showSettingModal" :currentStyles="styles"
                        @change="setStyles" @reset="resetStyle"/>

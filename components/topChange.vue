@@ -3,26 +3,26 @@
     <div class="tg-row header">
       <div class="field symbol" @click="clickSort('symbol')">
         <span>{{$t('symbol')}}</span>
-        <el-icon color="#1677ff">
+        <el-icon :class="{active: sort_key == 'symbol'}">
           <SortDown v-if="symbol_down"/><SortUp v-else/>
         </el-icon>
       </div>
       <div class="field price" @click="clickSort('price')">
         <span>{{$t('price')}}</span>
-        <el-icon color="#1677ff">
+        <el-icon :class="{active: sort_key == 'price'}">
           <SortDown v-if="price_down"/><SortUp v-else/>
         </el-icon>
       </div>
       <div class="field chg" @click="clickSort('chg')">
         <span>{{$t('up_down')}}</span>
-        <el-icon color="#1677ff">
+        <el-icon :class="{active: sort_key == 'chg'}">
           <SortDown v-if="chg_down"/><SortUp v-else/>
         </el-icon>
       </div>
     </div>
     <div class="list-box">
       <div class="tg-row item" v-for="(item, index) in data_list" :key="index"
-        :class="item.chg >= 0 ? 'up': 'down'">
+        :class="item.chg >= 0 ? 'up': 'down'" @click="clickRow(item)">
         <span class="field symbol">
           <span class="base">{{item.base_s}}</span>
           <span class="quote">/{{item.quote_s}}</span>
@@ -37,7 +37,7 @@
 <script setup lang="ts">
 import {SortDown, SortUp} from "@element-plus/icons-vue";
 import {useNuxtApp} from "#app";
-import {onMounted, reactive, ref} from "vue";
+import {defineEmits, onMounted, reactive, ref} from "vue";
 import {getApi} from "~/utils/netio";
 const {t} = useNuxtApp()
 const symbol_down = ref(true)
@@ -47,6 +47,11 @@ const vol_down = ref(true)
 const sort_key = ref('chg')
 const data_list = reactive<any[]>([])
 let loop_timer: ReturnType<typeof setTimeout>
+
+const emit = defineEmits<{
+  select: [symbol: string]
+}>()
+
 
 onMounted(async () => {
   await updateWrap()
@@ -112,6 +117,10 @@ function clickSort(key: string){
   sort_key.value = key
   doArrSort()
 }
+
+function clickRow(row: any){
+  emit('select', `${row.base_s}/${row.quote_s}`)
+}
 </script>
 
 <style scoped lang="scss">
@@ -166,8 +175,13 @@ function clickSort(key: string){
   &.header{
     color: rgb(112, 122, 138);
     padding-right: 20px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #eee;
     .field{
       cursor: pointer;
+    }
+    .el-icon.active{
+      color: $c-active-color
     }
   }
 }

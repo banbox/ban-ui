@@ -2,7 +2,7 @@
   <el-container class="kline-body">
     <KLineCharPro ref="chart" :datafeed="datafeed" :watermark="watermark" :symbol="symbol" :periods="periods"/>
     <el-aside class="slide">
-      <TopChange/>
+      <TopChange @select="clickSymbol"/>
     </el-aside>
   </el-container>
 </template>
@@ -20,7 +20,9 @@ const datafeed = ref(new MyDatafeed())
 const symbol = reactive(datafeed.value.getDefaultSymbol())
 const periods = reactive(datafeed.value.getAllPeriods())
 
-
+function clickSymbol(val: string){
+  symbol.ticker = val
+}
 </script>
 
 <style lang="scss">

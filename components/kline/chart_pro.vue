@@ -38,7 +38,7 @@ import {
 } from "#components";
 
 import {PaneInds, Period, SymbolInfo, Datafeed} from './types'
-import {computed, defineProps, onMounted, onUnmounted, reactive, ref, toRaw, watchEffect} from "vue";
+import {computed, defineProps, onMounted, onUnmounted, reactive, ref, toRaw, watch, watchEffect} from "vue";
 import Loading from "~/components/kline/loading.vue";
 import {getDefStyles, getThemeStyles, adjustFromTo, makeFormatDate} from "~/composables/kline/coms";
 import {def} from "@vue/shared";
@@ -88,7 +88,7 @@ const showScreenShotModal = ref(false)
 const showIndCfgModal = ref(false)
 const loadingChart = ref(false)
 const showDrawingBar = ref(true)
-const _symbol = ref<SymbolInfo>(props.symbol)
+const _symbol = reactive<SymbolInfo>(props.symbol)
 const chartRef = ref<HTMLElement>()
 const chart = ref<Nullable<Chart>>(null)
 const screenShotUrl = ref('')
@@ -209,7 +209,7 @@ onMounted(() => {
     const get = async () => {
       const [to] = adjustFromTo(_period, timestamp!, 1)
       const [from] = adjustFromTo(_period, to, 500)
-      const kdata = await props.datafeed.getHistoryKLineData(_symbol.value, _period, from, to)
+      const kdata = await props.datafeed.getHistoryKLineData(_symbol, _period, from, to)
       chart.value?.applyMoreData(kdata.data, kdata.data.length > 0)
       kdata.lays?.forEach(o => chart.value?.createOverlay(o))
       loading = false
@@ -254,7 +254,7 @@ onUnmounted(() => {
 
 watchEffect(() => {
   if(!priceUnitDom)return
-  const s = _symbol.value
+  const s = _symbol
   if (s?.priceCurrency) {
     priceUnitDom.innerHTML = s?.priceCurrency.toLocaleUpperCase()
     priceUnitDom.style.display = 'flex'
@@ -264,28 +264,37 @@ watchEffect(() => {
   chart.value?.setPriceVolumePrecision(s?.pricePrecision ?? 2, s?.volumePrecision ?? 0)
 })
 
+function loadSymbolPeriod(symbol: SymbolInfo, period: Period){
+  const s = symbol
+  const p = period
+  loading = true
+  loadingChart.value = true
+  const get = async () => {
+    const [from, to] = adjustFromTo(p, new Date().getTime(), 500)
+    const kdata = await props.datafeed.getHistoryKLineData(s, p, from, to)
+    chart.value?.removeOverlay()
+    chart.value?.applyNewData(kdata.data, kdata.data.length > 0)
+    kdata.lays?.forEach(o => chart.value?.createOverlay(o))
+    props.datafeed.subscribe(s, p, data => {
+      chart.value?.updateData(data)
+    })
+    loading = false
+    loadingChart.value = false
+  }
+  get()
+}
+
+watch(() => props.symbol, (new_val, old_val) => {
+  Object.assign(_symbol, new_val)
+  loadSymbolPeriod(_symbol, _period)
+})
+
 watch([_period, _symbol], ([period, symbol], [prev_period, prev_symbol]) => {
   if (!loading) {
     if (prev_period) {
       props.datafeed.unsubscribe(prev_symbol!, prev_period)
     }
-    const s = symbol!
-    const p = period!
-    loading = true
-    loadingChart.value = true
-    const get = async () => {
-      const [from, to] = adjustFromTo(p, new Date().getTime(), 500)
-      const kdata = await props.datafeed.getHistoryKLineData(s, p, from, to)
-      chart.value?.removeOverlay()
-      chart.value?.applyNewData(kdata.data, kdata.data.length > 0)
-      kdata.lays?.forEach(o => chart.value?.createOverlay(o))
-      props.datafeed.subscribe(s, p, data => {
-        chart.value?.updateData(data)
-      })
-      loading = false
-      loadingChart.value = false
-    }
-    get()
+    loadSymbolPeriod(symbol, period)
   }
 }, {immediate: true})
 

@@ -1,8 +1,9 @@
 <template>
   <el-container class="kline-body">
     <KLineCharPro ref="chart" :datafeed="datafeed" :watermark="watermark" :symbol="symbol" :periods="periods"/>
-    <el-aside class="slide">
+    <el-aside class="kline-slide">
       <TopChange @select="clickSymbol"/>
+      <OpinionFlow/>
     </el-aside>
   </el-container>
 </template>
@@ -12,6 +13,7 @@ import KLineCharPro from "~/components/kline/chart_pro.vue"
 import {MyDatafeed} from "~/composables/kline/datafeeds"
 import {reactive, ref} from "vue"
 import TopChange from "~/components/topChange.vue";
+import OpinionFlow from "~/components/opinionFlow.vue";
 
 const watermark = ref('<img width="504" src="/watermark.png"/>')
 
@@ -40,6 +42,13 @@ body{
 .kline-body{
   height: 100%;
   .klinecharts-pro{
+    flex-grow: 1;
+  }
+}
+.kline-slide{
+  display: flex;
+  flex-direction: column;
+  .opinion-box{
     flex-grow: 1;
   }
 }

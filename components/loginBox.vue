@@ -6,21 +6,21 @@
       </div>
       <el-form v-if="form_mode == 'register'" ref="regFormRef" :model="regForm" :rules="regRules"
         class="form-area" status-icon>
-        <el-form-item :required="true" prop="binance_uid">
+        <el-form-item prop="binance_uid">
           <el-input v-model.number="regForm.binance_uid" :placeholder="$t('binance_uid')">
             <template #prepend>
               <el-icon><Connection /></el-icon>
             </template>
           </el-input>
         </el-form-item>
-        <el-form-item :required="true" prop="username">
+        <el-form-item prop="username">
           <el-input v-model="regForm.username" :placeholder="$t('input_username')">
             <template #prepend>
               <el-icon><User /></el-icon>
             </template>
           </el-input>
         </el-form-item>
-        <el-form-item :required="true" prop="password">
+        <el-form-item prop="password">
           <el-input v-model="regForm.password" type="password" autocomplete="off" :show-password="showPwd"
                     :placeholder="$t('input_password')">
             <template #prepend>
@@ -28,7 +28,7 @@
             </template>
           </el-input>
         </el-form-item>
-        <el-form-item :required="true" prop="password2">
+        <el-form-item prop="password2">
           <el-input v-model="regForm.password2" type="password" autocomplete="off" :placeholder="$t('input_password2')">
             <template #prepend>
               <el-icon><Key/></el-icon>
@@ -42,14 +42,14 @@
         <el-link @click="form_mode='login'">{{$t('register_to_login')}}</el-link>
       </el-form>
       <el-form v-else ref="loginFormRef" :model="loginForm" :rules="loginRules" class="form-area" status-icon>
-        <el-form-item :required="true">
+        <el-form-item prop="username">
           <el-input v-model="loginForm.username" :placeholder="$t('input_username')">
             <template #prepend>
               <el-icon><User /></el-icon>
             </template>
           </el-input>
         </el-form-item>
-        <el-form-item :required="true">
+        <el-form-item prop="password">
           <el-input v-model="loginForm.password" type="password" autocomplete="off" :show-password="showPwd"
                     :placeholder="$t('input_password')">
             <template #prepend>
@@ -155,6 +155,9 @@ const form_mode = ref('register')
 const showPwd = ref(false)
 const regFormRef = ref<FormInstance>()
 const loginFormRef = ref<FormInstance>()
+if(process.client && localStorage.getItem('user_id')){
+  form_mode.value = 'login'
+}
 
 
 const props = defineProps<{
@@ -196,15 +199,12 @@ const submitForm = async (formEl: FormInstance | undefined) => {
         authData.value = rsp.user
         authToken.value = rsp.token
         showModal.value = false
+        localStorage.setItem('user_id', rsp.user.id)
       }
     })
   })
 }
 
-const resetForm = (formEl: FormInstance | undefined) => {
-  if (!formEl) return
-  formEl.resetFields()
-}
 </script>
 
 <style lang="scss">

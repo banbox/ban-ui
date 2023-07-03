@@ -3,11 +3,12 @@ import getURL from 'requrl'
 import { joinURL } from 'ufo'
 import {useRequestEvent, useAppConfig} from '#app'
 import {AuthProvider, SessionStatus, UseAuthStateReturn} from './types'
-import { useState } from '#imports'
+import {useState, watch} from '#imports'
 // @ts-ignore
 import type { SessionData } from '#auth'
 import {DeepRequired} from "ts-essentials";
 import defu from "defu"
+import {useStorage} from "@vueuse/core";
 
 const defaultsProvider: DeepRequired<AuthProvider> = {
   pages: {
@@ -37,8 +38,15 @@ export const useAuthState = (): UseAuthStateReturn => {
   const authToken = useState('auth:raw-token', () => _rawTokenCookie.value)
   watch(authToken, () => { _rawTokenCookie.value = authToken.value })
 
-  const authData = useState<SessionData | undefined | null>('auth:data', () => undefined)
-  const hasInitialSession = computed(() => !!authData.value)
+  const _rawAuthData = useStorage<SessionData | undefined | null>('auth:data', undefined)
+  const authData = useState<SessionData | undefined | null>('auth:data', () => {
+    try {
+      return JSON.parse(_rawAuthData.value)
+    }catch (e) {
+      return undefined
+    }
+  })
+  watch(authData, () => {_rawAuthData.value = JSON.stringify(authData.value)})
 
   // If session exists, initialize as not loading
   const authDoing = useState<boolean>('auth:loading', () => false)

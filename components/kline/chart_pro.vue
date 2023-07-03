@@ -1,6 +1,7 @@
 <template>
   <div class="klinecharts-pro">
     <i class="icon-close klinecharts-pro-load-icon"/>
+    <LoginBox v-model="showLoginBox"/>
     <KlineSymbolModal v-model="showSymbolModal" :datafeed="datafeed" @select="Object.assign(_symbol, $event)"/>
     <KlineIndSearchModal v-model="showIndSearchModal" :panes="_panes" @change="setIndicator"/>
     <KlineSettingModal v-model="showSettingModal" :currentStyles="styles"
@@ -8,7 +9,7 @@
     <KlineScreenshotModal v-model="showScreenShotModal" :url="screenShotUrl" @close="screenShotUrl = ''"/>
     <KlineIndCfgModal v-model="showIndCfgModal" :chart="chart" :ind-name="indCfg.ind_name" :pane-id="indCfg.paneId"/>
     <KlinePeriodBar :spread="showDrawingBar" :symbol="_symbol" :period="_period" :periods="periods"
-        @clickSymbol="showSymbolModal = true" @clickPeriod="Object.assign(_period, _periods[$event])"
+        @clickSymbol="showSymbolModal = true" @clickPeriod="clickPeriod(_periods[$event])"
         @clickMenu="showDrawingBar = !showDrawingBar" @clickInd="showIndSearchModal = true"
         @clickSetting="showSettingModal = true" @clickShot="clickScreenShot"/>
     <div class="klinecharts-pro-content">
@@ -34,7 +35,8 @@ import {
   KlinePeriodBar,
   KlineScreenshotModal,
   KlineSettingModal,
-  KlineSymbolModal
+  KlineSymbolModal,
+  LoginBox
 } from "#components";
 
 import {PaneInds, Period, SymbolInfo, Datafeed} from './types'
@@ -43,6 +45,7 @@ import Loading from "~/components/kline/loading.vue";
 import {getDefStyles, getThemeStyles, adjustFromTo, makeFormatDate} from "~/composables/kline/coms";
 import {def} from "@vue/shared";
 import overlays from '~/composables/kline/overlays'
+import {useAuthState} from "~/composables/auth";
 
 overlays.forEach(o => { kc.registerOverlay(o) })
 
@@ -60,7 +63,7 @@ type Props = {
 const props = withDefaults(defineProps<Props>(), {
   theme: 'light',
   symbol: () => ({ticker: 'BTC/USDT', exchange: 'binance', market: 'spot'}),
-  period: () => ({ multiplier: 5, timespan: 'minute', text: '5m', timeframe: '5m' }),
+  period: () => ({ multiplier: 3, timespan: 'day', text: '3d', timeframe: '3d' }),
   periods: () => ([
     { multiplier: 1, timespan: 'minute', text: '1m', timeframe: '1m' },
     { multiplier: 5, timespan: 'minute', text: '5m', timeframe: '5m' },
@@ -80,7 +83,9 @@ const props = withDefaults(defineProps<Props>(), {
   ])
 })
 
+const authTimeframes = ['1m', '5m', '15m', '1h', '2h', '4h', '1d']
 
+const {authDoing, authStatus} = useAuthState()
 const showSymbolModal = ref(false)
 const showIndSearchModal = ref(false)
 const showSettingModal = ref(false)
@@ -88,6 +93,7 @@ const showScreenShotModal = ref(false)
 const showIndCfgModal = ref(false)
 const loadingChart = ref(false)
 const showDrawingBar = ref(true)
+const showLoginBox = ref(false)
 const _symbol = reactive<SymbolInfo>(props.symbol)
 const chartRef = ref<HTMLElement>()
 const chart = ref<Nullable<Chart>>(null)
@@ -162,6 +168,14 @@ function clickScreenShot(){
   let bgColor = props.theme === 'dark' ? '#151517' : '#ffffff'
   screenShotUrl.value = chart.value?.getConvertPictureUrl(true, 'jpeg', bgColor) ?? ''
   showScreenShotModal.value = true
+}
+
+function clickPeriod(period: Period){
+  if(authStatus.value < 0 && authTimeframes.includes(period.timeframe)){
+    showLoginBox.value = true
+    return
+  }
+  Object.assign(_period, period)
 }
 
 const documentResize = () => {

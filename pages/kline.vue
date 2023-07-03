@@ -16,7 +16,6 @@ import TopChange from "~/components/topChange.vue";
 import OpinionFlow from "~/components/opinionFlow.vue";
 
 const watermark = ref('<img width="504" src="/watermark.png"/>')
-
 const datafeed = ref(new MyDatafeed())
 
 const symbol = reactive(datafeed.value.getDefaultSymbol())

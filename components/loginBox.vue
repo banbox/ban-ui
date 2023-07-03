@@ -41,16 +41,16 @@
         </el-button>
         <el-link @click="form_mode='login'">{{$t('register_to_login')}}</el-link>
       </el-form>
-      <el-form class="form-area" v-else>
+      <el-form v-else ref="loginFormRef" :model="loginForm" :rules="loginRules" class="form-area" status-icon>
         <el-form-item :required="true">
-          <el-input v-model="username" :placeholder="$t('input_username')">
+          <el-input v-model="loginForm.username" :placeholder="$t('input_username')">
             <template #prepend>
               <el-icon><User /></el-icon>
             </template>
           </el-input>
         </el-form-item>
         <el-form-item :required="true">
-          <el-input v-model="password" type="password" autocomplete="off" :show-password="showPwd"
+          <el-input v-model="loginForm.password" type="password" autocomplete="off" :show-password="showPwd"
                     :placeholder="$t('input_password')">
             <template #prepend>
               <el-icon><Key/></el-icon>
@@ -58,7 +58,7 @@
           </el-input>
         </el-form-item>
         <el-text type="danger" v-if="err_msg">{{err_msg}}</el-text>
-        <el-button size="large" type="primary" class="main" :loading="authDoing" @click="login">
+        <el-button size="large" type="primary" class="main" :loading="authDoing" @click="submitForm(loginFormRef)">
           {{ $t('login') }}
         </el-button>
         <el-link @click="form_mode='register'">{{$t('login_to_register')}}</el-link>
@@ -77,9 +77,10 @@
 import Modal from "~/components/kline/modal.vue"
 import {Connection, User, Key, Promotion, Message, View, Hide} from "@element-plus/icons-vue";
 import {useAuthState} from "~/composables/auth";
-import {computed, defineEmits, defineProps, reactive, ref} from "vue";
+import {computed, defineEmits, defineProps, reactive, ref, toRaw} from "vue";
 import type {FormRules, FormInstance} from "element-plus";
 import i18n from "~/composables/i18n"
+import {postApi} from "#imports";
 const t = i18n.global.t
 
 const {authData, authStatus, authToken, authDoing} = useAuthState()
@@ -96,8 +97,14 @@ const regForm = reactive({
   password2: ''
 })
 const validateBUid = (rule: any, value: any, callback: any) => {
-  console.log(value, typeof value)
-  callback()
+  postApi('/user/check_exg_uid', {exchange: 'binance', uid: value.toString()}).then(rsp => {
+    if(rsp.code == 200){
+      callback()
+    }
+    else{
+      callback(new Error(rsp.msg_code ? t(rsp.msg_code): (rsp.msg ?? 'Check Failed')))
+    }
+  })
 }
 
 const validatePass = (rule: any, value: any, callback: any) => {
@@ -133,6 +140,16 @@ const regRules = reactive<FormRules<RegRuleForm>>({
   password: [{validator: validatePass, trigger: 'blur'}],
   password2: [{validator: validatePass2, trigger: 'blur'}],
 })
+
+const loginForm = reactive({
+  username: '',
+  password: ''
+})
+const loginRules = reactive<FormRules<RegRuleForm>>({
+  username: [{required: true, message: t('this_is_required'), trigger: 'blur'}],
+  password: [{validator: validatePass, trigger: 'blur'}],
+})
+
 const err_msg = ref('')
 const form_mode = ref('register')
 const showPwd = ref(false)
@@ -158,21 +175,29 @@ const showModal = computed({
 })
 
 
-function register(){
-
-}
-
-function login(){
-
-}
 const submitForm = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate((valid, fields) => {
-    if (valid) {
-      console.log('submit!')
-    } else {
-      console.log('error submit!', fields)
+    if (!valid)return
+    authDoing.value = true
+    let post_url = '/user/login_by_pwd'
+    let post_data: any = toRaw(loginForm)
+    if(form_mode.value === 'register'){
+      post_url = '/user/reg_exg_uid'
+      post_data = toRaw(regForm)
+      post_data.exchange = 'binance'
+      post_data.exg_uid = post_data.binance_uid
     }
+    postApi(post_url, post_data).then(rsp => {
+      authDoing.value = false
+      if(rsp.code != 200 || !rsp.user){
+        err_msg.value = rsp.msg_code ? t(rsp.msg_code): (rsp.msg ?? 'submit fail');
+      }else{
+        authData.value = rsp.user
+        authToken.value = rsp.token
+        showModal.value = false
+      }
+    })
   })
 }
 

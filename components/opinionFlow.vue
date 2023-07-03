@@ -2,7 +2,7 @@
   <div class="opinion-box">
     <div class="item" v-for="(item, index) in data_list" :key="index">
       <div class="op-head">
-        <span class="nick">{{item.nick_name}}</span>
+        <span class="nick">{{item.user_name}}</span>
         <span class="date">{{item.create_at}}</span>
       </div>
       <div class="op-content" v-html="item.content"></div>
@@ -15,7 +15,7 @@ import {onMounted, reactive} from "vue";
 import {getApi} from "#imports";
 
 type Opinion = {
-  nick_name: string,
+  user_name: string,
   create_at: string,
   content: string
 }

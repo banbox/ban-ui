@@ -19,6 +19,9 @@
   "privacy_policy": "《隐私政策》",
   "register_to_login": "已有账号，去登录",
   "login_to_register": "没有账号，去注册",
+  "exg_uid_invalid": "UID无效或已被绑定",
+  "user_pwd_invald": "用户名或密码错误",
+  "user_exist_login": "用户名已存在，请登录",
 
   "indicator": "指标",
   "main_indicator": "主图指标",

@@ -23,7 +23,7 @@ export default class MyDatafeed implements Datafeed{
       { multiplier: 1, timespan: 'day', text: 'D', timeframe: '1d' },
       { multiplier: 3, timespan: 'day', text: '3D', timeframe: '3d' },
       { multiplier: 1, timespan: 'week', text: 'W', timeframe: '1w' },
-      { multiplier: 1, timespan: 'month', text: 'M', timeframe: '1M' },
+      //{ multiplier: 1, timespan: 'month', text: 'M', timeframe: '1M' },
     ]
   }
 

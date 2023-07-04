@@ -1,5 +1,6 @@
 # 项目配置
 /public/img
+.idea
 
 node_modules
 *.log*

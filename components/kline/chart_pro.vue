@@ -284,8 +284,9 @@ function loadSymbolPeriod(symbol: SymbolInfo, period: Period){
   loading = true
   loadingChart.value = true
   const get = async () => {
-    const [from, to] = adjustFromTo(p, new Date().getTime(), 500)
-    const kdata = await props.datafeed.getHistoryKLineData(s, p, from, to)
+    const curTime = new Date().getTime()
+    const [from, to] = adjustFromTo(p, curTime, 500)
+    const kdata = await props.datafeed.getHistoryKLineData(s, p, from, curTime)
     chart.value?.removeOverlay()
     chart.value?.applyNewData(kdata.data, kdata.data.length > 0)
     kdata.lays?.forEach(o => chart.value?.createOverlay(o))

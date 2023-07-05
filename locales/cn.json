@@ -149,5 +149,7 @@
   "log": "对数轴",
   "reverse_coordinate": "倒置坐标",
   "grid_show": "网格线显示",
-  "restore_default": "恢复默认"
+  "restore_default": "恢复默认",
+
+  "language": "多语言"
 }

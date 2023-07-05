@@ -1,5 +1,5 @@
 <template>
-  <Modal :title="$t('setting')" :width="560" :buttons="['restore_default']"
+  <Modal :title="$t('language')" :width="560" :buttons="['restore_default']"
          v-model="showModal" @click="$emit('reset')">
     <div class="klinecharts-pro-setting-modal-content">
       <template v-for="(item, index) in options" :key="item.key">
@@ -20,7 +20,6 @@ import Select from "~/components/kline/select.vue"
 import Switch from "~/components/kline/switch.vue"
 import {computed, defineEmits, defineProps, reactive} from "vue";
 import {useNuxtApp} from "#app";
-const {t} = useNuxtApp()
 import {Chart, Styles} from "klinecharts";
 import kc from "klinecharts"
 import _ from "lodash"

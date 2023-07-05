@@ -9,12 +9,13 @@
     <KlineScreenshotModal v-model="showScreenShotModal" :url="screenShotUrl" @close="screenShotUrl = ''"/>
     <KlineIndCfgModal v-model="showIndCfgModal" :chart="chart" :ind-name="indCfg.ind_name" :pane-id="indCfg.paneId"/>
     <KlineTimezoneModal v-model="showTimezoneModal" :chart="chart" :timezone="timezone"/>
+    <KlineI18nModal v-model="showI18nModal"/>
     <div class="kline-main">
       <KlinePeriodBar :spread="showDrawingBar" :symbol="symbol" :period="period" :periods="periods"
           @clickSymbol="showSymbolModal = true" @clickPeriod="clickPeriod(periods[$event])"
           @clickMenu="showDrawingBar = !showDrawingBar" @clickInd="showIndSearchModal = true"
           @clickSetting="showSettingModal = true" @clickShot="clickScreenShot"
-          @clickTZ="showTimezoneModal = true"/>
+          @clickTZ="showTimezoneModal = true" @clickLang="showI18nModal = true"/>
       <div class="klinecharts-pro-content">
         <Loading v-if="loadingChart"/>
         <KlineDrawBar :chart="chart" v-if="showDrawingBar"/>
@@ -72,6 +73,7 @@ const loadingChart = ref(false)
 const showDrawingBar = ref(true)
 const showLoginBox = ref(false)
 const showTimezoneModal = ref(false)
+const showI18nModal = ref(false)
 const chartRef = ref<HTMLElement>()
 const chart = ref<Nullable<Chart>>(null)
 const screenShotUrl = ref('')

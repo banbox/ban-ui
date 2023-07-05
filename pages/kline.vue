@@ -8,11 +8,13 @@
                        @change="setStyles" @reset="resetStyle"/>
     <KlineScreenshotModal v-model="showScreenShotModal" :url="screenShotUrl" @close="screenShotUrl = ''"/>
     <KlineIndCfgModal v-model="showIndCfgModal" :chart="chart" :ind-name="indCfg.ind_name" :pane-id="indCfg.paneId"/>
+    <KlineTimezoneModal v-model="showTimezoneModal" :chart="chart" :timezone="timezone"/>
     <div class="kline-main">
       <KlinePeriodBar :spread="showDrawingBar" :symbol="symbol" :period="period" :periods="periods"
           @clickSymbol="showSymbolModal = true" @clickPeriod="clickPeriod(periods[$event])"
           @clickMenu="showDrawingBar = !showDrawingBar" @clickInd="showIndSearchModal = true"
-          @clickSetting="showSettingModal = true" @clickShot="clickScreenShot"/>
+          @clickSetting="showSettingModal = true" @clickShot="clickScreenShot"
+          @clickTZ="showTimezoneModal = true"/>
       <div class="klinecharts-pro-content">
         <Loading v-if="loadingChart"/>
         <KlineDrawBar :chart="chart" v-if="showDrawingBar"/>
@@ -51,9 +53,9 @@ import {
   KlineScreenshotModal,
   KlineSettingModal,
   KlineSymbolModal,
+  KlineTimezoneModal,
   LoginBox
 } from "#components";
-
 
 overlays.forEach(o => { kc.registerOverlay(o) })
 
@@ -69,9 +71,11 @@ const showIndCfgModal = ref(false)
 const loadingChart = ref(false)
 const showDrawingBar = ref(true)
 const showLoginBox = ref(false)
+const showTimezoneModal = ref(false)
 const chartRef = ref<HTMLElement>()
 const chart = ref<Nullable<Chart>>(null)
 const screenShotUrl = ref('')
+const timezone = ref(Intl.DateTimeFormat().resolvedOptions().timeZone)
 const indCfg = reactive({ind_name: '', paneId: '', calcParams: [] as Array<any>})
 const _panes = reactive([
       {name: 'candle_pane', inds: []},
@@ -190,7 +194,6 @@ onMounted(() => {
     priceUnitDom.className = 'klinecharts-pro-price-unit'
     priceUnitContainer?.appendChild(priceUnitDom)
 
-    chart.value?.setTimezone('Africa/Abidjan')
   }
 
   _panes.forEach(pane => {
@@ -200,6 +203,8 @@ onMounted(() => {
   })
 
   chart.value?.setStyles(styles as Styles)
+
+  chart.value?.setTimezone(timezone.value)
 
   chart.value?.loadMore(timestamp => {
     loading = true
@@ -293,6 +298,10 @@ watch([period, symbol], ([new_period, new_symbol], [prev_period, prev_symbol]) =
 
 watchEffect(() => {
   chart.value?.setStyles(getThemeStyles(theme.value))
+})
+
+watchEffect(() => {
+  chart.value?.setTimezone(timezone.value)
 })
 
 </script>

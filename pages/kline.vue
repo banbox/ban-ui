@@ -39,7 +39,7 @@ import {MyDatafeed} from "~/composables/kline/datafeeds"
 import TopChange from "~/components/topChange.vue";
 import OpinionFlow from "~/components/opinionFlow.vue";
 import {PaneInds, Period, SymbolInfo, Datafeed} from '~/components/kline/types'
-import {computed, defineProps, onMounted, onUnmounted, reactive, ref, toRaw, watch, watchEffect} from "vue";
+import {computed, defineProps, onMounted, onUnmounted, reactive, ref, toRaw, watch} from "vue";
 import Loading from "~/components/kline/loading.vue";
 import {getDefStyles, getThemeStyles, adjustFromTo, makeFormatDate} from "~/composables/kline/coms";
 import {def} from "@vue/shared";
@@ -77,11 +77,11 @@ const chart = ref<Nullable<Chart>>(null)
 const screenShotUrl = ref('')
 const timezone = ref(Intl.DateTimeFormat().resolvedOptions().timeZone)
 const indCfg = reactive({ind_name: '', paneId: '', calcParams: [] as Array<any>})
-const _panes = reactive([
-      {name: 'candle_pane', inds: []},
-      {name: 'pane1', inds: ['VOL']}
-  ])
-const period = reactive({ multiplier: 3, timespan: 'day', text: '3d', timeframe: '3d' })
+const _panes = reactive<PaneInds[]>([
+    {name: 'candle_pane', inds: []},
+    {name: 'pane1', inds: ['VOL']}
+])
+const period = reactive<Period>({ multiplier: 3, timespan: 'day', text: '3d', timeframe: '3d' })
 let priceUnitDom: HTMLElement
 let loading = false
 
@@ -97,8 +97,8 @@ const styles = reactive(init_styles)
 const watermark = ref('<img width="504" src="/watermark.png"/>')
 const datafeed = new MyDatafeed()
 
-const symbol = reactive(datafeed.getDefaultSymbol())
-const periods = reactive(datafeed.getAllPeriods())
+const symbol = reactive<SymbolInfo>(datafeed.getDefaultSymbol())
+const periods = reactive<Period[]>(datafeed.getAllPeriods())
 
 
 function setIndicator(paneId: string, ind_name: string, is_add: boolean){
@@ -254,16 +254,15 @@ onUnmounted(() => {
   }
 })
 
-watchEffect(() => {
+watch(symbol, (new_val) => {
   if(!priceUnitDom)return
-  const s = symbol
-  if (s?.priceCurrency) {
-    priceUnitDom.innerHTML = s?.priceCurrency.toLocaleUpperCase()
+  if (new_val.priceCurrency) {
+    priceUnitDom.innerHTML = new_val.priceCurrency.toLocaleUpperCase()
     priceUnitDom.style.display = 'flex'
   } else {
     priceUnitDom.style.display = 'none'
   }
-  chart.value?.setPriceVolumePrecision(s?.pricePrecision ?? 2, s?.volumePrecision ?? 0)
+  chart.value?.setPriceVolumePrecision(new_val.pricePrecision ?? 2, new_val.volumePrecision ?? 0)
 })
 
 function loadSymbolPeriod(symbol: SymbolInfo, period: Period){
@@ -296,12 +295,12 @@ watch([period, symbol], ([new_period, new_symbol], [prev_period, prev_symbol]) =
   }
 }, {immediate: true})
 
-watchEffect(() => {
-  chart.value?.setStyles(getThemeStyles(theme.value))
+watch(theme, (new_val) => {
+  chart.value?.setStyles(getThemeStyles(new_val))
 })
 
-watchEffect(() => {
-  chart.value?.setTimezone(timezone.value)
+watch(timezone, (new_val) => {
+  chart.value?.setTimezone(new_val)
 })
 
 </script>

@@ -11,8 +11,9 @@
 </template>
 
 <script setup lang="ts">
-import {onMounted, reactive} from "vue";
+import {onMounted, reactive, watch} from "vue";
 import {getApi} from "#imports";
+import i18n from "~/composables/i18n";
 
 type Opinion = {
   user_name: string,
@@ -22,13 +23,18 @@ type Opinion = {
 
 const data_list = reactive<Opinion[]>([])
 
+
 async function loadOpinions(){
-  const rsp = await getApi('/kline/opinion_flow');
+  const rsp = await getApi('/kline/opinion_flow?locale='+i18n.global.locale.value);
   const flow = (rsp.data ?? []) as Opinion[]
   data_list.splice(0, data_list.length, ...flow)
 }
 
 onMounted(()=>{
+  loadOpinions()
+})
+
+watch(i18n.global.locale, (new_val) => {
   loadOpinions()
 })
 

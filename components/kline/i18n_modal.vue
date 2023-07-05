@@ -1,5 +1,5 @@
 <template>
-  <Modal :title="$t('timezone')" :buttons="['confirm']" :width="400" class="timezone"
+  <Modal :title="$t('language')" :buttons="['confirm']" :width="400" class="timezone"
          v-model="showModal" @click="clickModal">
     <Select :data-source="langDataOpts" :value="langMap[$i18n.locale]"
             @change="$i18n.locale = $event.value"/>
@@ -11,8 +11,6 @@ import Modal from "~/components/kline/modal.vue"
 import Select from "~/components/kline/select.vue"
 import {computed, defineProps, reactive, ref} from "vue";
 import {defineEmits} from "vue/dist/vue";
-import i18n from "~/composables/i18n";
-let t = i18n.global.t
 const props = defineProps<{
   modelValue: boolean
 }>()

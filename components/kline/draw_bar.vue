@@ -79,17 +79,17 @@ const GROUP_ID = 'drawing_tools'
 
 
 const singleLineOpts = [
+  { key: 'segment', text: t('segment') },
+  { key: 'arrow', text: t('arrow') },
+  { key: 'rayLine', text: t('ray_line') },
+  { key: 'straightLine', text: t('straight_line') },
+  { key: 'priceLine', text: t('price_line') },
   { key: 'horizontalStraightLine', text: t('horizontal_straight_line') },
   { key: 'horizontalRayLine', text: t('horizontal_ray_line') },
   { key: 'horizontalSegment', text: t('horizontal_segment') },
   { key: 'verticalStraightLine', text: t('vertical_straight_line') },
   { key: 'verticalRayLine', text: t('vertical_ray_line') },
   { key: 'verticalSegment', text: t('vertical_segment') },
-  { key: 'straightLine', text: t('straight_line') },
-  { key: 'rayLine', text: t('ray_line') },
-  { key: 'segment', text: t('segment') },
-  { key: 'arrow', text: t('arrow') },
-  { key: 'priceLine', text: t('price_line') },
 ]
 
 const moreLineOpts = [
@@ -124,7 +124,7 @@ const waveOpts = [
 ]
 
 const overlays = reactive([
-  { key: 'single-line', icon: 'horizontalStraightLine', list: singleLineOpts },
+  { key: 'single-line', icon: 'segment', list: singleLineOpts },
   { key: 'more-line', icon: 'priceChannelLine', list: moreLineOpts },
   { key: 'polygon', icon: 'circle', list: polygonOpts },
   { key: 'fibonacci', icon: 'fibonacciLine', list: fibonacciOpts },

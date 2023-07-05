@@ -1,41 +1,29 @@
 <template>
-  <Modal :title="$t('indicator')" :width="800" v-model="showModal">
-    <div class="kc-ind-modal">
-      <List class="klinecharts-pro-ind-box ind-col left-pane">
-        <div class="row title">{{$t(active_pane == 'candle_pane' ? 'main_indicator': 'sub_indicator')}}</div>
-        <div class="row" v-for="(item, index) in all_pane_inds" :key="item.name">
-          <span @click="addActiveInd(item.name)">{{ $t(item.name.toLowerCase()) }}</span>
-        </div>
-      </List>
-      <div class="select-box ind-col">
-        <List class="klinecharts-pro-ind-box pane-box" v-for="pane in _panes" :key="pane.name">
-          <div class="row title" @click="active_pane = pane.name">{{paneTitle(pane)}}</div>
-          <template v-if="pane.name == active_pane">
-            <div class="row" v-for="(item, index) in pane.inds" :key="item">
-              <span>{{ $t(item.toLowerCase()) }}</span>
-              <svg @click="clickIndDelete(item)" class="icon" viewBox="0 0 1024 1024" p-id="2382" width="20" height="20">
-                <path d="M176 130.752l-45.248 45.248 22.72 22.528L466.752 512l-336 336 45.248 45.248L512 557.248l313.28 313.472 22.72 22.528 45.248-45.248-22.528-22.72L557.248 512l336-336-45.248-45.248L512 466.752 198.528 153.472z" fill="" p-id="2383"></path>
-              </svg>
-            </div>
-            <div class="row" v-if="!pane.inds.length">
-              <span>{{ $t('check_from_left') }}</span>
-            </div>
-          </template>
-        </List>
-        <div class="add-pane" @click="addSubPane">{{ $t('add_sub_pane') }}</div>
+  <Modal :title="$t('indicator')" :width="400" v-model="showModal">
+    <List class="klinecharts-pro-ind-box">
+      <div class="row title">{{$t('main_indicator')}}</div>
+      <div class="row" v-for="(item, index) in main_inds" :key="item.name">
+        <Checkbox :model-value="checked_inds.includes(item)" :label="$t(item.toLowerCase())"
+                  @change="toggleInd(true, item, $event)"/>
       </div>
-    </div>
+      <div class="row title">{{$t('sub_indicator')}}</div>
+      <div class="row" v-for="(item, index) in sub_inds" :key="item.name">
+        <Checkbox :model-value="checked_inds.includes(item)" :label="$t(item.toLowerCase())"
+                  @change="toggleInd(false, item, $event)"/>
+      </div>
+    </List>
   </Modal>
 </template>
 
 <script setup lang="ts">
 import Modal from "~/components/kline/modal.vue"
 import List from "~/components/kline/list.vue"
+import Checkbox from "~/components/kline/checkbox.vue"
 import {PaneInds} from "~/components/kline/types";
 import {computed, defineEmits, defineProps, reactive} from "vue";
 import {Chart} from "klinecharts";
-import Checkbox from "~/components/kline/checkbox.vue";
 import i18n from "~/composables/i18n"
+import {an} from "~/.output/public/_nuxt/entry.9543edf0";
 let t = i18n.global.t
 
 const props = defineProps<{
@@ -43,11 +31,6 @@ const props = defineProps<{
   panes: PaneInds[]
 }>()
 
-const _panes = reactive(props.panes ?? [])
-if(!_panes.find(i => i.name == 'candle_pane')){
-  _panes.unshift({name: 'candle_pane', inds: []})
-}
-const active_pane = ref('candle_pane')
 
 const emit = defineEmits<{
   'change': [paneId: string, ind_name: string, is_add: boolean],
@@ -63,51 +46,33 @@ const showModal = computed({
   }
 })
 
-type IndItem = {
-  name: string,
-  is_main: boolean
+const main_inds = reactive(['MA', 'EMA', 'SMA', 'BOLL', 'SAR', 'BBI'])
+
+const sub_inds = reactive(['VOL', 'MACD', 'KDJ', 'RSI', 'BIAS', 'BRAR',
+  'CCI', 'DMI', 'CR', 'PSY', 'DMA', 'TRIX', 'OBV', 'VR', 'WR', 'MTM', 'EMV',
+  'SAR', 'ROC', 'PVT', 'AO'])
+
+const checked_inds = reactive<string[]>([])
+
+function toggleInd(is_main: boolean, name: string, val: any){
+  if(val){
+    checked_inds.push(name);
+  }else{
+    const delId = checked_inds.indexOf(name);
+    if(delId >= 0){
+      checked_inds.splice(delId, 1)
+    }
+  }
+  const pane_name = is_main ? 'candle_pane': `pane_${name}`
+  emit('change', pane_name, name, val as boolean)
 }
 
 
-const all_inds = reactive([
-    {name: 'MA', is_main: true},
-    {name: 'EMA', is_main: true},
-    {name: 'SMA', is_main: true},
-    {name: 'BOLL', is_main: true},
-    {name: 'SAR', is_main: true},
-    {name: 'BBI', is_main: true},
-    {name: 'VOL', is_main: false},
-    {name: 'MACD', is_main: false},
-    {name: 'KDJ', is_main: false},
-    {name: 'RSI', is_main: false},
-    {name: 'BIAS', is_main: false},
-    {name: 'BRAR', is_main: false},
-    {name: 'CCI', is_main: false},
-    {name: 'DMI', is_main: false},
-    {name: 'CR', is_main: false},
-    {name: 'PSY', is_main: false},
-    {name: 'DMA', is_main: false},
-    {name: 'TRIX', is_main: false},
-    {name: 'OBV', is_main: false},
-    {name: 'VR', is_main: false},
-    {name: 'WR', is_main: false},
-    {name: 'MTM', is_main: false},
-    {name: 'EMV', is_main: false},
-    {name: 'SAR', is_main: false},
-    {name: 'ROC', is_main: false},
-    {name: 'PVT', is_main: false},
-    {name: 'AO', is_main: false},
-])
 
-const all_pane_inds = computed(() => {
-  if(active_pane.value == 'candle_pane'){
-    return all_inds.filter(it => it.is_main)
-  }
-  else{
-    return all_inds.filter(it => !it.is_main)
-  }
-})
-
+/**
+ * 下面是旧的单窗口多指标处理代码，保留以后可能需要
+ *
+ */
 
 function paneTitle(pane: PaneInds){
   let result = [];
@@ -123,6 +88,15 @@ function paneTitle(pane: PaneInds){
   }
   return result.join('')
 }
+
+/**
+ * _panes和active_pane是针对单窗口多指标功能开发的，目前暂时不需要
+ */
+const _panes = reactive(props.panes ?? [])
+if(!_panes.find(i => i.name == 'candle_pane')){
+  _panes.unshift({name: 'candle_pane', inds: []})
+}
+const active_pane = ref('candle_pane')
 
 function addActiveInd(ind_name: string){
   for(let pane of _panes){
@@ -160,22 +134,10 @@ function addSubPane(){
 <style lang="scss">
 @import '~/assets/klinebase.scss';
 
-.kc-ind-modal{
-  display: flex;
-  flex-direction: row;
-  .ind-col{
-    flex-grow: 1;
-    max-height: 500px;
-    width: 50%;
-    overflow-y: scroll;
-  }
-  .left-pane{
-    border-right: 1px solid #aaaaaa;
-  }
-}
-
 .#{$prefix-cls}-ind-box {
   min-height: 0;
+  max-height: 500px;
+  margin: 0 -20px;
   .title {
     position: sticky;
     top: 0;

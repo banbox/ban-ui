@@ -1,5 +1,5 @@
 <template>
-  <Modal :title="$t('timezone')" :buttons="['confirm']" :width="400"
+  <Modal :title="$t('timezone')" :buttons="['confirm']" :width="400" class="timezone"
          v-model="showModal" @click="clickModal">
     <Select :data-source="timeZoneOpts" :value="timezone_text" @change="clickTimeZone"/>
   </Modal>
@@ -51,13 +51,16 @@ function clickModal(from: string){
 </script>
 
 <style lang="scss">
-.content-container{
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 70px;
-  .klinecharts-pro-select{
-    width: 70%;
+.timezone {
+  .content-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70px;
+
+    .klinecharts-pro-select {
+      width: 70%;
+    }
   }
 }
 </style>

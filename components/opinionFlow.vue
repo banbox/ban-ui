@@ -70,6 +70,7 @@ watch(i18n.global.locale, (new_val) => {
   color: #444;
   img{
     width: 100%;
+    margin: 10px 0;
   }
 }
 </style>

@@ -23,7 +23,7 @@
       </div>
     </div>
     <div class="kline-slide">
-      <TopChange @select="symbol.ticker = $event"/>
+      <TopChange :symbol="symbol.ticker" @select="symbol.ticker = $event"/>
       <OpinionFlow/>
     </div>
   </div>

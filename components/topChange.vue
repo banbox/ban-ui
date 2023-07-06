@@ -1,5 +1,6 @@
 <template>
   <div class="top-chg-box">
+    <div>{{symbol}}</div>
     <div class="tg-row header">
       <div class="field symbol" @click="clickSort('symbol')">
         <span>{{$t('symbol')}}</span>
@@ -22,7 +23,7 @@
     </div>
     <div class="list-box">
       <div class="tg-row item" v-for="(item, index) in data_list" :key="index"
-        :class="item.chg >= 0 ? 'up': 'down'" @click="clickRow(item)">
+        :class="[item.chg >= 0 ? 'up': 'down', item.symbol === symbol ? 'selected': '']" @click="clickRow(item)">
         <span class="field symbol">
           <span class="base">{{item.base_s}}</span>
           <span class="quote">/{{item.quote_s}}</span>
@@ -37,7 +38,7 @@
 <script setup lang="ts">
 import {SortDown, SortUp} from "@element-plus/icons-vue";
 import {useNuxtApp} from "#app";
-import {defineEmits, onMounted, reactive, ref} from "vue";
+import {defineProps, defineEmits, onMounted, reactive, ref} from "vue";
 import {getApi} from "~/utils/netio";
 const {t} = useNuxtApp()
 const symbol_down = ref(true)
@@ -47,6 +48,10 @@ const vol_down = ref(true)
 const sort_key = ref('chg')
 const data_list = reactive<any[]>([])
 let loop_timer: ReturnType<typeof setTimeout>
+
+const props = defineProps<{
+  symbol: string
+}>()
 
 const emit = defineEmits<{
   select: [symbol: string]
@@ -63,6 +68,7 @@ async function updateData(){
   const map_list = new_list.map(row => {
     const [base_s, quote_s] = row[1].split('/');
     return {
+      symbol: row[1],
       base_s, quote_s,
       sid: row[0],
       price: row[2],
@@ -183,6 +189,15 @@ function clickRow(row: any){
     .el-icon.active{
       color: $c-active-color
     }
+  }
+  &.selected{
+    background-color: $c-hover-background-light;
+  }
+  &:hover{
+    background-color: #eee;
+  }
+  &.header:hover{
+    background-color: #fff;
   }
 }
 .list-box{

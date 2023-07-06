@@ -64,10 +64,8 @@
         <el-link @click="form_mode='register'">{{$t('login_to_register')}}</el-link>
       </el-form>
       <div class="login-btm">
-        <span>{{$t('reg_log_accept')}}</span>
-        <el-link target="_blank" href="/user_contact.html">{{$t('user_contract')}}</el-link>
-        <span>{{$t('and')}}</span>
-        <el-link target="_blank" href="/privacy_policy.html">{{$t('privacy_policy')}}</el-link>
+        <span>{{$t('reg_log_accept')}} </span>
+        <el-link target="_blank" :href="aggrement_url">{{$t('user_contract')}}</el-link>
       </div>
     </div>
   </Modal>
@@ -96,6 +94,11 @@ const regForm = reactive({
   password: '',
   password2: ''
 })
+
+const aggrement_url = computed(() => {
+  return `/agreement.${i18n.global.locale.value}.html`
+})
+
 const validateBUid = (rule: any, value: any, callback: any) => {
   postApi('/user/check_exg_uid', {exchange: 'binance', uid: value.toString()}).then(rsp => {
     if(rsp.code == 200){

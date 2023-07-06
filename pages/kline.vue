@@ -17,9 +17,10 @@
           @clickSetting="showSettingModal = true" @clickShot="clickScreenShot"
           @clickTZ="showTimezoneModal = true" @clickLang="showI18nModal = true"/>
       <div class="klinecharts-pro-content">
-        <Loading v-if="loadingChart"/>
-        <KlineDrawBar :chart="chart" v-if="showDrawingBar"/>
-        <div ref="chartRef" class='klinecharts-pro-widget' :data-drawing-bar-visible="showDrawingBar"/>
+        <KlineLoading v-if="loadingChart"/>
+        <KlineDrawBar ref="drawBar" :chart="chart" v-if="showDrawingBar"/>
+        <div ref="chartRef" class='klinecharts-pro-widget' :data-drawing-bar-visible="showDrawingBar"
+          @keydown.delete="drawBar.clickRemove()"/>
       </div>
     </div>
     <div class="kline-slide">
@@ -31,32 +32,17 @@
 
 <script setup lang="ts">
 import {
-  ActionType, Chart, DomPosition, FormatDateType, init, Nullable, PaneOptions, Styles,
+  ActionType, Chart, DomPosition, FormatDateType, Nullable, PaneOptions, Styles,
   Indicator
 } from 'klinecharts'
 import kc from 'klinecharts'
 import _ from "lodash"
 import {MyDatafeed} from "~/composables/kline/datafeeds"
-import TopChange from "~/components/topChange.vue";
-import OpinionFlow from "~/components/opinionFlow.vue";
 import {PaneInds, Period, SymbolInfo, Datafeed} from '~/components/kline/types'
 import {computed, defineProps, onMounted, onUnmounted, reactive, ref, toRaw, watch} from "vue";
-import Loading from "~/components/kline/loading.vue";
 import {getDefStyles, getThemeStyles, adjustFromTo, makeFormatDate} from "~/composables/kline/coms";
-import {def} from "@vue/shared";
 import overlays from '~/composables/kline/overlays'
 import {useAuthState} from "~/composables/auth";
-import {
-  KlineDrawBar,
-  KlineIndCfgModal,
-  KlineIndSearchModal,
-  KlinePeriodBar,
-  KlineScreenshotModal,
-  KlineSettingModal,
-  KlineSymbolModal,
-  KlineTimezoneModal,
-  LoginBox
-} from "#components";
 
 overlays.forEach(o => { kc.registerOverlay(o) })
 
@@ -76,12 +62,13 @@ const showTimezoneModal = ref(false)
 const showI18nModal = ref(false)
 const chartRef = ref<HTMLElement>()
 const chart = ref<Nullable<Chart>>(null)
+const drawBar = ref(null)
 const screenShotUrl = ref('')
 const timezone = ref(Intl.DateTimeFormat().resolvedOptions().timeZone)
 const indCfg = reactive({ind_name: '', paneId: '', calcParams: [] as Array<any>})
 const _panes = reactive<PaneInds[]>([
     {name: 'candle_pane', inds: []},
-    {name: 'pane1', inds: ['VOL']}
+    {name: 'pane_VOL', inds: ['VOL']}
 ])
 const period = reactive<Period>({ multiplier: 3, timespan: 'day', text: '3d', timeframe: '3d' })
 let priceUnitDom: HTMLElement
@@ -173,7 +160,7 @@ const documentResize = () => {
 
 onMounted(() => {
   window.addEventListener('resize', documentResize)
-  chart.value = init(chartRef.value!, {
+  chart.value = kc.init(chartRef.value!, {
     customApi: {
       formatDate: makeFormatDate(period.timespan)
     }

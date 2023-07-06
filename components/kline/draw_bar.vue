@@ -69,6 +69,7 @@ const modeIcon = ref('weakMagnet')
 const mode = ref('normal')
 const lock = ref(false)
 const visiable = ref(true)
+const hisLays = reactive<string[]>([])  // 按创建顺序，记录所有overlay，方便删除
 const selectDraw = ref('')
 
 const props = defineProps<{
@@ -146,7 +147,7 @@ function clickPopoverKey(value: string){
 }
 
 function startOverlay(value: string){
-  props.chart.createOverlay({
+  const layId = props.chart.createOverlay({
     groupId: GROUP_ID,
     name: value,
     visible: visiable.value,
@@ -161,6 +162,14 @@ function startOverlay(value: string){
       return true;
     },
   })
+  if(layId){
+    if(Array.isArray(layId)){
+      hisLays.push(...(layId as string[]))
+    }
+    else{
+      hisLays.push(layId as string)
+    }
+  }
 }
 
 function clickSubPopover(index: integer, value: string){
@@ -200,8 +209,15 @@ function clickRemove(){
   if(selectDraw.value){
     args['id'] = selectDraw.value
   }
+  else if(hisLays.length > 0){
+    args['id'] = hisLays.pop()
+  }
   props.chart.removeOverlay(args)
 }
+
+defineExpose({
+  clickRemove
+})
 </script>
 
 <style scoped lang="scss">

@@ -1,6 +1,5 @@
 <template>
   <div class="top-chg-box">
-    <div>{{symbol}}</div>
     <div class="tg-row header">
       <div class="field symbol" @click="clickSort('symbol')">
         <span>{{$t('symbol')}}</span>

@@ -1,12 +1,80 @@
 import {Period} from "~/components/kline/types";
-import {FormatDateType} from "klinecharts";
+import {CandleTooltipCustomCallbackData, CandleStyle, FormatDateType} from "klinecharts";
 import kc from "klinecharts";
+import i18n from "~/composables/i18n"
+const t = i18n.global.t
+const formatPrecision = kc.utils.formatPrecision
+const formatThousands = kc.utils.formatThousands
+const formatDate = kc.utils.formatDate
+const formatBigNumber = kc.utils.formatBigNumber
 
-export function getDefStyles(){
+
+function GetPricePrecision(price: number){
+  if(price >= 1)return 2
+  let count = 0;
+  while (price < 1){
+    price = price * 10;
+    count += 1;
+  }
+  return count + 2;
+}
+
+function buildDateTimeFormat (timezone?: string): Intl.DateTimeFormat | null {
+  const options: Intl.DateTimeFormatOptions = {
+    hour12: false,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  }
+  if (timezone !== undefined) {
+    options.timeZone = timezone
+  }
+  let dateTimeFormat: Intl.DateTimeFormat | null = null
+  try {
+    dateTimeFormat = new Intl.DateTimeFormat('en', options)
+  } catch (e) {
+    console.error('', '', 'Timezone is error!!!')
+  }
+  return dateTimeFormat
+}
+
+const dateTimeFormat = buildDateTimeFormat()
+
+
+function CandleTooltipCustom(data: CandleTooltipCustomCallbackData, styles: CandleStyle){
+  const tooltipStyles = styles.tooltip
+  const current = data.current
+  const prevClose = data.prev?.close ?? current.close
+  const changeValue = current.close - prevClose
+  const thousandsSeparator = ','
+  const chigh = data.current.high
+  const pricePrecision = GetPricePrecision(Math.max(chigh, data.prev?.high ?? chigh, data.next?.high ?? chigh))
+  const volumePrecision = 3
+
+  const volume = formatThousands(
+      formatBigNumber(formatPrecision(current.volume ?? tooltipStyles.defaultValue, volumePrecision)),
+      thousandsSeparator
+    )
+  const change = prevClose === 0 ? tooltipStyles.defaultValue : `${formatPrecision(changeValue / prevClose * 100)}%`
+  return [
+    { title: t('time'), value: formatDate(dateTimeFormat!, current.timestamp, 'YYYY-MM-DD HH:mm') },
+    { title: t('open'), value: formatThousands(formatPrecision(current.open, pricePrecision), thousandsSeparator) },
+    { title: t('high'), value: formatThousands(formatPrecision(current.high, pricePrecision), thousandsSeparator) },
+    { title: t('low'), value: formatThousands(formatPrecision(current.low, pricePrecision), thousandsSeparator) },
+    { title: t('close'), value: formatThousands(formatPrecision(current.close, pricePrecision), thousandsSeparator)},
+    { title: t('volume'), value: volume},
+    { title: t('change'), value: change}
+  ]
+}
+
+export function getDefStyles() {
   return {
     candle: {
       type: 'candle_solid',
-          priceMark: {
+      priceMark: {
         last: {
           show: true
         },
@@ -16,24 +84,20 @@ export function getDefStyles(){
         low: {
           show: true
         }
+      },
+      tooltip: {
+        custom: CandleTooltipCustom
       }
     },
     indicator: {
-      lastValueMark:{
+      lastValueMark: {
         show: false
       }
     },
     yAxis: {
       type: 'normal',
-          reverse: false
+      reverse: false
     },
-    xAxis: {},
-    grid: {
-      show: true
-    },
-    separator: {},
-    crosshair: {},
-    overlay: {}
   }
 }
 

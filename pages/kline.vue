@@ -73,14 +73,7 @@ const period = reactive<Period>({ multiplier: 3, timespan: 'day', text: '3d', ti
 let priceUnitDom: HTMLElement
 let loading = false
 
-let cstyles = chart.value?.getStyles();
-let init_styles = getDefStyles()
-let theme_styles = getThemeStyles(theme.value)
-_.merge(init_styles, theme_styles)
-if(cstyles) {
-  _.merge(init_styles, cstyles)
-}
-const styles = reactive(init_styles)
+const styles = reactive({})
 
 const watermark = ref('<img width="504" src="/watermark.png"/>')
 const datafeed = new MyDatafeed()
@@ -183,8 +176,9 @@ function initChart(chartObj: Chart){
       createIndicator(chartObj, ind, true, {id: pane.name})
     })
   })
-
-  chartObj.setStyles(styles as Styles)
+  _.merge(styles, getDefStyles())
+  _.merge(styles, getThemeStyles(theme.value))
+  chartObj.setStyles(toRaw(styles) as Styles)
 
   chartObj.setTimezone(timezone.value)
 

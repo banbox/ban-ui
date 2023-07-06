@@ -4,8 +4,7 @@
     <LoginBox v-model="showLoginBox"/>
     <KlineSymbolModal v-model="showSymbolModal" :datafeed="datafeed" @select="Object.assign(symbol, $event)"/>
     <KlineIndSearchModal v-model="showIndSearchModal" :panes="_panes" @change="setIndicator"/>
-    <KlineSettingModal v-model="showSettingModal" :currentStyles="styles"
-                       @change="setStyles" @reset="resetStyle"/>
+    <KlineSettingModal v-model="showSettingModal" :chart="chart" :currentStyles="styles"/>
     <KlineScreenshotModal v-model="showScreenShotModal" :url="screenShotUrl" @close="screenShotUrl = ''"/>
     <KlineIndCfgModal v-model="showIndCfgModal" :chart="chart" :ind-name="indCfg.ind_name" :pane-id="indCfg.paneId"/>
     <KlineTimezoneModal v-model="showTimezoneModal" :chart="chart" :timezone="timezone"/>
@@ -131,15 +130,6 @@ function createIndicator (widget: Nullable<Chart>, indicatorName: string, isStac
   }, isStack, paneOptions) ?? null
 }
 
-function setStyles(styles: Styles){
-  chart.value?.setStyles(styles as Styles)
-}
-
-function resetStyle(){
-  Object.assign(styles, getDefStyles())
-  chart.value?.setStyles(styles as Styles)
-}
-
 function clickScreenShot(){
   let bgColor = theme.value === 'dark' ? '#151517' : '#ffffff'
   screenShotUrl.value = chart.value?.getConvertPictureUrl(true, 'jpeg', bgColor) ?? ''
@@ -165,62 +155,65 @@ onMounted(() => {
       formatDate: makeFormatDate(period.timespan)
     }
   })
-  if (chart) {
-    const watermarkContainer = chart.value?.getDom('candle_pane', DomPosition.Main)
-    if (watermarkContainer) {
-      let elt = document.createElement('div')
-      elt.className = 'klinecharts-pro-watermark'
-      if (kc.utils.isString(watermark.value)) {
-        const str = (watermark.value as string).replace(/(^\s*)|(\s*$)/g, '')
-        elt.innerHTML = str
-      } else {
-        elt.appendChild(watermark.value as Node)
-      }
-      watermarkContainer.appendChild(elt)
-    }
-    const priceUnitContainer = chart.value?.getDom('candle_pane', DomPosition.YAxis)
-    priceUnitDom = document.createElement('span')
-    priceUnitDom.className = 'klinecharts-pro-price-unit'
-    priceUnitContainer?.appendChild(priceUnitDom)
-
+  if(chart.value){
+    initChart(chart.value)
   }
+})
+
+function initChart(chartObj: Chart){
+  const watermarkContainer = chartObj.getDom('candle_pane', DomPosition.Main)
+  if (watermarkContainer) {
+    let elt = document.createElement('div')
+    elt.className = 'klinecharts-pro-watermark'
+    if (kc.utils.isString(watermark.value)) {
+      const str = (watermark.value as string).replace(/(^\s*)|(\s*$)/g, '')
+      elt.innerHTML = str
+    } else {
+      elt.appendChild(watermark.value as Node)
+    }
+    watermarkContainer.appendChild(elt)
+  }
+  const priceUnitContainer = chartObj.getDom('candle_pane', DomPosition.YAxis)
+  priceUnitDom = document.createElement('span')
+  priceUnitDom.className = 'klinecharts-pro-price-unit'
+  priceUnitContainer?.appendChild(priceUnitDom)
 
   _panes.forEach(pane => {
     pane.inds.forEach(ind => {
-      createIndicator(chart.value, ind, true, {id: pane.name})
+      createIndicator(chartObj, ind, true, {id: pane.name})
     })
   })
 
-  chart.value?.setStyles(styles as Styles)
+  chartObj.setStyles(styles as Styles)
 
-  chart.value?.setTimezone(timezone.value)
+  chartObj.setTimezone(timezone.value)
 
-  chart.value?.loadMore(timestamp => {
+  chartObj.loadMore(timestamp => {
     loading = true
     const get = async () => {
       const [to] = adjustFromTo(period, timestamp!, 1)
       const [from] = adjustFromTo(period, to, 500)
       const kdata = await datafeed.getHistoryKLineData(symbol, period, from, to)
-      chart.value?.applyMoreData(kdata.data, kdata.data.length > 0)
-      kdata.lays?.forEach(o => chart.value?.createOverlay(o))
+      chartObj.applyMoreData(kdata.data, kdata.data.length > 0)
+      kdata.lays?.forEach(o => chartObj.createOverlay(o))
       loading = false
     }
     get()
   })
 
-  chart.value?.subscribeAction(ActionType.OnTooltipIconClick, data => {
+  chartObj.subscribeAction(ActionType.OnTooltipIconClick, data => {
     if (data.indicatorName) {
       switch (data.iconId) {
         case 'visible': {
-          chart.value?.overrideIndicator({ name: data.indicatorName, visible: true }, data.paneId)
+          chartObj.overrideIndicator({ name: data.indicatorName, visible: true }, data.paneId)
           break
         }
         case 'invisible': {
-          chart.value?.overrideIndicator({ name: data.indicatorName, visible: false }, data.paneId)
+          chartObj.overrideIndicator({ name: data.indicatorName, visible: false }, data.paneId)
           break
         }
         case 'setting': {
-          const indicator = chart.value?.getIndicatorByPaneId(data.paneId, data.indicatorName) as Indicator
+          const indicator = chartObj.getIndicatorByPaneId(data.paneId, data.indicatorName) as Indicator
           indCfg.ind_name = data.indicatorName
           indCfg.paneId = data.paneId
           indCfg.calcParams = indicator.calcParams
@@ -233,8 +226,7 @@ onMounted(() => {
       }
     }
   })
-
-})
+}
 
 onUnmounted(() => {
   window.removeEventListener('resize', documentResize)

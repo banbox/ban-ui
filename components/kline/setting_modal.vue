@@ -1,6 +1,6 @@
 <template>
   <Modal :title="$t('language')" :width="560" :buttons="['restore_default']"
-         v-model="showModal" @click="$emit('reset')">
+         v-model="showModal" @click="resetStyle">
     <div class="klinecharts-pro-setting-modal-content">
       <template v-for="(item, index) in options" :key="item.key">
         <span>{{item.text}}</span>
@@ -23,15 +23,15 @@ import {useNuxtApp} from "#app";
 import {Chart, Styles} from "klinecharts";
 import kc from "klinecharts"
 import _ from "lodash"
+import {getDefStyles} from "~/composables/kline/coms";
 const props = defineProps<{
+  chart: Chart,
   currentStyles: Styles,
   modelValue: boolean
 }>()
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean],
-  'change': [styles: Styles],
-  'reset': []
 }>()
 
 const showModal = computed({
@@ -48,7 +48,12 @@ const options = reactive(getOptions())
 
 function update(key: string, value: any){
   _.set(styles, key, value)
-  emit('change', styles)
+  props.chart.setStyles(styles as Styles)
+}
+
+function resetStyle(){
+  Object.assign(styles, getDefStyles())
+  props.chart.setStyles(styles as Styles)
 }
 
 </script>

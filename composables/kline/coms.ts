@@ -7,6 +7,8 @@ const formatPrecision = kc.utils.formatPrecision
 const formatThousands = kc.utils.formatThousands
 const formatDate = kc.utils.formatDate
 const formatBigNumber = kc.utils.formatBigNumber
+const FormatDateType = kc.FormatDateType
+const TooltipIconPosition = kc.TooltipIconPosition
 
 
 export function GetNumberDotOffset(value: number){
@@ -109,7 +111,7 @@ export function getThemeStyles(theme: string) {
         icons: [
           {
             id: 'visible',
-            position: kc.TooltipIconPosition.Middle,
+            position: TooltipIconPosition.Middle,
             marginLeft: 8,
             marginTop: 7,
             marginRight: 0,
@@ -128,7 +130,7 @@ export function getThemeStyles(theme: string) {
           },
           {
             id: 'invisible',
-            position: kc.TooltipIconPosition.Middle,
+            position: TooltipIconPosition.Middle,
             marginLeft: 8,
             marginTop: 7,
             marginRight: 0,
@@ -147,7 +149,7 @@ export function getThemeStyles(theme: string) {
           },
           {
             id: 'setting',
-            position: kc.TooltipIconPosition.Middle,
+            position: TooltipIconPosition.Middle,
             marginLeft: 6,
             marginTop: 7,
             marginBottom: 0,
@@ -166,7 +168,7 @@ export function getThemeStyles(theme: string) {
           },
           {
             id: 'close',
-            position: kc.TooltipIconPosition.Middle,
+            position: TooltipIconPosition.Middle,
             marginLeft: 6,
             marginTop: 7,
             marginRight: 0,
@@ -242,38 +244,38 @@ export function adjustFromTo(period: Period, toTimestamp: number, count: number)
 }
 
 export function makeFormatDate(timespan: string) {
-  function formatDate(dateTimeFormat: Intl.DateTimeFormat, timestamp: number,
+  function doFormatDate(dateTimeFormat: Intl.DateTimeFormat, timestamp: number,
                       format: string, type: kc.FormatDateType) {
     switch (timespan) {
       case 'minute': {
-        if (type === kc.FormatDateType.XAxis) {
-          return kc.utils.formatDate(dateTimeFormat, timestamp, 'HH:mm')
+        if (type === FormatDateType.XAxis) {
+          return formatDate(dateTimeFormat, timestamp, 'HH:mm')
         }
-        return kc.utils.formatDate(dateTimeFormat, timestamp, 'YYYY-MM-DD HH:mm')
+        return formatDate(dateTimeFormat, timestamp, 'YYYY-MM-DD HH:mm')
       }
       case 'hour': {
-        if (type === kc.FormatDateType.XAxis) {
-          return kc.utils.formatDate(dateTimeFormat, timestamp, 'MM-DD HH:mm')
+        if (type === FormatDateType.XAxis) {
+          return formatDate(dateTimeFormat, timestamp, 'MM-DD HH:mm')
         }
-        return kc.utils.formatDate(dateTimeFormat, timestamp, 'YYYY-MM-DD HH:mm')
+        return formatDate(dateTimeFormat, timestamp, 'YYYY-MM-DD HH:mm')
       }
       case 'day':
       case 'week':
-        return kc.utils.formatDate(dateTimeFormat, timestamp, 'YYYY-MM-DD')
+        return formatDate(dateTimeFormat, timestamp, 'YYYY-MM-DD')
       case 'month': {
-        if (type === kc.FormatDateType.XAxis) {
-          return kc.utils.formatDate(dateTimeFormat, timestamp, 'YYYY-MM')
+        if (type === FormatDateType.XAxis) {
+          return formatDate(dateTimeFormat, timestamp, 'YYYY-MM')
         }
-        return kc.utils.formatDate(dateTimeFormat, timestamp, 'YYYY-MM-DD')
+        return formatDate(dateTimeFormat, timestamp, 'YYYY-MM-DD')
       }
       case 'year': {
-        if (type === kc.FormatDateType.XAxis) {
-          return kc.utils.formatDate(dateTimeFormat, timestamp, 'YYYY')
+        if (type === FormatDateType.XAxis) {
+          return formatDate(dateTimeFormat, timestamp, 'YYYY')
         }
-        return kc.utils.formatDate(dateTimeFormat, timestamp, 'YYYY-MM-DD')
+        return formatDate(dateTimeFormat, timestamp, 'YYYY-MM-DD')
       }
     }
-    return kc.utils.formatDate(dateTimeFormat, timestamp, 'YYYY-MM-DD HH:mm')
+    return formatDate(dateTimeFormat, timestamp, 'YYYY-MM-DD HH:mm')
   }
-  return formatDate;
+  return doFormatDate;
 }

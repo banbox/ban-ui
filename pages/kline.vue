@@ -39,7 +39,7 @@ import _ from "lodash"
 import {MyDatafeed} from "~/composables/kline/datafeeds"
 import {PaneInds, Period, SymbolInfo, Datafeed} from '~/components/kline/types'
 import {computed, defineProps, onMounted, onUnmounted, reactive, ref, toRaw, watch} from "vue";
-import {getDefStyles, getThemeStyles, adjustFromTo, makeFormatDate} from "~/composables/kline/coms";
+import {getDefStyles, getThemeStyles, adjustFromTo, makeFormatDate, GetNumberDotOffset} from "~/composables/kline/coms";
 import overlays from '~/composables/kline/overlays'
 import {useAuthState} from "~/composables/auth";
 
@@ -240,7 +240,6 @@ watch(symbol, (new_val) => {
   } else {
     priceUnitDom.style.display = 'none'
   }
-  chart.value?.setPriceVolumePrecision(new_val.pricePrecision ?? 2, new_val.volumePrecision ?? 0)
 })
 
 function loadSymbolPeriod(symbol: SymbolInfo, period: Period){
@@ -252,8 +251,13 @@ function loadSymbolPeriod(symbol: SymbolInfo, period: Period){
     const curTime = new Date().getTime()
     const [from, to] = adjustFromTo(p, curTime, 500)
     const kdata = await datafeed.getHistoryKLineData(s, p, from, curTime)
+    const klines = kdata.data
+    if(klines.length > 0){
+      const pricePrec = GetNumberDotOffset(Math.min(klines[0].low, klines[klines.length - 1].low)) + 2
+      chart.value?.setPriceVolumePrecision(pricePrec, 0)
+    }
     chart.value?.removeOverlay()
-    chart.value?.applyNewData(kdata.data, kdata.data.length > 0)
+    chart.value?.applyNewData(klines, klines.length > 0)
     kdata.lays?.forEach(o => chart.value?.createOverlay(o))
     datafeed.subscribe(s, p, data => {
       chart.value?.updateData(data)

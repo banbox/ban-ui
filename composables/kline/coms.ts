@@ -9,14 +9,15 @@ const formatDate = kc.utils.formatDate
 const formatBigNumber = kc.utils.formatBigNumber
 
 
-function GetPricePrecision(price: number){
-  if(price >= 1)return 2
+export function GetNumberDotOffset(value: number){
+  value = Math.abs(value)
+  if(value >= 1)return 0
   let count = 0;
-  while (price < 1){
-    price = price * 10;
+  while (value < 1){
+    value = value * 10;
     count += 1;
   }
-  return count + 2;
+  return count;
 }
 
 function buildDateTimeFormat (timezone?: string): Intl.DateTimeFormat | null {
@@ -45,20 +46,19 @@ const dateTimeFormat = buildDateTimeFormat()
 
 
 function CandleTooltipCustom(data: CandleTooltipCustomCallbackData, styles: CandleStyle){
-  const tooltipStyles = styles.tooltip
+  const defVal = styles.tooltip.defaultValue
   const current = data.current
   const prevClose = data.prev?.close ?? current.close
   const changeValue = current.close - prevClose
   const thousandsSeparator = ','
-  const chigh = data.current.high
-  const pricePrecision = GetPricePrecision(Math.max(chigh, data.prev?.high ?? chigh, data.next?.high ?? chigh))
+  const clow = data.current.low
+  const minProce = Math.min(clow, data.prev?.low ?? clow, data.next?.low ?? clow)
+  const pricePrecision = GetNumberDotOffset(minProce) + 2
   const volumePrecision = 3
 
-  const volume = formatThousands(
-      formatBigNumber(formatPrecision(current.volume ?? tooltipStyles.defaultValue, volumePrecision)),
-      thousandsSeparator
-    )
-  const change = prevClose === 0 ? tooltipStyles.defaultValue : `${formatPrecision(changeValue / prevClose * 100)}%`
+  const volPrecision = formatPrecision(current.volume ?? defVal, volumePrecision)
+  const volume = formatThousands(formatBigNumber(volPrecision), thousandsSeparator)
+  const change = prevClose === 0 ? defVal : `${formatPrecision(changeValue / prevClose * 100)}%`
   return [
     { title: t('time'), value: formatDate(dateTimeFormat!, current.timestamp, 'YYYY-MM-DD HH:mm') },
     { title: t('open'), value: formatThousands(formatPrecision(current.open, pricePrecision), thousandsSeparator) },

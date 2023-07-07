@@ -135,6 +135,9 @@ function clickPeriod(item: Period){
     return
   }
   Object.assign(period, item)
+  chart.value?.setCustomApi({
+    formatDate: makeFormatDate(period.timespan)
+  })
 }
 
 const documentResize = () => {

@@ -1,5 +1,5 @@
 import {Period} from "~/components/kline/types";
-import {CandleTooltipCustomCallbackData, CandleStyle, FormatDateType} from "klinecharts";
+import {CandleTooltipCustomCallbackData, CandleStyle} from "klinecharts";
 import kc from "klinecharts";
 import i18n from "~/composables/i18n"
 const t = i18n.global.t
@@ -243,16 +243,16 @@ export function adjustFromTo(period: Period, toTimestamp: number, count: number)
 
 export function makeFormatDate(timespan: string) {
   function formatDate(dateTimeFormat: Intl.DateTimeFormat, timestamp: number,
-                      format: string, type: FormatDateType) {
+                      format: string, type: kc.FormatDateType) {
     switch (timespan) {
       case 'minute': {
-        if (type === FormatDateType.XAxis) {
+        if (type === kc.FormatDateType.XAxis) {
           return kc.utils.formatDate(dateTimeFormat, timestamp, 'HH:mm')
         }
         return kc.utils.formatDate(dateTimeFormat, timestamp, 'YYYY-MM-DD HH:mm')
       }
       case 'hour': {
-        if (type === FormatDateType.XAxis) {
+        if (type === kc.FormatDateType.XAxis) {
           return kc.utils.formatDate(dateTimeFormat, timestamp, 'MM-DD HH:mm')
         }
         return kc.utils.formatDate(dateTimeFormat, timestamp, 'YYYY-MM-DD HH:mm')
@@ -261,13 +261,13 @@ export function makeFormatDate(timespan: string) {
       case 'week':
         return kc.utils.formatDate(dateTimeFormat, timestamp, 'YYYY-MM-DD')
       case 'month': {
-        if (type === FormatDateType.XAxis) {
+        if (type === kc.FormatDateType.XAxis) {
           return kc.utils.formatDate(dateTimeFormat, timestamp, 'YYYY-MM')
         }
         return kc.utils.formatDate(dateTimeFormat, timestamp, 'YYYY-MM-DD')
       }
       case 'year': {
-        if (type === FormatDateType.XAxis) {
+        if (type === kc.FormatDateType.XAxis) {
           return kc.utils.formatDate(dateTimeFormat, timestamp, 'YYYY')
         }
         return kc.utils.formatDate(dateTimeFormat, timestamp, 'YYYY-MM-DD')

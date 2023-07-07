@@ -30,10 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  ActionType, Chart, DomPosition, FormatDateType, Nullable, PaneOptions, Styles,
-  Indicator
-} from 'klinecharts'
+import {ActionType, Chart, DomPosition, Nullable, PaneOptions, Styles, Indicator} from 'klinecharts'
 import kc from 'klinecharts'
 import _ from "lodash"
 import {MyDatafeed} from "~/composables/kline/datafeeds"

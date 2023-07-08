@@ -45,11 +45,11 @@ watch(i18n.global.locale, (new_val) => {
 
 .opinion-box{
   overflow-y: scroll;
-  border: 1px solid #eee;
+  border: 1px solid var(--klinecharts-pro-border-color);
   margin-bottom: 20px;
   .item{
     padding: 5px 15px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--klinecharts-pro-border-color);
   }
 }
 .op-head{

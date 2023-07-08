@@ -132,7 +132,7 @@ function clickRow(row: any){
 @import "~/assets/klinebase.scss";
 .top-chg-box{
   padding: 5px 0;
-  border: 1px solid #eee;
+  border: 1px solid var(--klinecharts-pro-border-color);
 }
 .tg-row{
   display: flex;
@@ -177,10 +177,10 @@ function clickRow(row: any){
     }
   }
   &.header{
-    color: rgb(112, 122, 138);
+    color: var(--klinecharts-pro-text-second-color);
     padding-right: 20px;
     padding-bottom: 5px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--klinecharts-pro-border-color);
     .field{
       cursor: pointer;
     }
@@ -192,10 +192,10 @@ function clickRow(row: any){
     background-color: $c-hover-background-light;
   }
   &:hover{
-    background-color: #eee;
+    background-color: var(--klinecharts-pro-hover-background-color);
   }
   &.header:hover{
-    background-color: #fff;
+    background-color: var(--klinecharts-pro-background-color);
   }
 }
 .list-box{

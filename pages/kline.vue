@@ -31,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import {ActionType, Chart, DomPosition, Nullable, PaneOptions, Styles, Indicator} from 'klinecharts'
+import {ActionType, Chart, DomPosition, Nullable, PaneOptions, Styles, Indicator, OverlayCreate} from 'klinecharts'
 import kc from 'klinecharts'
 import _ from "lodash"
 import {MyDatafeed} from "~/composables/kline/datafeeds"
@@ -69,6 +69,7 @@ const _panes = reactive<PaneInds[]>([
     {name: 'pane_VOL', inds: ['VOL']}
 ])
 const period = reactive<Period>({ multiplier: 3, timespan: 'day', text: '3d', timeframe: '3d' })
+const sigOvers = reactive<OverlayCreate[]>([])
 let priceUnitDom: HTMLElement
 let loading = false
 
@@ -200,7 +201,10 @@ function initChart(chartObj: Chart){
       const [from] = adjustFromTo(period, to, 500)
       const kdata = await datafeed.getHistoryKLineData(symbol, period, from, to)
       chartObj.applyMoreData(kdata.data, kdata.data.length > 0)
-      kdata.lays?.forEach(o => chartObj.createOverlay(o))
+      kdata.lays?.forEach(o => {
+        const oid = chartObj.createOverlay(o) as string
+        sigOvers.push({id: oid, name: o.name, extendData: o.extendData})
+      })
       loading = false
     }
     get()
@@ -262,9 +266,13 @@ function loadSymbolPeriod(symbol: SymbolInfo, period: Period){
       const pricePrec = GetNumberDotOffset(Math.min(klines[0].low, klines[klines.length - 1].low)) + 2
       chart.value?.setPriceVolumePrecision(pricePrec, 0)
     }
+    sigOvers.splice(0, sigOvers.length)
     chart.value?.removeOverlay()
     chart.value?.applyNewData(klines, klines.length > 0)
-    kdata.lays?.forEach(o => chart.value?.createOverlay(o))
+    kdata.lays?.forEach(o => {
+      const oid = chart.value?.createOverlay(o) as string
+      sigOvers.push({id: oid, name: o.name, extendData: o.extendData})
+    })
     datafeed.subscribe(s, p, data => {
       chart.value?.updateData(data)
     })
@@ -284,6 +292,20 @@ watch([period, symbol], ([new_period, new_symbol], [prev_period, prev_symbol]) =
 }, {immediate: true})
 
 watch(theme, (new_val) => {
+  // 加载新指标时，修改默认颜色
+  if(new_val == 'light'){
+    datafeed.longColor = 'green'
+    datafeed.shortColor = 'red'
+  }
+  else{
+    datafeed.longColor = 'green'
+    datafeed.shortColor = 'rgb(255,135,8)'
+  }
+  // 修改已绘制的指标颜色
+  sigOvers.forEach(olay => {
+    olay.extendData.bgColor = olay.extendData.postion == 'top' ? datafeed.shortColor: datafeed.longColor;
+    chart.value?.overrideOverlay(olay)
+  })
   chart.value?.setStyles(getThemeStyles(new_val))
 })
 

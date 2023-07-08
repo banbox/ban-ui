@@ -4,6 +4,9 @@ import {$fetch} from "ofetch";
 
 export default class MyDatafeed implements Datafeed{
 
+  public shortColor: string = 'red'
+  public longColor: string = 'green'
+
   getDefaultSymbol(): SymbolInfo {
     return {ticker: 'BTC/USDT.P', exchange: 'binance'}
   }
@@ -41,11 +44,11 @@ export default class MyDatafeed implements Datafeed{
     const all_sigs = (rsp.signals || []).map((s: any) => {
       let extendData: any, price: number
       if(s.action == 'sell'){
-        extendData = {postion: 'top', bgColor: 'red'}
+        extendData = {postion: 'top', bgColor: this.shortColor}
         price = s.price ?? s.high
       }
       else{
-        extendData = {postion: 'bottom', bgColor: 'green'}
+        extendData = {postion: 'bottom', bgColor: this.longColor}
         price = s.price ?? s.low
       }
       extendData.text = s.action + ':' + price

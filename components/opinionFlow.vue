@@ -67,7 +67,7 @@ watch(i18n.global.locale, (new_val) => {
 
 .op-content{
   font-size: 14px;
-  color: #444;
+  color: var(--klinecharts-pro-text-second-color);
   img{
     width: 100%;
     margin: 10px 0;

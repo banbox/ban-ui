@@ -131,7 +131,6 @@ function clickRow(row: any){
 <style scoped lang="scss">
 @import "~/assets/klinebase.scss";
 .top-chg-box{
-  background-color: #fff;
   padding: 5px 0;
   border: 1px solid #eee;
 }
@@ -155,10 +154,10 @@ function clickRow(row: any){
     justify-content: flex-start;
     min-width: 120px;
     .base{
-      color: rgb(30, 35, 41)
+      color: var(--klinecharts-pro-text-color)
     }
     .quote{
-      color: rgb(112, 122, 138)
+      color: var(--klinecharts-pro-text-second-color)
     }
   }
   .chg{

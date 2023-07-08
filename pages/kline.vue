@@ -1,5 +1,5 @@
 <template>
-  <div class="kline-body klinecharts-pro">
+  <div class="kline-body klinecharts-pro" :data-theme="theme">
     <i class="icon-close klinecharts-pro-load-icon"/>
     <LoginBox v-model="showLoginBox"/>
     <KlineSymbolModal v-model="showSymbolModal" :datafeed="datafeed" @select="Object.assign(symbol, $event)"/>
@@ -14,12 +14,13 @@
           @clickSymbol="showSymbolModal = true" @clickPeriod="clickPeriod(periods[$event])"
           @clickMenu="showDrawingBar = !showDrawingBar" @clickInd="showIndSearchModal = true"
           @clickSetting="showSettingModal = true" @clickShot="clickScreenShot"
-          @clickTZ="showTimezoneModal = true" @clickLang="showI18nModal = true"/>
+          @clickTZ="showTimezoneModal = true" @clickLang="showI18nModal = true"
+          @clickTheme="toggleTheme"/>
       <div class="klinecharts-pro-content">
         <KlineLoading v-if="loadingChart"/>
         <KlineDrawBar ref="drawBar" :chart="chart" v-if="showDrawingBar"/>
         <div ref="chartRef" class='klinecharts-pro-widget' :data-drawing-bar-visible="showDrawingBar"
-          @keydown.delete="drawBar.clickRemove()"/>
+           @keydown.delete="drawBar.clickRemove()"/>
       </div>
     </div>
     <div class="kline-slide">
@@ -136,6 +137,15 @@ function clickPeriod(item: Period){
   chart.value?.setCustomApi({
     formatDate: makeFormatDate(period.timespan)
   })
+}
+
+function toggleTheme(){
+  if(theme.value === 'light'){
+    theme.value = 'dark'
+  }
+  else{
+    theme.value = 'light'
+  }
 }
 
 const documentResize = () => {

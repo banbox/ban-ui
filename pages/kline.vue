@@ -214,7 +214,7 @@ function initChart(chartObj: Chart){
           break
         }
         case 'close': {
-          console.log('close tootip:', data)
+          setIndicator(data.paneId, data.indicatorName, false)
         }
       }
     }

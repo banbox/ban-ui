@@ -20,7 +20,7 @@ import Modal from "~/components/kline/modal.vue"
 import List from "~/components/kline/list.vue"
 import Checkbox from "~/components/kline/checkbox.vue"
 import {PaneInds} from "~/components/kline/types";
-import {computed, defineEmits, defineProps, reactive} from "vue";
+import {computed, defineEmits, defineProps, reactive, watch} from "vue";
 import {Chart} from "klinecharts";
 import i18n from "~/composables/i18n"
 import {an} from "~/.output/public/_nuxt/entry.9543edf0";
@@ -67,6 +67,12 @@ function toggleInd(is_main: boolean, name: string, val: any){
   emit('change', pane_name, name, val as boolean)
 }
 
+watch(() => props.panes, (new_panes) => {
+  checked_inds.splice(0, checked_inds.length)
+  new_panes.forEach(p => {
+    checked_inds.push(...p.inds)
+  })
+}, {immediate: true})
 
 
 /**

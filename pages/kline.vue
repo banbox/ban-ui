@@ -6,7 +6,7 @@
     <KlineIndSearchModal v-model="showIndSearchModal" :panes="_panes" @change="setIndicator"/>
     <KlineSettingModal v-model="showSettingModal" :chart="chart" :currentStyles="styles"/>
     <KlineScreenshotModal v-model="showScreenShotModal" :url="screenShotUrl" @close="screenShotUrl = ''"/>
-    <KlineIndCfgModal v-model="showIndCfgModal" :chart="chart" :ind-name="indCfg.ind_name" :pane-id="indCfg.paneId"/>
+    <KlineIndCfgModal v-model="showIndCfgModal" :chart="chart" :indName="editIndName" :paneId="editPaneId"/>
     <KlineTimezoneModal v-model="showTimezoneModal" :chart="chart" :timezone="timezone"/>
     <KlineI18nModal v-model="showI18nModal"/>
     <div class="kline-main">
@@ -61,7 +61,8 @@ const chart = ref<Nullable<Chart>>(null)
 const drawBar = ref(null)
 const screenShotUrl = ref('')
 const timezone = ref(Intl.DateTimeFormat().resolvedOptions().timeZone)
-const indCfg = reactive({ind_name: '', paneId: '', calcParams: [] as Array<any>})
+const editIndName = ref('')
+const editPaneId = ref('')
 const _panes = reactive<PaneInds[]>([
     {name: 'candle_pane', inds: []},
     {name: 'pane_VOL', inds: ['VOL']}
@@ -207,10 +208,8 @@ function initChart(chartObj: Chart){
           break
         }
         case 'setting': {
-          const indicator = chartObj.getIndicatorByPaneId(data.paneId, data.indicatorName) as Indicator
-          indCfg.ind_name = data.indicatorName
-          indCfg.paneId = data.paneId
-          indCfg.calcParams = indicator.calcParams
+          editIndName.value = data.indicatorName
+          editPaneId.value = data.paneId
           showIndCfgModal.value = true
           break
         }

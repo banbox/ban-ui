@@ -128,6 +128,7 @@
   "params_3": "参数3",
   "params_4": "参数4",
   "params_5": "参数5",
+  "no_ind_params": "此指标无需设置参数",
   "period": "周期",
   "standard_deviation": "标准差",
 

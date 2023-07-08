@@ -1,6 +1,9 @@
 <template>
   <Modal v-model="showModal" :title="indName" :buttons="['confirm']" @click="clickModel" :width="360">
-    <div class="klinecharts-pro-indicator-setting-modal-content">
+    <div class="empty-msg" v-if="!fields.length">
+      <div class="text-block">{{$t('no_ind_params')}}</div>
+    </div>
+    <div class="klinecharts-pro-indicator-setting-modal-content" v-else>
       <template v-for="(d, i) in fields">
         <span>{{$t(d.paramNameKey)}}</span>
         <Input :value="params[i]" css-vars="width: '200px'" :precision="d.precision"
@@ -15,18 +18,17 @@ import Modal from "~/components/kline/modal.vue"
 import Input from "~/components/kline/input.vue"
 import { Chart, Indicator } from 'klinecharts'
 import kc from "klinecharts"
-import IndFields from "~/components/kline/inds"
-import {defineEmits, reactive, computed} from "vue";
+import {GetIndFields} from "~/components/kline/inds"
+import {defineEmits, reactive, computed, watch} from "vue";
 
 const props = defineProps<{
-  chart: Chart,  // 绘图对象
+  chart?: Chart,  // 绘图对象
   indName: string,  // 指标ID
   paneId: string,  // 指标所属面板
   modelValue: boolean
 }>()
 
 const emit = defineEmits<{
-  confirm: [indName: string, paneId: string, params: any[]],
   'update:modelValue': [value: boolean]
 }>()
 
@@ -39,14 +41,26 @@ const showModal = computed({
   }
 })
 
-const indicator = props.chart?.getIndicatorByPaneId(props.paneId, props.indName) as Indicator
-const params = reactive(indicator?.calcParams ?? {})
+const IndFieldsMap = GetIndFields();
+const params = reactive<any[]>([])
+const fields = reactive<any[]>([])
 
-const IndFieldsMap = Object.fromEntries(Object.entries(IndFields));
-const fields = reactive(Object.fromEntries(Object.entries(IndFieldsMap[props.indName] ?? {})))
+watch(() => [props.paneId, props.indName], ([new_pid, new_ind]) => {
+  if(!props.chart)return
+  fields.splice(0, fields.length)
+  fields.push(...(IndFieldsMap[new_ind] ?? []))
+  const indicator = props.chart.getIndicatorByPaneId(new_pid, new_ind) as Indicator
+  params.splice(0, params.length)
+  if(indicator?.calcParams){
+    params.push(...(indicator?.calcParams ?? []))
+  }
+})
 
 function clickModel(from: string){
-  if(from !== 'confirm')return;
+  showModal.value = false
+  if(from !== 'confirm' || fields.length == 0){
+    return;
+  }
   const result: any[] = []
   params.forEach((param: any, i: number) => {
     if (!kc.utils.isValid(param) || param === '') {
@@ -56,8 +70,7 @@ function clickModel(from: string){
     }
     result.push(param)
   })
-  props.chart.overrideIndicator({name: props.indName, calcParams: result}, props.paneId)
-  emit('confirm', props.indName, props.paneId, result)
+  props.chart?.overrideIndicator({name: props.indName, calcParams: result}, props.paneId)
 }
 
 </script>
@@ -71,5 +84,13 @@ function clickModel(from: string){
   grid-row-gap: 20px;
   margin-top: 20px;
   align-items: center;
+}
+.empty-msg{
+  height: 100%;
+  min-height: 120px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>

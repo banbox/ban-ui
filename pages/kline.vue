@@ -79,7 +79,7 @@ let loading = false
 
 const styles = reactive({})
 
-const watermark = ref('<img width="504" src="/watermark.png"/>')
+const watermark = ref('<img width="432" src="/watermark.png"/>')
 const datafeed = new MyDatafeed()
 
 const symbol = reactive<SymbolInfo>(datafeed.getDefaultSymbol())

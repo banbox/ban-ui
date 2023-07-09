@@ -99,7 +99,7 @@ var fullScreen = ref(isFullscreen());
 
 function enterFullscreen() {
   if(!process.client)return;
-  let elem = (period_bar.value.parentElement as any);
+  let elem = (period_bar.value.parentElement.parentElement as any);
   if (elem.requestFullscreen) {
     elem.requestFullscreen();
   } else if (elem.mozRequestFullScreen) { /* Firefox */

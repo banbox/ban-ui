@@ -105,7 +105,16 @@ export function getDefStyles() {
 
 export function getThemeStyles(theme: string) {
   const color = theme === 'dark' ? '#929AA5' : '#76808F'
+  const lineColor = theme === 'dark' ? '#555555' : '#dddddd'
   return {
+    grid:{
+      horizontal:{
+        color: lineColor
+      },
+      vertical:{
+        color: lineColor
+      }
+    },
     indicator: {
       tooltip: {
         icons: [

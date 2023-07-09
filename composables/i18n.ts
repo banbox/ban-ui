@@ -9,6 +9,7 @@ import {useState, watch} from "#build/imports";
 function getUserLang(){
   if(process.client){
     const nav = navigator as any;
+    //https://stackoverflow.com/questions/5580876/navigator-language-list-of-all-languages
     const userLang: string = nav.language || nav.userLanguage || 'en-US';
     if(userLang.startsWith('zh-')){
       return 'cn'

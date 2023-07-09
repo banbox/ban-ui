@@ -11,9 +11,11 @@ import Modal from "~/components/kline/modal.vue"
 import Select from "~/components/kline/select.vue"
 import {computed, defineProps, reactive, ref} from "vue";
 import {defineEmits} from "vue/dist/vue";
+import i18n, {useUserLang} from "~/composables/i18n";
 const props = defineProps<{
   modelValue: boolean
 }>()
+const userLang = useUserLang()
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
@@ -37,6 +39,11 @@ const langMap = reactive<Record<string, string>>({
   en: 'English',
   cn: '简体中文'
 })
+
+function setLocale(locale: any){
+  i18n.global.locale.value = locale
+  userLang.value = locale
+}
 
 const langDataOpts = reactive<SelOption[]>(Object.entries(langMap).map(([value, text]) => ({ value, text })))
 

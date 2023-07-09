@@ -18,12 +18,13 @@ import Modal from "~/components/kline/modal.vue"
 import {getOptions} from "~/components/kline/setting_opts";
 import Select from "~/components/kline/select.vue"
 import Switch from "~/components/kline/switch.vue"
-import {computed, defineEmits, defineProps, reactive} from "vue";
+import {computed, defineEmits, defineProps, reactive, watch} from "vue";
 import {useNuxtApp} from "#app";
 import {Chart, Styles} from "klinecharts";
 import kc from "klinecharts"
 import _ from "lodash"
 import {getDefStyles} from "~/composables/kline/coms";
+import i18n from "~/composables/i18n";
 const props = defineProps<{
   chart: Chart,
   currentStyles: Styles,
@@ -45,6 +46,10 @@ const showModal = computed({
 
 const styles = reactive(props.currentStyles ?? {})
 const options = reactive(getOptions())
+
+watch(i18n.global.locale, (new_locale) => {
+  options.splice(0, options.length, ...getOptions())
+})
 
 function update(key: string, value: any){
   _.set(styles, key, value)

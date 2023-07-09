@@ -8,10 +8,11 @@
 <script setup lang="ts">
 import Modal from "~/components/kline/modal.vue"
 import Select from "~/components/kline/select.vue"
-import {computed, defineProps, ref} from "vue";
+import {computed, defineProps, ref, watch} from "vue";
 import {defineEmits} from "vue/dist/vue";
 import {translateTimezone, getTimezoneSelectOptions} from "~/components/kline/timezone_opts";
 import {Chart} from "klinecharts";
+import i18n from "~/composables/i18n";
 
 const props = defineProps<{
   chart: Chart,  // 绘图对象
@@ -23,6 +24,10 @@ const timeZoneOpts = ref(getTimezoneSelectOptions())
 const timezone_ = ref(props.timezone)
 const timezone_text = computed(() => {
   return translateTimezone(timezone_.value)
+})
+
+watch(i18n.global.locale, (new_locale) => {
+  timeZoneOpts.value = getTimezoneSelectOptions()
 })
 
 const emit = defineEmits<{

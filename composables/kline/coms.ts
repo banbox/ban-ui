@@ -3,10 +3,10 @@ import {CandleTooltipCustomCallbackData, CandleStyle} from "klinecharts";
 import kc from "klinecharts";
 import i18n from "~/composables/i18n"
 const t = i18n.global.t
-const formatPrecision = kc.utils.formatPrecision
-const formatThousands = kc.utils.formatThousands
-const formatDate = kc.utils.formatDate
-const formatBigNumber = kc.utils.formatBigNumber
+export const formatPrecision = kc.utils.formatPrecision
+export const formatThousands = kc.utils.formatThousands
+export const formatDate = kc.utils.formatDate
+export const formatBigNumber = kc.utils.formatBigNumber
 const FormatDateType = kc.FormatDateType
 const TooltipIconPosition = kc.TooltipIconPosition
 
@@ -62,13 +62,13 @@ function CandleTooltipCustom(data: CandleTooltipCustomCallbackData, styles: Cand
   const volume = formatThousands(formatBigNumber(volPrecision), thousandsSeparator)
   const change = prevClose === 0 ? defVal : `${formatPrecision(changeValue / prevClose * 100)}%`
   return [
-    { title: t('time'), value: formatDate(dateTimeFormat!, current.timestamp, 'YYYY-MM-DD HH:mm') },
-    { title: t('open'), value: formatThousands(formatPrecision(current.open, pricePrecision), thousandsSeparator) },
-    { title: t('high'), value: formatThousands(formatPrecision(current.high, pricePrecision), thousandsSeparator) },
-    { title: t('low'), value: formatThousands(formatPrecision(current.low, pricePrecision), thousandsSeparator) },
-    { title: t('close'), value: formatThousands(formatPrecision(current.close, pricePrecision), thousandsSeparator)},
-    { title: t('volume'), value: volume},
-    { title: t('change'), value: change}
+    { title: t('time_'), value: formatDate(dateTimeFormat!, current.timestamp, 'YYYY-MM-DD HH:mm') },
+    { title: t('open_'), value: formatThousands(formatPrecision(current.open, pricePrecision), thousandsSeparator) },
+    { title: t('high_'), value: formatThousands(formatPrecision(current.high, pricePrecision), thousandsSeparator) },
+    { title: t('low_'), value: formatThousands(formatPrecision(current.low, pricePrecision), thousandsSeparator) },
+    { title: t('close_'), value: formatThousands(formatPrecision(current.close, pricePrecision), thousandsSeparator)},
+    { title: t('volume_'), value: volume},
+    { title: t('change_'), value: change}
   ]
 }
 

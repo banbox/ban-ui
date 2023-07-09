@@ -1,50 +1,62 @@
 <template>
   <div class="top-chg-box">
     <div class="tg-row header">
-      <div class="field symbol" @click="clickSort('symbol')">
+      <div class="field symbol">
         <span>{{$t('symbol')}}</span>
-        <el-icon :class="{active: sort_key == 'symbol'}">
+        <el-icon :class="{active: sort_key == 'symbol'}" @click="clickSort('symbol')">
           <SortDown v-if="symbol_down"/><SortUp v-else/>
         </el-icon>
       </div>
-      <div class="field price" @click="clickSort('price')">
+      <div class="field price">
         <span>{{$t('price')}}</span>
-        <el-icon :class="{active: sort_key == 'price'}">
+        <el-icon :class="{active: sort_key == 'price'}" @click="clickSort('price')">
           <SortDown v-if="price_down"/><SortUp v-else/>
         </el-icon>
       </div>
-      <div class="field chg" @click="clickSort('chg')">
+      <div class="field chg" v-if="main_col == 'chg'">
         <span>{{$t('up_down')}}</span>
-        <el-icon :class="{active: sort_key == 'chg'}">
+        <el-icon :class="{active: sort_key == 'chg'}" @click="clickSort('chg')">
           <SortDown v-if="chg_down"/><SortUp v-else/>
         </el-icon>
+        <el-icon @click="main_col = 'vol'"><Switch/></el-icon>
+      </div>
+      <div class="field vol" v-else>
+        <span>{{$t('volume')}}</span>
+        <el-icon :class="{active: sort_key == 'vol'}" @click="clickSort('vol')">
+          <SortDown v-if="vol_down"/><SortUp v-else/>
+        </el-icon>
+        <el-icon @click="main_col = 'chg'"><Switch/></el-icon>
       </div>
     </div>
     <div class="list-box">
       <div class="tg-row item" v-for="(item, index) in data_list" :key="index"
-        :class="[item.chg >= 0 ? 'up': 'down', item.symbol === symbol ? 'selected': '']" @click="clickRow(item)">
+        :class="[item.symbol === symbol ? 'selected': '']" @click="clickRow(item)">
         <span class="field symbol">
           <span class="base">{{item.base_s}}</span>
           <span class="quote">/{{item.quote_s}}</span>
         </span>
-        <span class="field price">{{item.price}}</span>
-        <span class="field chg">{{item.chg >= 0 ? '+' : ''}}{{(item.chg * 100).toFixed(2)}}%</span>
+        <span class="field price" :class="[item.prc_add >= 0 ? 'up': 'down']">{{item.price}}</span>
+        <span class="field main chg" v-if="main_col == 'chg'" :class="[item.chg >= 0 ? 'up': 'down']">
+          {{item.chg >= 0 ? '+' : ''}}{{(item.chg * 100).toFixed(2)}}%</span>
+        <span class="field main vol" v-else>{{item.vol_text}}</span>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import {SortDown, SortUp} from "@element-plus/icons-vue";
+import {SortDown, SortUp, Switch} from "@element-plus/icons-vue";
 import {useNuxtApp} from "#app";
 import {defineProps, defineEmits, onMounted, reactive, ref} from "vue";
 import {getApi} from "~/utils/netio";
+import {formatBigNumber, formatPrecision} from "~/composables/kline/coms";
 const {t} = useNuxtApp()
 const symbol_down = ref(true)
 const price_down = ref(true)
 const chg_down = ref(true)
 const vol_down = ref(true)
 const sort_key = ref('chg')
+const main_col = ref('chg')
 const data_list = reactive<any[]>([])
 let loop_timer: ReturnType<typeof setTimeout>
 
@@ -66,6 +78,7 @@ async function updateData(){
   const new_list = (rsp.data ?? []) as any[]
   const map_list = new_list.map(row => {
     const [base_s, quote_s] = row[1].split('/');
+    const vol_text = formatBigNumber(formatPrecision(row[5], 2))
     return {
       symbol: row[1],
       base_s, quote_s,
@@ -73,7 +86,9 @@ async function updateData(){
       price: row[2],
       chg: row[3],
       vol: row[4],
-      vol_q: row[5]
+      vol_q: row[5],
+      vol_text,
+      prc_add: row[6]
     }
   })
   data_list.splice(0, data_list.length, ...map_list)
@@ -100,6 +115,10 @@ function doArrSort(){
     const flag = chg_down.value ? -1 : 1;
     data_list.sort((a, b) => flag * (a.chg - b.chg))
   }
+  else if(key == 'vol'){
+    const flag = vol_down.value ? -1 : 1;
+    data_list.sort((a, b) => flag * (a.vol_q - b.vol_q))
+  }
 }
 
 function clickSort(key: string){
@@ -117,6 +136,11 @@ function clickSort(key: string){
   else if(key === 'chg'){
     if(is_toggle){
       chg_down.value = !chg_down.value
+    }
+  }
+  else if(key === 'vol'){
+    if(is_toggle){
+      vol_down.value = !vol_down.value
     }
   }
   sort_key.value = key
@@ -160,21 +184,17 @@ function clickRow(row: any){
       color: var(--klinecharts-pro-text-second-color)
     }
   }
-  .chg{
+  .main{
     min-width: 60px;
   }
   &.item{
     cursor: pointer;
   }
-  &.up{
-    .price, .chg{
-      color: #{ $c-bar-up-color }
-    }
+  .up{
+    color: #{ $c-bar-up-color }
   }
-  &.down{
-    .price, .chg{
-      color: #{ $c-bar-down-color }
-    }
+  .down{
+    color: #{ $c-bar-down-color }
   }
   &.header{
     color: var(--klinecharts-pro-text-second-color);

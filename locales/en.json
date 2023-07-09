@@ -151,13 +151,14 @@
   "grid_show": "Show Grid Lines",
   "restore_default": "Restore Default",
 
-  "time": "Time: ",
-  "open": "Open: ",
-  "high": "High: ",
-  "low": "Low: ",
-  "close": "Close: ",
-  "volume": "Volume: ",
-  "change": "Change: ",
+  "time_": "Time: ",
+  "open_": "Open: ",
+  "high_": "High: ",
+  "low_": "Low: ",
+  "close_": "Close: ",
+  "volume_": "Volume: ",
+  "change_": "Change: ",
+  "volume": "Volume",
 
   "language": "Language"
 }

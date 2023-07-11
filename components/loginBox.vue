@@ -78,7 +78,6 @@ import {useAuthState} from "~/composables/auth";
 import {computed, defineEmits, defineProps, reactive, ref, toRaw} from "vue";
 import type {FormRules, FormInstance} from "element-plus";
 import i18n from "~/composables/i18n"
-import {postApi} from "#imports";
 const t = i18n.global.t
 
 const {authData, authStatus, authToken, authDoing} = useAuthState()

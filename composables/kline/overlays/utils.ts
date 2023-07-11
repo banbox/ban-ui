@@ -15,6 +15,35 @@
 import { Coordinate, Bounding, LineAttrs } from 'klinecharts'
 import kc from "klinecharts"
 
+export function getArrowLine(point1: Coordinate, point2: Coordinate){
+  const flag = point2.x > point1.x ? 0 : 1
+  const kb = kc.utils.getLinearSlopeIntercept(point1, point2)
+  let offsetAngle
+  if (kb) {
+    offsetAngle = Math.atan(kb[0]) + Math.PI * flag
+  } else {
+    if (point2.y > point1.y) {
+      offsetAngle = Math.PI / 2
+    } else {
+      offsetAngle = Math.PI / 2 * 3
+    }
+  }
+  const rotateCoordinate1 = getRotateCoordinate({ x: point2.x - 8, y: point2.y + 4 }, point2, offsetAngle)
+  const rotateCoordinate2 = getRotateCoordinate({ x: point2.x - 8, y: point2.y - 4 }, point2, offsetAngle)
+  return [
+    {
+      type: 'line',
+      attrs: { coordinates: [point1, point2] }
+    },
+    {
+      type: 'line',
+      ignoreEvent: true,
+      attrs: { coordinates: [rotateCoordinate1, point2, rotateCoordinate2] }
+    }
+  ]
+}
+
+
 export function getRotateCoordinate (coordinate: Coordinate, targetCoordinate: Coordinate, angle: number): Coordinate {
   const x = (coordinate.x - targetCoordinate.x) * Math.cos(angle) - (coordinate.y - targetCoordinate.y) * Math.sin(angle) + targetCoordinate.x
   const y = (coordinate.x - targetCoordinate.x) * Math.sin(angle) + (coordinate.y - targetCoordinate.y) * Math.cos(angle) + targetCoordinate.y
@@ -24,30 +53,32 @@ export function getRotateCoordinate (coordinate: Coordinate, targetCoordinate: C
 export function getRayLine (coordinates: Coordinate[], bounding: Bounding): LineAttrs | LineAttrs[] {
   if (coordinates.length > 1) {
     let coordinate: Coordinate
-    if (coordinates[0].x === coordinates[1].x && coordinates[0].y !== coordinates[1].y) {
-      if (coordinates[0].y < coordinates[1].y) {
+    const point1 = coordinates[0]
+    const point2 = coordinates[1]
+    if (point1.x === point2.x && point1.y !== point2.y) {
+      if (point1.y < point2.y) {
         coordinate = {
-          x: coordinates[0].x,
+          x: point1.x,
           y: bounding.height
         }
       } else {
         coordinate = {
-          x: coordinates[0].x,
+          x: point1.x,
           y: 0
         }
       }
-    } else if (coordinates[0].x > coordinates[1].x) {
+    } else if (point1.x > point2.x) {
       coordinate = {
         x: 0,
-        y: kc.utils.getLinearYFromCoordinates(coordinates[0], coordinates[1], { x: 0, y: coordinates[0].y })
+        y: kc.utils.getLinearYFromCoordinates(point1, point2, { x: 0, y: point1.y })
       }
     } else {
       coordinate = {
         x: bounding.width,
-        y: kc.utils.getLinearYFromCoordinates(coordinates[0], coordinates[1], { x: bounding.width, y: coordinates[0].y })
+        y: kc.utils.getLinearYFromCoordinates(point1, point2, { x: bounding.width, y: point1.y })
       }
     }
-    return { coordinates: [coordinates[0], coordinate] }
+    return { coordinates: [point1, coordinate] }
   }
   return []
 }

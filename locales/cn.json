@@ -161,5 +161,10 @@
   "change_": "涨幅：",
   "volume": "成交量",
 
+  "num_bar": "根K线",
+  "days": "天",
+  "hours": "时",
+  "mins": "分",
+
   "language": "多语言"
 }

@@ -39,6 +39,7 @@ import {PaneInds, Period, SymbolInfo, Datafeed} from '~/components/kline/types'
 import {computed, defineProps, onMounted, onUnmounted, reactive, ref, toRaw, watch} from "vue";
 import {getDefStyles, getThemeStyles, adjustFromTo, makeFormatDate, GetNumberDotOffset} from "~/composables/kline/coms";
 import overlays from '~/composables/kline/overlays'
+import figures from '~/composables/kline/figure'
 import {useAuthState} from "~/composables/auth";
 import {useUserLang, i18n} from "~/composables/i18n";
 // 根据浏览器语言设置显示语言
@@ -46,6 +47,7 @@ const userLang = useUserLang()
 i18n.global.locale.value = userLang.value as any
 
 overlays.forEach(o => { kc.registerOverlay(o) })
+figures.forEach(o => { kc.registerFigure(o) })
 
 const authTimeframes = ['1m', '5m', '15m', '1h', '2h', '4h', '1d']
 

@@ -160,5 +160,10 @@
   "change_": "Change: ",
   "volume": "Volume",
 
+  "num_bar": " Bars",
+  "days": "d",
+  "hours": "h",
+  "mins": "m",
+
   "language": "Language"
 }

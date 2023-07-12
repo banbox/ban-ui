@@ -70,6 +70,7 @@ const screenShotUrl = ref('')
 const timezone = ref(Intl.DateTimeFormat().resolvedOptions().timeZone)
 const editIndName = ref('')
 const editPaneId = ref('')
+const batch_num = ref(500)
 const _panes = reactive<PaneInds[]>([
     {name: 'candle_pane', inds: []},
     {name: 'pane_VOL', inds: ['VOL']}
@@ -86,6 +87,8 @@ const datafeed = new MyDatafeed()
 
 const symbol = reactive<SymbolInfo>(datafeed.getDefaultSymbol())
 const periods = reactive<Period[]>(datafeed.getAllPeriods())
+
+let loop_timer: ReturnType<typeof setTimeout>
 
 
 function setIndicator(paneId: string, ind_name: string, is_add: boolean){
@@ -155,6 +158,34 @@ function toggleTheme(){
   }
 }
 
+async function loadKlineData(from: number, to: number, isNewData?: boolean){
+  loading = true
+  const kdata = await datafeed.getHistoryKLineData(symbol, period, from, to)
+  if(isNewData){
+    kdata.data.forEach(bar => {
+      chart.value?.updateData(bar)
+    })
+  }
+  else{
+    const more = kdata.data.length > 0
+    chart.value?.applyMoreData(kdata.data, more)
+  }
+  kdata.lays?.forEach(o => {
+    const oid = chart.value?.createOverlay(o) as string
+    sigOvers.push({id: oid, name: o.name, extendData: o.extendData})
+  })
+  loading = false
+}
+
+async function updateKlines(){
+  if(chart.value){
+    const kline = chart.value.getDataList()
+    const last = kline[kline.length - 1]
+    await loadKlineData(last.timestamp, new Date().getTime(), true)
+  }
+  loop_timer = setTimeout(updateKlines, 60000)
+}
+
 const documentResize = () => {
   chart.value?.resize()
 }
@@ -201,19 +232,9 @@ function initChart(chartObj: Chart){
   chartObj.setTimezone(timezone.value)
 
   chartObj.loadMore(timestamp => {
-    loading = true
-    const get = async () => {
-      const [to] = adjustFromTo(period, timestamp!, 1)
-      const [from] = adjustFromTo(period, to, 500)
-      const kdata = await datafeed.getHistoryKLineData(symbol, period, from, to)
-      chartObj.applyMoreData(kdata.data, kdata.data.length > 0)
-      kdata.lays?.forEach(o => {
-        const oid = chartObj.createOverlay(o) as string
-        sigOvers.push({id: oid, name: o.name, extendData: o.extendData})
-      })
-      loading = false
-    }
-    get()
+    const [to] = adjustFromTo(period, timestamp!, 1)
+    const [from] = adjustFromTo(period, to, batch_num.value)
+    loadKlineData(from, to)
   })
 
   chartObj.subscribeAction(ActionType.OnTooltipIconClick, data => {
@@ -258,14 +279,14 @@ watch(symbol, (new_val) => {
   }
 })
 
-function loadSymbolPeriod(symbol: SymbolInfo, period: Period){
+function loadSymbolPeriod(symbol_chg: boolean, period_chg: boolean){
   const s = symbol
   const p = period
   loading = true
   loadingChart.value = true
   const get = async () => {
     const curTime = new Date().getTime()
-    const [from, to] = adjustFromTo(p, curTime, 500)
+    const [from, to] = adjustFromTo(p, curTime, batch_num.value)
     const kdata = await datafeed.getHistoryKLineData(s, p, from, curTime)
     const klines = kdata.data
     if(klines.length > 0){
@@ -273,15 +294,22 @@ function loadSymbolPeriod(symbol: SymbolInfo, period: Period){
       chart.value?.setPriceVolumePrecision(pricePrec, 0)
     }
     sigOvers.splice(0, sigOvers.length)
-    chart.value?.removeOverlay()
+    const delArgs: Partial<Pick<kc.Overlay, "id" | "groupId" | "name">> = {}
+    if(!symbol_chg){
+      delArgs.groupId = 'klineSigs'
+    }
+    chart.value?.removeOverlay(delArgs)
     chart.value?.applyNewData(klines, klines.length > 0)
     kdata.lays?.forEach(o => {
+      o.groupId = 'klineSigs'
       const oid = chart.value?.createOverlay(o) as string
       sigOvers.push({id: oid, name: o.name, extendData: o.extendData})
     })
     datafeed.subscribe(s, p, data => {
       chart.value?.updateData(data)
     })
+    clearTimeout(loop_timer)
+    updateKlines()
     loading = false
     loadingChart.value = false
   }
@@ -293,7 +321,7 @@ watch([period, symbol], ([new_period, new_symbol], [prev_period, prev_symbol]) =
     if (prev_period) {
       datafeed.unsubscribe(prev_symbol!, prev_period)
     }
-    loadSymbolPeriod(new_symbol, new_period)
+    loadSymbolPeriod(new_symbol != prev_symbol, new_period != prev_period)
   }
 }, {immediate: true})
 

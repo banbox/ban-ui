@@ -1,6 +1,7 @@
 import {KLineData} from "klinecharts";
 import {Datafeed, SymbolInfo, Period, DatafeedSubscribeCallback, KData} from "~/components/kline/types";
 import {$fetch} from "ofetch";
+import {getApi} from "~/utils/netio";
 
 export default class MyDatafeed implements Datafeed{
 
@@ -32,7 +33,7 @@ export default class MyDatafeed implements Datafeed{
 
   async getHistoryKLineData(symbol: SymbolInfo, period: Period, from: number, to: number): Promise<KData> {
     const query = {symbol: symbol.ticker, timeframe: period.timeframe, exchange: symbol.exchange, from, to}
-    const rsp = await $fetch('/api/kline/hist', {query})
+    const rsp = await getApi('/kline/hist', query)
     const kline_data = (rsp.data || []).map((data: any) => ({
       timestamp: data[0],
       open: data[1],
@@ -58,7 +59,7 @@ export default class MyDatafeed implements Datafeed{
   }
 
   async searchSymbols(search?: string): Promise<SymbolInfo[]> {
-    const rsp = await $fetch(`/api/kline/symbols?search=${search}`)
+    const rsp = await getApi(`/kline/symbols?search=${search}`)
     return await (rsp.data || []).map((data: any) => ({
       ticker: data.symbol,
       name: data.symbol,

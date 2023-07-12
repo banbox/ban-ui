@@ -181,7 +181,9 @@ async function updateKlines(){
   if(chart.value){
     const kline = chart.value.getDataList()
     const last = kline[kline.length - 1]
-    await loadKlineData(last.timestamp, new Date().getTime(), true)
+    if(last && last.timestamp){
+      await loadKlineData(last.timestamp, new Date().getTime(), true)
+    }
   }
   loop_timer = setTimeout(updateKlines, 60000)
 }

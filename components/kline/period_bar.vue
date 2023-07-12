@@ -12,7 +12,7 @@
       <span>{{symbol.shortName ?? symbol.name ?? symbol.ticker}}</span>
     </div>
     <span class="item period" v-for="(item, index) in periods"
-          :class="{selected: item.timeframe === period.text}"
+          :class="{selected: item.timeframe === period.timeframe}"
           @click="$emit('clickPeriod', index)">
       {{item.text}}
     </span>

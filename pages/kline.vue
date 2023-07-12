@@ -75,7 +75,7 @@ const _panes = reactive<PaneInds[]>([
     {name: 'candle_pane', inds: []},
     {name: 'pane_VOL', inds: ['VOL']}
 ])
-const period = reactive<Period>({ multiplier: 3, timespan: 'day', text: '3d', timeframe: '3d' })
+const period = reactive<Period>({ multiplier: 3, timespan: 'day', text: '3D', timeframe: '3d' })
 const sigOvers = reactive<OverlayCreate[]>([])
 let priceUnitDom: HTMLElement
 let loading = false

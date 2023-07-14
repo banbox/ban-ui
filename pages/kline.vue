@@ -171,6 +171,7 @@ async function loadKlineData(from: number, to: number, isNewData?: boolean){
     chart.value?.applyMoreData(kdata.data, more)
   }
   kdata.lays?.forEach(o => {
+    o.groupId = 'klineSigs'
     const oid = chart.value?.createOverlay(o) as string
     sigOvers.push({id: oid, name: o.name, extendData: o.extendData})
   })

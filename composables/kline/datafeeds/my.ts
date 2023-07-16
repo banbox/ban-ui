@@ -2,18 +2,18 @@ import {KLineData} from "klinecharts";
 import {Datafeed, SymbolInfo, Period, DatafeedSubscribeCallback, KData} from "~/components/kline/types";
 import {$fetch} from "ofetch";
 import {getApi} from "~/utils/netio";
+import {useAppConfig} from "#app";
+import {build_ohlcvs, tf_to_secs} from "~/composables/kline/coms";
 
 export default class MyDatafeed implements Datafeed{
 
   public shortColor: string = 'red'
   public longColor: string = 'green'
+  private _prevSymbol?: string
+  private _ws?: WebSocket
 
   getDefaultSymbol(): SymbolInfo {
     return {ticker: 'BTC/USDT.P', exchange: 'binance'}
-  }
-
-  canSymbolSearch(): boolean {
-    return true
   }
 
   getAllPeriods(): Period[] {
@@ -58,8 +58,8 @@ export default class MyDatafeed implements Datafeed{
     return await {data: kline_data, lays: all_sigs}
   }
 
-  async searchSymbols(search?: string): Promise<SymbolInfo[]> {
-    const rsp = await getApi(`/kline/symbols?search=${search}`)
+  async getSymbols(): Promise<SymbolInfo[]> {
+    const rsp = await getApi(`/kline/symbols`)
     return await (rsp.data || []).map((data: any) => ({
       ticker: data.symbol,
       name: data.symbol,
@@ -73,9 +73,41 @@ export default class MyDatafeed implements Datafeed{
   }
 
   subscribe(symbol: SymbolInfo, period: Period, callback: DatafeedSubscribeCallback): void {
+    if(!process.client)return;
+    if(this._prevSymbol === symbol.ticker)return
+    let ws_url = useAppConfig().ws_url as string
+    if(process.env.NODE_ENV == 'production'){
+      ws_url = `wss://${location.host}/api`
+    }
+    this._prevSymbol = symbol.ticker
+    this._ws?.close()
+    this._ws = new WebSocket(`${ws_url}/ws/ohlcv`)
+    this._ws.onopen = () => {
+      this._ws?.send(JSON.stringify({
+        action: 'subscribe',
+        exchange: symbol.exchange,
+        symbol: symbol.ticker
+      }))
+    }
+    this._ws.onmessage = event => {
+      const result = JSON.parse(event.data)
+      const action = result.a as string
+      if(action == 'subscribe'){
+        callback(result)
+      }
+      else{
+        console.error('unknown msg:', event)
+      }
+    }
   }
 
   unsubscribe(symbol: SymbolInfo, period: Period): void {
+    if(!this._ws || this._prevSymbol === symbol.ticker)return
+    this._ws?.send(JSON.stringify({
+      action: 'unsubscribe',
+      exchange: symbol.exchange,
+      symbol: symbol.ticker
+    }))
   }
 
 }

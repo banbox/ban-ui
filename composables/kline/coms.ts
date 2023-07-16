@@ -1,4 +1,4 @@
-import {Period} from "~/components/kline/types";
+import {Datafeed, Period, SymbolInfo} from "~/components/kline/types";
 import {CandleTooltipCustomCallbackData, CandleStyle} from "klinecharts";
 import kc from "klinecharts";
 import i18n from "~/composables/i18n"
@@ -252,6 +252,63 @@ export function adjustFromTo(period: Period, toTimestamp: number, count: number)
   return [from, to]
 }
 
+export type BarArr = [number, number, number, number, number, number]
+
+export function tf_to_secs(timeframe?: string): number{
+  if(!timeframe)return 0
+  const unit = timeframe.substring(timeframe.length - 1);
+  const amount = parseInt(timeframe.substring(0, timeframe.length - 1))
+  let scale = 0
+  if(unit == 'y'){
+    scale = 31536000 // 60 * 60 * 24 * 365
+  }
+  else if(unit == 'M'){
+    scale = 2592000  // 60 * 60 * 24 * 30
+  }
+  else if(unit == 'w'){
+    scale = 604800 // 60 * 60 * 24 * 7
+  }
+  else if(unit == 'd'){
+    scale = 86400 // 60 * 60 * 24
+  }
+  else if(unit == 'h'){
+    scale = 3600
+  }
+  else if(unit == 'm'){
+    scale = 60
+  }
+  else if(unit == 's'){
+    scale = 1
+  }
+  else{
+    throw Error(`unsupport timeframe: ${timeframe}`)
+  }
+  return scale * amount
+}
+
+export function build_ohlcvs(details: BarArr[], tf_msecs: number, last_bar: BarArr | null = null): BarArr[] {
+  if(last_bar){
+    last_bar[0] = Math.floor(last_bar[0] / tf_msecs) * tf_msecs
+  }
+  const result: BarArr[] = last_bar ? [last_bar] : []
+  let lastIdx = result.length - 1
+  details.forEach((row: BarArr, index: number) => {
+    row[0] = Math.floor(row[0] / tf_msecs) * tf_msecs
+    if(lastIdx < 0 || row[0] > result[lastIdx][0]){
+      result.push(row)
+      lastIdx += 1
+    }
+    else{
+      const prow = result[lastIdx]
+      prow[2] = Math.max(prow[2], row[2])
+      prow[3] = Math.min(prow[3], row[3])
+      prow[4] = row[4]
+      prow[5] += row[5]
+    }
+  })
+  return result
+}
+
 export function makeFormatDate(timespan: string) {
   function doFormatDate(dateTimeFormat: Intl.DateTimeFormat, timestamp: number,
                       format: string, type: kc.FormatDateType) {
@@ -287,4 +344,27 @@ export function makeFormatDate(timespan: string) {
     return formatDate(dateTimeFormat, timestamp, 'YYYY-MM-DD HH:mm')
   }
   return doFormatDate;
+}
+
+export function useSymbols(feeder: Datafeed){
+  const symbols = ref<SymbolInfo[]>([])
+  const error = ref(null)
+  const loading = ref(false)
+
+  function doFetch(){
+    loading.value = true
+    symbols.value = []
+    error.value = null
+    feeder.getSymbols().then(res => {
+      symbols.value = res
+      loading.value = false
+    })
+    .catch(err => {
+      error.value = err
+      loading.value = false
+    })
+  }
+
+  doFetch()
+  return {symbols, error, loading}
 }

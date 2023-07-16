@@ -11,7 +11,7 @@
       </template>
     </Input>
     <List class-name="klinecharts-pro-symbol-search-modal-list" :loading="loading">
-      <li v-for="symbol in symbols" :key="symbol.name" @click="clickSymbol(symbol)">
+      <li v-for="symbol in matchSymbols" :key="symbol.name" @click="clickSymbol(symbol)">
         <div>
           <img v-if="symbol.logo" :src="symbol.logo" />
           <span :title="symbol.name">{{symbol.shortName ?? symbol.ticker}}</span>
@@ -28,7 +28,7 @@ import Input from "~/components/kline/input.vue"
 import List from "~/components/kline/list.vue"
 import {defineEmits, defineProps, reactive, ref, computed} from "vue";
 import {Datafeed, SymbolInfo} from "~/components/kline/types";
-import {useSearchSymbol} from "~/composables/kline/search_symbols"
+import {useSymbols} from "~/composables/kline/coms"
 
 const props = defineProps<{
   datafeed: Datafeed
@@ -36,7 +36,12 @@ const props = defineProps<{
 }>()
 
 const keyword = ref('')
-const {symbols, error, loading} = useSearchSymbol(props.datafeed, keyword)
+const {symbols, error, loading} = useSymbols(props.datafeed)
+
+const matchSymbols = computed(() => {
+  if(!keyword.value)return symbols.value
+  return symbols.value.filter(s => s.ticker.includes(keyword.value))
+})
 
 const emit = defineEmits<{
   select: [symbol: SymbolInfo],

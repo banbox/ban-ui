@@ -31,10 +31,10 @@ export type KData = {
   lays?: OverlayCreate[]
 }
 
-export type DatafeedSubscribeCallback = (data: KLineData) => void
+export type DatafeedSubscribeCallback = (data: any) => void
 
 export interface Datafeed {
-  searchSymbols (search?: string): Promise<SymbolInfo[]>
+  getSymbols (): Promise<SymbolInfo[]>
   getHistoryKLineData (symbol: SymbolInfo, period: Period, from: number, to: number): Promise<KData>
   subscribe (symbol: SymbolInfo, period: Period, callback: DatafeedSubscribeCallback): void
   unsubscribe (symbol: SymbolInfo, period: Period): void

@@ -31,13 +31,30 @@
 </template>
 
 <script setup lang="ts">
-import {ActionType, Chart, DomPosition, Nullable, PaneOptions, Styles, Indicator, OverlayCreate} from 'klinecharts'
+import {
+  ActionType,
+  Chart,
+  DomPosition,
+  Nullable,
+  PaneOptions,
+  Styles,
+  Indicator,
+  OverlayCreate,
+  KLineData
+} from 'klinecharts'
 import kc from 'klinecharts'
 import _ from "lodash"
 import {MyDatafeed} from "~/composables/kline/datafeeds"
 import {PaneInds, Period, SymbolInfo, Datafeed} from '~/components/kline/types'
 import {computed, defineProps, onMounted, onUnmounted, reactive, ref, toRaw, watch} from "vue";
-import {getDefStyles, getThemeStyles, adjustFromTo, makeFormatDate, GetNumberDotOffset} from "~/composables/kline/coms";
+import {
+  getDefStyles,
+  getThemeStyles,
+  adjustFromTo,
+  makeFormatDate,
+  GetNumberDotOffset,
+  build_ohlcvs, tf_to_secs, BarArr
+} from "~/composables/kline/coms";
 import overlays from '~/composables/kline/overlays'
 import figures from '~/composables/kline/figure'
 import {useAuthState} from "~/composables/auth";
@@ -79,6 +96,7 @@ const period = reactive<Period>({ multiplier: 3, timespan: 'day', text: '3D', ti
 const sigOvers = reactive<OverlayCreate[]>([])
 let priceUnitDom: HTMLElement
 let loading = false
+let tf_msecs = 0
 
 const styles = reactive({})
 
@@ -87,8 +105,6 @@ const datafeed = new MyDatafeed()
 
 const symbol = reactive<SymbolInfo>(datafeed.getDefaultSymbol())
 const periods = reactive<Period[]>(datafeed.getAllPeriods())
-
-let loop_timer: ReturnType<typeof setTimeout>
 
 
 function setIndicator(paneId: string, ind_name: string, is_add: boolean){
@@ -178,16 +194,6 @@ async function loadKlineData(from: number, to: number, isNewData?: boolean){
   loading = false
 }
 
-async function updateKlines(){
-  if(chart.value){
-    const kline = chart.value.getDataList()
-    const last = kline[kline.length - 1]
-    if(last && last.timestamp){
-      await loadKlineData(last.timestamp, new Date().getTime(), true)
-    }
-  }
-  loop_timer = setTimeout(updateKlines, 60000)
-}
 
 const documentResize = () => {
   chart.value?.resize()
@@ -308,11 +314,26 @@ function loadSymbolPeriod(symbol_chg: boolean, period_chg: boolean){
       const oid = chart.value?.createOverlay(o) as string
       sigOvers.push({id: oid, name: o.name, extendData: o.extendData})
     })
-    datafeed.subscribe(s, p, data => {
-      chart.value?.updateData(data)
+    tf_msecs = tf_to_secs(period.timeframe) * 1000
+    datafeed.subscribe(s, p, result => {
+      if(!chart.value)return
+      const kline = chart.value.getDataList()
+      const last = kline[kline.length - 1]
+      const lastBar: BarArr | null = last && last.timestamp ? [
+          last.timestamp, last.open, last.high, last.low, last.close, last.volume ?? 0
+      ] : null
+      const ohlcvArr = build_ohlcvs(result.bars, tf_msecs, lastBar)
+      ohlcvArr.forEach((row: any) => {
+        chart.value?.updateData({
+          timestamp: row[0],
+          open: row[1],
+          high: row[2],
+          low: row[3],
+          close: row[4],
+          volume: row[5]
+        })
+      })
     })
-    clearTimeout(loop_timer)
-    updateKlines()
     loading = false
     loadingChart.value = false
   }

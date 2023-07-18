@@ -24,7 +24,7 @@
   <div class="main-trade">
     <div class="bg">
       <div class="img-box">
-        <img src="/img/main-img.png"/>
+        <img :src="'/img/main-img.png'"/>
       </div>
       <div class="text-box">
         <div class="h3">{{$t('smart_money')}}</div>

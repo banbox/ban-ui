@@ -25,7 +25,7 @@ const data_list = reactive<Opinion[]>([])
 
 
 async function loadOpinions(){
-  const rsp = await getApi('/kline/opinion_flow?locale='+i18n.global.locale.value);
+  const rsp = await getApi('/kline/opinion_flow');
   const flow = (rsp.data ?? []) as Opinion[]
   data_list.splice(0, data_list.length, ...flow)
 }

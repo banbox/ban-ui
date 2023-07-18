@@ -36,8 +36,8 @@ type SelOption = {
 }
 
 const langMap = reactive<Record<string, string>>({
-  en: 'English',
-  cn: '简体中文'
+  'en-US': 'English',
+  'zh-CN': '简体中文'
 })
 
 function setLocale(locale: any){

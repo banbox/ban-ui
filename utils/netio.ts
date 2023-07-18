@@ -1,5 +1,6 @@
 import {$fetch, $Fetch, FetchOptions, SearchParameters, FetchError} from "ofetch";
 import _ from "lodash"
+import i18n from "~/composables/i18n";
 
 export type ApiResult = Record<string, any> & {
   code: number,
@@ -11,7 +12,8 @@ const requestApi = async function(method: string, url: string,
                                   query?: SearchParameters,
                                   body?: RequestInit["body"] | Record<string, any>): Promise<ApiResult> {
   try {
-    let rsp = await $fetch('/api' + url, {method, body, query});
+    const headers = {'X-Language': i18n.global.locale.value}
+    let rsp = await $fetch('/api' + url, {method, body, query, headers});
     if(!_.isObject(rsp)){
       return {code: 200, data: rsp}
     }

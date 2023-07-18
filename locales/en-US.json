@@ -165,5 +165,20 @@
   "hours": "h",
   "mins": "m",
 
-  "language": "Language"
+  "language": "Language",
+  "m_best_tool": "World's Leading Data Market Tool",
+  "smart_money": "Smart Money",
+  "why_good": "Users' first choice, exclusive and advanced trading method",
+  "pc": "PC",
+  "kf": "Service",
+  "contact-us": "Contact Us",
+  "contact-tip": "If you have any problem during download or updates, please contact customer service for assistance.",
+  "discord_offical": "Discord Offical",
+  "go_to": "Go to",
+  "how_open_pc": "How to Open DigoChain in PC",
+  "open_in_pc_tip": "Get a more powerful chart tool with complete features which also supports API authorized trade with multiple accounts and platforms realizing one-stop asset management.",
+  "copy_link_open_pc": "Copy the link and open it on computer",
+  "copy_not_support": "The browser is not supported, please manually copy.",
+  "copy_fail": "Copy failed, please copy manually.",
+  "copy_success": "Copy Success"
 }

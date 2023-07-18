@@ -4,6 +4,7 @@ import enUS from "~/locales/en-US.json";
 import {useStorage} from "@vueuse/core";
 import {Ref} from "@vue/reactivity";
 import {useState, watch} from "#build/imports";
+import {reactive} from "vue";
 
 
 function getUserLang(): string | undefined{
@@ -28,6 +29,21 @@ export const useUserLang = (): Ref<string | undefined> => {
   return lang
 }
 
+export type SelOption = {
+  value: string,
+  text: string
+}
+
+export const useLangOpts = () => {
+  const langMap = reactive<Record<string, string>>({
+    'en-US': 'English',
+    'zh-CN': '简体中文'
+  })
+
+  const langOpts = reactive<SelOption[]>(Object.entries(langMap).map(([value, text]) => ({ value, text })))
+
+  return {langMap, langOpts}
+}
 
 export const i18n = createI18n({
   legacy: false,

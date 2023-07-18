@@ -166,5 +166,20 @@
   "hours": "时",
   "mins": "分",
 
-  "language": "多语言"
+  "language": "多语言",
+  "m_best_tool": "全球领先的数据行情工具",
+  "smart_money": "主力大单",
+  "why_good": "行业首创，用户首选，更先进的交易方式",
+  "pc": "电脑端",
+  "kf": "联系客服",
+  "contact-us": "联系我们",
+  "contact-tip": "下载或更新过程中，如遇问题，请联系客服咨询",
+  "discord_offical": "官方Discord",
+  "go_to": "前往",
+  "how_open_pc": "如何在PC端打开DigoChain",
+  "open_in_pc_tip": "功能更齐全的强大K线工具，支持多账户多平台的API授权交易，实现一站式资产管理。",
+  "copy_link_open_pc": "复制后使用电脑打开链接",
+  "copy_not_support": "浏览器不支持，请手动复制",
+  "copy_fail": "复制失败，请手动复制",
+  "copy_success": "复制成功"
 }

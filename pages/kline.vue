@@ -342,10 +342,12 @@ function loadSymbolPeriod(symbol_chg: boolean, period_chg: boolean){
 
 watch([period, symbol], ([new_period, new_symbol], [prev_period, prev_symbol]) => {
   if (!loading) {
-    if (prev_period) {
-      datafeed.unsubscribe(prev_symbol!, prev_period)
+    const symbol_chg = new_symbol != prev_symbol
+    const period_chg = new_period != prev_period
+    if (symbol_chg) {
+      datafeed.unsubscribe(prev_symbol!, prev_period!)
     }
-    loadSymbolPeriod(new_symbol != prev_symbol, new_period != prev_period)
+    loadSymbolPeriod(symbol_chg, period_chg)
   }
 }, {immediate: true})
 

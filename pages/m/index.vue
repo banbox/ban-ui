@@ -173,7 +173,7 @@ body{
 }
 
 .top-h1{
-  margin-top: 15vw;
+  margin-top: 5vw;
   padding: 8.53vw 6vw 10.66vw;
   line-height: 11.2vw;
   text-align: center;

@@ -40,7 +40,8 @@ const {symbols, error, loading} = useSymbols(props.datafeed)
 
 const matchSymbols = computed(() => {
   if(!keyword.value)return symbols.value
-  return symbols.value.filter(s => s.ticker.includes(keyword.value))
+  const search = keyword.value.toUpperCase()
+  return symbols.value.filter(s => s.ticker.includes(search))
 })
 
 const emit = defineEmits<{

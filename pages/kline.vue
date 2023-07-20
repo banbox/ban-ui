@@ -322,7 +322,7 @@ function loadSymbolPeriod(symbol_chg: boolean, period_chg: boolean){
       const lastBar: BarArr | null = last && last.timestamp ? [
           last.timestamp, last.open, last.high, last.low, last.close, last.volume ?? 0
       ] : null
-      const ohlcvArr = build_ohlcvs(result.bars, tf_msecs, lastBar)
+      const ohlcvArr = build_ohlcvs(result.bars, result.secs * 1000, tf_msecs, lastBar)
       ohlcvArr.forEach((row: any) => {
         chart.value?.updateData({
           timestamp: row[0],

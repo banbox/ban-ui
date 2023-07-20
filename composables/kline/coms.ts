@@ -286,9 +286,15 @@ export function tf_to_secs(timeframe?: string): number{
   return scale * amount
 }
 
-export function build_ohlcvs(details: BarArr[], tf_msecs: number, last_bar: BarArr | null = null): BarArr[] {
+export function build_ohlcvs(details: BarArr[], in_msecs: number, tf_msecs: number, last_bar: BarArr | null = null): BarArr[] {
   if(last_bar){
     last_bar[0] = Math.floor(last_bar[0] / tf_msecs) * tf_msecs
+  }
+  if(in_msecs == tf_msecs){
+    if(last_bar && details[0][0] > last_bar[0]){
+      details.splice(0, 0, last_bar)
+    }
+    return details
   }
   const result: BarArr[] = last_bar ? [last_bar] : []
   let lastIdx = result.length - 1

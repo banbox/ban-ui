@@ -59,6 +59,7 @@ import overlays from '~/composables/kline/overlays'
 import figures from '~/composables/kline/figure'
 import {useAuthState} from "~/composables/auth";
 import {useUserLang, i18n} from "~/composables/i18n";
+import {GetIndDefaults} from "~/components/kline/inds";
 // 根据浏览器语言设置显示语言
 const userLang = useUserLang()
 i18n.global.locale.value = userLang.value as any
@@ -130,6 +131,9 @@ function setIndicator(paneId: string, ind_name: string, is_add: boolean){
     if(index >= 0){
       target.inds.splice(index, 1)
     }
+    if(!target.inds.length && matches.length){
+      _panes.splice(_panes.indexOf(target), 1)
+    }
   }
 }
 
@@ -139,6 +143,7 @@ function createIndicator (widget: Nullable<Chart>, indicatorName: string, isStac
   }
   return widget?.createIndicator({
     name: indicatorName,
+    calcParams: GetIndDefaults(indicatorName),
     // @ts-expect-error
     createTooltipDataSource: ({ indicator, defaultStyles }) => {
       const icon_ids = [indicator.visible ? 1: 0, 2, 3];

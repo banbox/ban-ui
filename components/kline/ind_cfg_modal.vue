@@ -68,7 +68,9 @@ function clickModel(from: string){
         param = fields[i].default
       }
     }
-    result.push(Number(param))
+    if(param){
+      result.push(Number(param))
+    }
   })
   props.chart?.overrideIndicator({name: props.indName, calcParams: result}, props.paneId)
 }

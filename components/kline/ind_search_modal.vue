@@ -72,7 +72,7 @@ watch(() => props.panes, (new_panes) => {
   new_panes.forEach(p => {
     checked_inds.push(...p.inds)
   })
-}, {immediate: true})
+}, {immediate: true, deep: true})
 
 
 /**

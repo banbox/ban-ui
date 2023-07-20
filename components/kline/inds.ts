@@ -51,8 +51,6 @@ export const GetIndFields = (): Record<string, Record<string, any>[]> => ({
     { paramNameKey: 'EMA1', precision: 0, min: 1, styleKey: 'lines[0].color' },
     { paramNameKey: 'EMA2', precision: 0, min: 1, styleKey: 'lines[1].color' },
     { paramNameKey: 'EMA3', precision: 0, min: 1, styleKey: 'lines[2].color' },
-    { paramNameKey: 'EMA4', precision: 0, min: 1, styleKey: 'lines[3].color' },
-    { paramNameKey: 'EMA5', precision: 0, min: 1, styleKey: 'lines[4].color' }
   ],
   MTM: [
     { paramNameKey: 'params_1', precision: 0, min: 1, default: 12 },
@@ -62,8 +60,6 @@ export const GetIndFields = (): Record<string, Record<string, any>[]> => ({
     { paramNameKey: 'MA1', precision: 0, min: 1, styleKey: 'lines[0].color' },
     { paramNameKey: 'MA2', precision: 0, min: 1, styleKey: 'lines[1].color' },
     { paramNameKey: 'MA3', precision: 0, min: 1, styleKey: 'lines[2].color' },
-    { paramNameKey: 'MA4', precision: 0, min: 1, styleKey: 'lines[3].color' },
-    { paramNameKey: 'MA5', precision: 0, min: 1, styleKey: 'lines[4].color' },
   ],
   MACD: [
     { paramNameKey: 'params_1', precision: 0, min: 1, default: 12 },
@@ -107,7 +103,11 @@ export const GetIndFields = (): Record<string, Record<string, any>[]> => ({
     { paramNameKey: 'params_1', precision: 0, min: 1, default: 12 },
     { paramNameKey: 'params_2', precision: 0, min: 1, default: 9 }
   ],
-  VOL: [],
+  VOL: [
+    { paramNameKey: 'params_1', precision: 0, min: 1, default: 5 },
+    { paramNameKey: 'params_2', precision: 0, min: 1, default: 10 },
+    { paramNameKey: 'params_3', precision: 0, min: 1, default: 20 }
+  ],
   VR: [
     { paramNameKey: 'params_1', precision: 0, min: 1, default: 26 },
     { paramNameKey: 'params_2', precision: 0, min: 1, default: 6 }
@@ -120,3 +120,11 @@ export const GetIndFields = (): Record<string, Record<string, any>[]> => ({
     { paramNameKey: 'WR5', precision: 0, min: 1, styleKey: 'lines[4].color' },
   ]
 })
+
+export const GetIndDefaults = (name: string): any[] | undefined => {
+  switch (name) {
+    case "MA": return [5, 10, 30];
+    case "EMA": return [5, 10, 30];
+    default: return undefined
+  }
+}

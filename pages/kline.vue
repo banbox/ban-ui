@@ -18,7 +18,7 @@
           @clickTheme="toggleTheme"/>
       <div class="klinecharts-pro-content">
         <KlineLoading v-if="loadingChart"/>
-        <KlineDrawBar ref="drawBar" :chart="chart" v-if="showDrawingBar"/>
+        <KlineDrawBar ref="drawBar" :chart="chart" v-if="showDrawingBar" :symbol="symbol" :period="period"/>
         <div ref="chartRef" class='klinecharts-pro-widget' :data-drawing-bar-visible="showDrawingBar"
            @keydown.delete="drawBar.clickRemove()"/>
       </div>
@@ -83,7 +83,7 @@ const showTimezoneModal = ref(false)
 const showI18nModal = ref(false)
 const chartRef = ref<HTMLElement>()
 const chart = ref<Nullable<Chart>>(null)
-const drawBar = ref(null)
+const drawBar = ref<any>(null)
 const screenShotUrl = ref('')
 const timezone = ref(Intl.DateTimeFormat().resolvedOptions().timeZone)
 const editIndName = ref('')
@@ -192,9 +192,10 @@ async function loadKlineData(from: number, to: number, isNewData?: boolean){
     chart.value?.applyMoreData(kdata.data, more)
   }
   kdata.lays?.forEach(o => {
-    o.groupId = 'klineSigs'
-    const oid = chart.value?.createOverlay(o) as string
-    sigOvers.push({id: oid, name: o.name, extendData: o.extendData})
+    const oid = drawBar.value?.addOverlay(o)
+    if(o.groupId == 'klineSigs'){
+      sigOvers.push({id: oid, name: o.name, extendData: o.extendData})
+    }
   })
   loading = false
 }
@@ -304,7 +305,7 @@ function loadSymbolPeriod(symbol_chg: boolean, period_chg: boolean){
     const kdata = await datafeed.getHistoryKLineData(s, p, from, curTime)
     const klines = kdata.data
     if(klines.length > 0){
-      const pricePrec = GetNumberDotOffset(Math.min(klines[0].low, klines[klines.length - 1].low)) + 2
+      const pricePrec = GetNumberDotOffset(Math.min(klines[0].low, klines[klines.length - 1].low)) + 3
       chart.value?.setPriceVolumePrecision(pricePrec, 0)
     }
     sigOvers.splice(0, sigOvers.length)
@@ -315,9 +316,10 @@ function loadSymbolPeriod(symbol_chg: boolean, period_chg: boolean){
     chart.value?.removeOverlay(delArgs)
     chart.value?.applyNewData(klines, klines.length > 0)
     kdata.lays?.forEach(o => {
-      o.groupId = 'klineSigs'
-      const oid = chart.value?.createOverlay(o) as string
-      sigOvers.push({id: oid, name: o.name, extendData: o.extendData})
+      const oid = drawBar.value?.addOverlay(o)
+      if(o.groupId == 'klineSigs') {
+        sigOvers.push({id: oid, name: o.name, extendData: o.extendData})
+      }
     })
     tf_msecs = tf_to_secs(period.timeframe) * 1000
     datafeed.subscribe(s, p, result => {

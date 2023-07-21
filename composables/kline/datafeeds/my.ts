@@ -42,7 +42,7 @@ export default class MyDatafeed implements Datafeed{
       close: data[4],
       volume: data[5]
     }))
-    const all_sigs = (rsp.signals || []).map((s: any) => {
+    let overlays = (rsp.signals || []).map((s: any) => {
       let extendData: any, price: number
       if(s.action == 'sell'){
         extendData = {postion: 'top', bgColor: this.shortColor}
@@ -53,9 +53,13 @@ export default class MyDatafeed implements Datafeed{
         price = s.price ?? s.low
       }
       extendData.text = s.action + ':' + price
-      return {name: 'barSignal', extendData, points: [{timestamp: s.bar_ms ?? s.time, value: price}]}
+      return {name: 'barSignal', groupId: 'klineSigs', extendData,
+        points: [{timestamp: s.bar_ms ?? s.time, value: price}]}
     })
-    return await {data: kline_data, lays: all_sigs}
+    if(rsp.overlays){
+      overlays = overlays.concat(rsp.overlays)
+    }
+    return await {data: kline_data, lays: overlays}
   }
 
   async getSymbols(): Promise<SymbolInfo[]> {

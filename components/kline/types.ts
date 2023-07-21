@@ -28,7 +28,7 @@ export type PaneInds = {
 
 export type KData = {
   data: KLineData[],
-  lays?: OverlayCreate[]
+  lays?: any[]
 }
 
 export type DatafeedSubscribeCallback = (data: any) => void

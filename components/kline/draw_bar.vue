@@ -65,8 +65,11 @@ import List from "~/components/kline/list.vue"
 import {defineEmits, defineProps, reactive, ref} from 'vue'
 import {Integer} from "type-fest";
 import {integer} from "vscode-languageserver-types";
-import {Chart, OverlayMode, OverlayRemove} from "klinecharts";
+import {Chart, Overlay, OverlayEvent, OverlayMode, OverlayRemove} from "klinecharts";
 import i18n from "~/composables/i18n"
+import {postApi} from "~/utils/netio";
+import {useAuthState} from "~/composables/auth";
+import {Period, SymbolInfo} from "~/components/kline/types";
 let t = i18n.global.t
 
 const popoverKey = ref('')
@@ -76,9 +79,14 @@ const lock = ref(false)
 const visiable = ref(true)
 const hisLays = reactive<string[]>([])  // 按创建顺序，记录所有overlay，方便删除
 const selectDraw = ref('')
+const delOverlayIds: string[] = []
+const layIdMap: Record<string, any> = {}
+const {authStatus} = useAuthState()
 
 const props = defineProps<{
-  chart: Chart
+  chart: Chart,
+  symbol: SymbolInfo,
+  period: Period
 }>()
 
 const GROUP_ID = 'drawing_tools'
@@ -151,22 +159,38 @@ function clickPopoverKey(value: string){
   }
 }
 
-function startOverlay(value: string){
-  const layId = props.chart.createOverlay({
+function addOverlay(data: any){
+  let moved = false;
+  let defData = {
     groupId: GROUP_ID,
-    name: value,
-    visible: visiable.value,
-    lock: lock.value,
-    mode: mode.value as OverlayMode,
-    onSelected: event => {
+    onDrawEnd: (event: OverlayEvent) => {
+      editOverlay(event.overlay)
+      return true
+    },
+    onPressedMoving: (event: OverlayEvent) => {
+      moved = true;
+      return false
+    },
+    onPressedMoveEnd: (event: OverlayEvent) => {
+      if(!moved)return true
+      moved = false
+      editOverlay(event.overlay)
+      return true
+    },
+    onSelected: (event: OverlayEvent) => {
       selectDraw.value = event.overlay.id
       return true;
     },
-    onDeselected: event => {
+    onDeselected: (event: OverlayEvent) => {
       selectDraw.value = ''
       return true;
     },
-  })
+    onRemoved: (event: OverlayEvent) => {
+      delOverlayIds.push(event.overlay.id)
+      return true
+    }
+  }
+  const layId = props.chart.createOverlay({...defData, ...data})
   if(layId){
     if(Array.isArray(layId)){
       hisLays.push(...(layId as string[]))
@@ -175,6 +199,19 @@ function startOverlay(value: string){
       hisLays.push(layId as string)
     }
   }
+  if(data.ban_id && layId){
+    layIdMap[layId as string] = data.ban_id
+  }
+  return layId;
+}
+
+function startOverlay(value: string){
+  addOverlay({
+    name: value,
+    visible: visiable.value,
+    lock: lock.value,
+    mode: mode.value as OverlayMode,
+  })
 }
 
 function clickSubPopover(index: integer, value: string){
@@ -217,11 +254,51 @@ function clickRemove(){
   else if(hisLays.length > 0){
     args['id'] = hisLays.pop()
   }
+  delOverlayIds.splice(0, delOverlayIds.length)
   props.chart.removeOverlay(args)
+  setTimeout(() => {
+    if(!delOverlayIds.length)return
+    delOverlays(delOverlayIds)
+  }, 500)
+}
+
+
+function editOverlay(overlay: any){
+  if(authStatus.value <= 0 || overlay.groupId == 'klineSigs')return
+  const keys = ['extendData', 'groupId', 'id', 'lock', 'mode', 'name', 'paneId', 'points', 'styles',
+    'totalStep', 'visible', 'zLevel']
+  const data = Object.fromEntries(keys.map(k => [k, overlay[k]]))
+  data['ban_id'] = layIdMap[overlay['id']]
+  postApi('/kline/save_overlay', {
+    exchange: props.symbol.exchange,
+    symbol: props.symbol.ticker,
+    timeframe: props.period.timeframe,
+    data
+  }).then(res => {
+    if(res.oid){
+      layIdMap[overlay['id']] = res.oid
+    }
+  }).catch(e => {
+    console.error('save overlay fail:', e)
+  })
+}
+
+function delOverlays(ids: string[]){
+  if(authStatus.value <= 0)return
+  const ban_ids = ids.map(v => layIdMap[v]).filter(v => v)
+  if(!ban_ids.length)return;
+  postApi('/kline/del_overlays', {ids: ban_ids}).then(res => {
+    ids.forEach(k =>{
+      delete layIdMap[k]
+    })
+  }).catch(e => {
+    console.error('delete overlay fail:', e)
+  })
 }
 
 defineExpose({
-  clickRemove
+  clickRemove,
+  addOverlay
 })
 </script>
 

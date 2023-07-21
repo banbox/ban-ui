@@ -1,6 +1,7 @@
 import {$fetch, $Fetch, FetchOptions, SearchParameters, FetchError} from "ofetch";
 import _ from "lodash"
 import i18n from "~/composables/i18n";
+import {useAuthState} from "~/composables/auth";
 
 export type ApiResult = Record<string, any> & {
   code: number,
@@ -11,8 +12,10 @@ export type ApiResult = Record<string, any> & {
 const requestApi = async function(method: string, url: string,
                                   query?: SearchParameters,
                                   body?: RequestInit["body"] | Record<string, any>): Promise<ApiResult> {
+  const {authToken, authData} = useAuthState()
   try {
-    const headers = {'X-Language': i18n.global.locale.value}
+    const headers = {'X-Language': i18n.global.locale.value, 'X-Authorization': authToken.value}
+    // @ts-ignore
     let rsp = await $fetch('/api' + url, {method, body, query, headers});
     if(!_.isObject(rsp)){
       return {code: 200, data: rsp}
@@ -22,7 +25,12 @@ const requestApi = async function(method: string, url: string,
   }catch (e){
     const err = (e as FetchError)
     const msg = err.data && err.data.detail ? `${err.status}: ${err.data.detail}` : err.toString()
-    return {code: err.status ?? 400, msg}
+    const result = {code: err.status ?? 400, msg}
+    if(result.code == 401){
+      authToken.value = null
+      authData.value = undefined
+    }
+    return result
   }
 }
 

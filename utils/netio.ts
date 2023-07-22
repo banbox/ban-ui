@@ -1,7 +1,7 @@
 import {$fetch, $Fetch, FetchOptions, SearchParameters, FetchError} from "ofetch";
 import _ from "lodash"
-import i18n from "~/composables/i18n";
 import {useAuthState} from "~/composables/auth";
+import {useMainStore} from "~/stores/main";
 
 export type ApiResult = Record<string, any> & {
   code: number,
@@ -13,8 +13,9 @@ const requestApi = async function(method: string, url: string,
                                   query?: SearchParameters,
                                   body?: RequestInit["body"] | Record<string, any>): Promise<ApiResult> {
   const {authToken, authData} = useAuthState()
+  const store = useMainStore()
   try {
-    const headers = {'X-Language': i18n.global.locale.value, 'X-Authorization': authToken.value}
+    const headers = {'X-Language': store.locale, 'X-Authorization': authToken.value}
     // @ts-ignore
     let rsp = await $fetch('/api' + url, {method, body, query, headers});
     if(!_.isObject(rsp)){

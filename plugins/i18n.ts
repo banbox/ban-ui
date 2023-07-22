@@ -1,6 +1,10 @@
-import i18n from "~/composables/i18n";
 import {defineNuxtPlugin} from "#app";
+import {useMainStore} from "~/stores/main";
 
-export default defineNuxtPlugin(({ vueApp }) => {
-  vueApp.use(i18n)
+export default defineNuxtPlugin(nuxtApp => {
+  const store = useMainStore()
+
+  nuxtApp.hook('i18n:localeSwitched', ({oldLocale, newLocale}) => {
+    store.setLocale(newLocale)
+  })
 })

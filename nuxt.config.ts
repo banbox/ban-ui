@@ -9,6 +9,7 @@ const backendHost = process.env.inter_aipp_host || 'http://127.0.0.1:8000'
 export default defineNuxtConfig({
   // @ts-ignore
   modules: [
+    '@nuxtjs/i18n',
     '@element-plus/nuxt',
     '@pinia/nuxt',
     'nuxt-lodash'
@@ -46,4 +47,17 @@ export default defineNuxtConfig({
       ["isDate", "isLodashDate"], // => _isLodashDate
     ],
   },
+  i18n: {
+    strategy: 'prefix_and_default',
+    defaultLocale: 'en-US',
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: 'i18n_redirected',
+      redirectOn: 'root',
+    },
+    locales: [
+      {code: 'en-US', name: 'English'},
+      {code: 'zh-CN', name: '简体中文'},
+    ]
+  }
 })

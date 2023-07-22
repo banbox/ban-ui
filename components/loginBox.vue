@@ -77,8 +77,8 @@ import {Connection, User, Key, Promotion, Message, View, Hide} from "@element-pl
 import {useAuthState} from "~/composables/auth";
 import {computed, defineEmits, defineProps, reactive, ref, toRaw} from "vue";
 import type {FormRules, FormInstance} from "element-plus";
-import i18n from "~/composables/i18n"
-const t = i18n.global.t
+import {useI18n} from "vue-i18n";
+const {locale, t} = useI18n()
 
 const {authData, authStatus, authToken, authDoing} = useAuthState()
 interface RegRuleForm{
@@ -95,7 +95,7 @@ const regForm = reactive({
 })
 
 const aggrement_url = computed(() => {
-  return `/agreement.${i18n.global.locale.value}.html`
+  return `/agreement.${locale.value}.html`
 })
 
 const validateBUid = (rule: any, value: any, callback: any) => {

@@ -12,7 +12,7 @@
       <List v-if="item.key === popoverKey" class-name="list">
         <li v-for="data in item.list" @click="clickSubPopover(index, data.key)">
           <Icon :name="data.key"/>
-          <span style="padding-left:8px">{{data.text}}</span>
+          <span style="padding-left:8px">{{$t(data.text)}}</span>
         </li>
       </List>
     </div>
@@ -66,11 +66,9 @@ import {defineEmits, defineProps, reactive, ref} from 'vue'
 import {Integer} from "type-fest";
 import {integer} from "vscode-languageserver-types";
 import {Chart, Overlay, OverlayEvent, OverlayMode, OverlayRemove} from "klinecharts";
-import i18n from "~/composables/i18n"
 import {postApi} from "~/utils/netio";
 import {useAuthState} from "~/composables/auth";
 import {Period, SymbolInfo} from "~/components/kline/types";
-let t = i18n.global.t
 
 const popoverKey = ref('')
 const modeIcon = ref('weakMagnet')
@@ -93,48 +91,48 @@ const GROUP_ID = 'drawing_tools'
 
 
 const singleLineOpts = [
-  { key: 'segment', text: t('segment') },
-  { key: 'arrow', text: t('arrow') },
-  { key: 'rayLine', text: t('ray_line') },
-  { key: 'straightLine', text: t('straight_line') },
-  { key: 'priceLine', text: t('price_line') },
-  { key: 'horizontalStraightLine', text: t('horizontal_straight_line') },
-  { key: 'horizontalRayLine', text: t('horizontal_ray_line') },
-  { key: 'horizontalSegment', text: t('horizontal_segment') },
-  { key: 'verticalStraightLine', text: t('vertical_straight_line') },
-  { key: 'verticalRayLine', text: t('vertical_ray_line') },
-  { key: 'verticalSegment', text: t('vertical_segment') },
+  { key: 'segment', text: 'segment' },
+  { key: 'arrow', text: 'arrow' },
+  { key: 'rayLine', text: 'ray_line' },
+  { key: 'straightLine', text: 'straight_line' },
+  { key: 'priceLine', text: 'price_line' },
+  { key: 'horizontalStraightLine', text: 'horizontal_straight_line' },
+  { key: 'horizontalRayLine', text: 'horizontal_ray_line' },
+  { key: 'horizontalSegment', text: 'horizontal_segment' },
+  { key: 'verticalStraightLine', text: 'vertical_straight_line' },
+  { key: 'verticalRayLine', text: 'vertical_ray_line' },
+  { key: 'verticalSegment', text: 'vertical_segment' },
 ]
 
 const moreLineOpts = [
-  { key: 'priceChannelLine', text: t('price_channel_line') },
-  { key: 'parallelStraightLine', text: t('parallel_straight_line') }
+  { key: 'priceChannelLine', text: 'price_channel_line' },
+  { key: 'parallelStraightLine', text: 'parallel_straight_line' }
 ]
 
 const polygonOpts = [
-  { key: 'circle', text: t('circle') },
-  { key: 'rect', text: t('rect') },
-  { key: 'parallelogram', text: t('parallelogram') },
-  { key: 'triangle', text: t('triangle') }
+  { key: 'circle', text: 'circle' },
+  { key: 'rect', text: 'rect' },
+  { key: 'parallelogram', text: 'parallelogram' },
+  { key: 'triangle', text: 'triangle' }
 ]
 
 const fibonacciOpts = [
-  { key: 'fibonacciLine', text: t('fibonacci_line') },
-  { key: 'fibonacciSegment', text: t('fibonacci_segment') },
-  { key: 'fibonacciCircle', text: t('fibonacci_circle') },
-  { key: 'fibonacciSpiral', text: t('fibonacci_spiral') },
-  { key: 'fibonacciSpeedResistanceFan', text: t('fibonacci_speed_resistance_fan') },
-  { key: 'fibonacciExtension', text: t('fibonacci_extension') },
-  { key: 'gannBox', text: t('gann_box') }
+  { key: 'fibonacciLine', text: 'fibonacci_line' },
+  { key: 'fibonacciSegment', text: 'fibonacci_segment' },
+  { key: 'fibonacciCircle', text: 'fibonacci_circle' },
+  { key: 'fibonacciSpiral', text: 'fibonacci_spiral' },
+  { key: 'fibonacciSpeedResistanceFan', text: 'fibonacci_speed_resistance_fan' },
+  { key: 'fibonacciExtension', text: 'fibonacci_extension' },
+  { key: 'gannBox', text: 'gann_box' }
 ]
 
 const waveOpts = [
-  { key: 'xabcd', text: t('xabcd') },
-  { key: 'abcd', text: t('abcd') },
-  { key: 'threeWaves', text: t('three_waves') },
-  { key: 'fiveWaves', text: t('five_waves') },
-  { key: 'eightWaves', text: t('eight_waves') },
-  { key: 'anyWaves', text: t('any_waves') },
+  { key: 'xabcd', text: 'xabcd' },
+  { key: 'abcd', text: 'abcd' },
+  { key: 'threeWaves', text: 'three_waves' },
+  { key: 'fiveWaves', text: 'five_waves' },
+  { key: 'eightWaves', text: 'eight_waves' },
+  { key: 'anyWaves', text: 'any_waves' },
 ]
 
 const overlays = reactive([
@@ -146,8 +144,8 @@ const overlays = reactive([
 ])
 
 const modes = reactive([
-  { key: 'weakMagnet', text: t('weakMagnet') },
-  { key: 'strongMagnet', text: t('strongMagnet') }
+  { key: 'weakMagnet', text: 'weakMagnet' },
+  { key: 'strongMagnet', text: 'strongMagnet' }
 ])
 
 function clickPopoverKey(value: string){

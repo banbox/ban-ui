@@ -58,11 +58,9 @@ import {
 import overlays from '~/composables/kline/overlays'
 import figures from '~/composables/kline/figure'
 import {useAuthState} from "~/composables/auth";
-import {useUserLang, i18n} from "~/composables/i18n";
 import {GetIndDefaults} from "~/components/kline/inds";
-// 根据浏览器语言设置显示语言
-const userLang = useUserLang()
-i18n.global.locale.value = userLang.value as any
+import {useI18n} from "vue-i18n";
+const {t} = useI18n()
 
 overlays.forEach(o => { kc.registerOverlay(o) })
 figures.forEach(o => { kc.registerFigure(o) })
@@ -240,7 +238,7 @@ function initChart(chartObj: Chart){
       createIndicator(chartObj, ind, true, {id: pane.name})
     })
   })
-  _.merge(styles, getDefStyles())
+  _.merge(styles, getDefStyles(t))
   _.merge(styles, getThemeStyles(theme.value))
   chartObj.setStyles(toRaw(styles) as Styles)
 

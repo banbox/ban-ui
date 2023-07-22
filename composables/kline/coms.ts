@@ -1,8 +1,6 @@
 import {Datafeed, Period, SymbolInfo} from "~/components/kline/types";
 import {CandleTooltipCustomCallbackData, CandleStyle} from "klinecharts";
 import kc from "klinecharts";
-import i18n from "~/composables/i18n"
-const t = i18n.global.t
 export const formatPrecision = kc.utils.formatPrecision
 export const formatThousands = kc.utils.formatThousands
 export const formatDate = kc.utils.formatDate
@@ -45,34 +43,37 @@ function buildDateTimeFormat (timezone?: string): Intl.DateTimeFormat | null {
 }
 
 const dateTimeFormat = buildDateTimeFormat()
+export type Translate = (input: string) => string;
 
+function makeCandleTooltipCustom(t: Translate) {
+  function CandleTooltipCustom(data: CandleTooltipCustomCallbackData, styles: CandleStyle) {
+    const defVal = styles.tooltip.defaultValue
+    const current = data.current
+    const prevClose = data.prev?.close ?? current.close
+    const changeValue = current.close - prevClose
+    const thousandsSeparator = ','
+    const clow = data.current.low
+    const minProce = Math.min(clow, data.prev?.low ?? clow, data.next?.low ?? clow)
+    const pricePrecision = GetNumberDotOffset(minProce) + 2
+    const volumePrecision = 3
 
-function CandleTooltipCustom(data: CandleTooltipCustomCallbackData, styles: CandleStyle){
-  const defVal = styles.tooltip.defaultValue
-  const current = data.current
-  const prevClose = data.prev?.close ?? current.close
-  const changeValue = current.close - prevClose
-  const thousandsSeparator = ','
-  const clow = data.current.low
-  const minProce = Math.min(clow, data.prev?.low ?? clow, data.next?.low ?? clow)
-  const pricePrecision = GetNumberDotOffset(minProce) + 2
-  const volumePrecision = 3
-
-  const volPrecision = formatPrecision(current.volume ?? defVal, volumePrecision)
-  const volume = formatThousands(formatBigNumber(volPrecision), thousandsSeparator)
-  const change = prevClose === 0 ? defVal : `${formatPrecision(changeValue / prevClose * 100)}%`
-  return [
-    { title: t('time_'), value: formatDate(dateTimeFormat!, current.timestamp, 'YYYY-MM-DD HH:mm') },
-    { title: t('open_'), value: formatThousands(formatPrecision(current.open, pricePrecision), thousandsSeparator) },
-    { title: t('high_'), value: formatThousands(formatPrecision(current.high, pricePrecision), thousandsSeparator) },
-    { title: t('low_'), value: formatThousands(formatPrecision(current.low, pricePrecision), thousandsSeparator) },
-    { title: t('close_'), value: formatThousands(formatPrecision(current.close, pricePrecision), thousandsSeparator)},
-    { title: t('volume_'), value: volume},
-    { title: t('change_'), value: change}
-  ]
+    const volPrecision = formatPrecision(current.volume ?? defVal, volumePrecision)
+    const volume = formatThousands(formatBigNumber(volPrecision), thousandsSeparator)
+    const change = prevClose === 0 ? defVal : `${formatPrecision(changeValue / prevClose * 100)}%`
+    return [
+      {title: t('time_'), value: formatDate(dateTimeFormat!, current.timestamp, 'YYYY-MM-DD HH:mm')},
+      {title: t('open_'), value: formatThousands(formatPrecision(current.open, pricePrecision), thousandsSeparator)},
+      {title: t('high_'), value: formatThousands(formatPrecision(current.high, pricePrecision), thousandsSeparator)},
+      {title: t('low_'), value: formatThousands(formatPrecision(current.low, pricePrecision), thousandsSeparator)},
+      {title: t('close_'), value: formatThousands(formatPrecision(current.close, pricePrecision), thousandsSeparator)},
+      {title: t('volume_'), value: volume},
+      {title: t('change_'), value: change}
+    ]
+  }
+  return CandleTooltipCustom
 }
 
-export function getDefStyles() {
+export function getDefStyles(t: Translate) {
   return {
     candle: {
       type: 'candle_solid',
@@ -88,7 +89,7 @@ export function getDefStyles() {
         }
       },
       tooltip: {
-        custom: CandleTooltipCustom
+        custom: makeCandleTooltipCustom(t)
       }
     },
     indicator: {

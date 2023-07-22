@@ -1,7 +1,7 @@
 <template>
   <Modal :title="$t('timezone')" :buttons="['confirm']" :width="400" class="timezone"
          v-model="showModal" @click="clickModal">
-    <Select :data-source="timeZoneOpts" :value="timezone_text" @change="clickTimeZone"/>
+    <Select :data-source="timeZoneOpts" :value="$t(timezone_text)" @change="clickTimeZone"/>
   </Modal>
 </template>
 
@@ -12,7 +12,6 @@ import {computed, defineProps, ref, watch} from "vue";
 import {defineEmits} from "vue/dist/vue";
 import {translateTimezone, getTimezoneSelectOptions} from "~/components/kline/timezone_opts";
 import {Chart} from "klinecharts";
-import i18n from "~/composables/i18n";
 
 const props = defineProps<{
   chart: Chart,  // 绘图对象
@@ -26,9 +25,6 @@ const timezone_text = computed(() => {
   return translateTimezone(timezone_.value)
 })
 
-watch(i18n.global.locale, (new_locale) => {
-  timeZoneOpts.value = getTimezoneSelectOptions()
-})
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]

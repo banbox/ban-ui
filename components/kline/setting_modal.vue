@@ -3,7 +3,7 @@
          v-model="showModal" @click="resetStyle">
     <div class="klinecharts-pro-setting-modal-content">
       <template v-for="(item, index) in options" :key="item.key">
-        <span>{{item.text}}</span>
+        <span>{{$t(item.text)}}</span>
         <Select v-if="item.component == 'select'" :data-source="item.dataSource" css-vars="width: 120px"
                 :value="$t(kc.utils.formatValue(styles, item.key))" @change="update(item.key, $event.key)"/>
         <Switch v-else-if="item.component == 'switch'" :open="!!kc.utils.formatValue(styles, item.key)"
@@ -24,7 +24,8 @@ import {Chart, Styles} from "klinecharts";
 import kc from "klinecharts"
 import _ from "lodash"
 import {getDefStyles} from "~/composables/kline/coms";
-import i18n from "~/composables/i18n";
+import {useI18n} from "vue-i18n";
+const {t} = useI18n()
 const props = defineProps<{
   chart: Chart,
   currentStyles: Styles,
@@ -47,17 +48,13 @@ const showModal = computed({
 const styles = reactive(props.currentStyles ?? {})
 const options = reactive(getOptions())
 
-watch(i18n.global.locale, (new_locale) => {
-  options.splice(0, options.length, ...getOptions())
-})
-
 function update(key: string, value: any){
   _.set(styles, key, value)
   props.chart.setStyles(styles as Styles)
 }
 
 function resetStyle(){
-  Object.assign(styles, getDefStyles())
+  Object.assign(styles, getDefStyles(t))
   props.chart.setStyles(styles as Styles)
 }
 

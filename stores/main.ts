@@ -2,7 +2,10 @@ import {defineStore} from "pinia";
 import {ref} from "#imports";
 
 export const useMainStore = defineStore('main', () => {
-    const host = ref('')
+    const locale = ref('en-US')
 
-    return {}
+    function setLocale(val: string){
+        locale.value = val
+    }
+    return {locale, setLocale}
 })

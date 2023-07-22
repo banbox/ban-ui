@@ -22,9 +22,7 @@ import Checkbox from "~/components/kline/checkbox.vue"
 import {PaneInds} from "~/components/kline/types";
 import {computed, defineEmits, defineProps, reactive, watch} from "vue";
 import {Chart} from "klinecharts";
-import i18n from "~/composables/i18n"
-import {an} from "~/.output/public/_nuxt/entry.9543edf0";
-let t = i18n.global.t
+
 
 const props = defineProps<{
   modelValue: boolean,
@@ -83,7 +81,7 @@ watch(() => props.panes, (new_panes) => {
 function paneTitle(pane: PaneInds){
   let result = [];
   if(pane.name == 'candle_pane'){
-    result.push(t('main_pane') + ':')
+    result.push('main_pane')
   }
   else {
     result.push(pane.name + ':')

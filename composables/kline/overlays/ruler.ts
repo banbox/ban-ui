@@ -14,11 +14,11 @@
 
 import { OverlayTemplate } from 'klinecharts'
 import {getArrowLine} from './utils'
-import i18n from "~/composables/i18n"
-const t = i18n.global.t
+import {useI18n} from "vue-i18n";
 
 
 function getIntervalText(interval: number){
+  const {t} = useI18n()
   const minSecs = 60
   const hourSecs = 3600
   const daySecs = 24 * 3600
@@ -57,6 +57,7 @@ const ruler: OverlayTemplate = {
     }
   },
   createPointFigures: ({ coordinates, overlay, precision, barSpace }) => {
+    const {t} = useI18n()
     if (coordinates.length > 1) {
       const pt1 = coordinates[0]
       const pt2 = coordinates[1]

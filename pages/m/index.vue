@@ -49,8 +49,6 @@
 
 <script lang="ts" setup>
 import {ref} from "vue";
-import i18n from "~/composables/i18n";
-const t = i18n.global.t
 
 const showContact = ref(false)
 const showPcModal = ref(false)

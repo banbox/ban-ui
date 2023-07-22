@@ -2,18 +2,28 @@
   <div class="header">
     <img class="logo" src="/logo_horz.png" alt="logo"/>
     <div class="right-area">
-      <Select :data-source="langOpts" :value="langMap[$i18n.locale]"
-            @change="$i18n.locale = $event.value"/>
+      <Select :data-source="locales" :value="localeMap[locale]" value_key="name" @change="setLocale($event.code)"/>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import Select from "~/components/kline/select.vue"
-import i18n, {useUserLang, useLangOpts} from "~/composables/i18n";
+import {useI18n} from "vue-i18n"
+import {navigateTo} from "#app";
+import {LocaleObject, useSwitchLocalePath} from "#i18n";
+import {reactive, ref} from "vue";
+const {locale, locales} = useI18n()
 
-const userLang = useUserLang()
-const {langMap, langOpts} = useLangOpts()
+const switchLocalePath = useSwitchLocalePath()
+const localeMap = reactive(Object.fromEntries(locales.value.map(item => {
+  const {code, name} = item as LocaleObject;
+  return [code, name]
+})))
+
+function setLocale(code: string){
+  navigateTo(switchLocalePath(code))
+}
 
 </script>
 

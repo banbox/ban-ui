@@ -13,7 +13,6 @@
 <script setup lang="ts">
 import {onMounted, reactive, watch} from "vue";
 import {getApi} from "#imports";
-import i18n from "~/composables/i18n";
 
 type Opinion = {
   user_name: string,
@@ -34,9 +33,6 @@ onMounted(()=>{
   loadOpinions()
 })
 
-watch(i18n.global.locale, (new_val) => {
-  loadOpinions()
-})
 
 </script>
 

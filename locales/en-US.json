@@ -10,7 +10,7 @@
   "this_is_required": "This field is required",
   "this_is_number": "This field must be a number",
   "two_pwd_not_match": "The two passwords do not match",
-  "pwd_format_error": "At least 10 characters, must include letters and numbers, allowed symbols: !@#$%^&*()",
+  "pwd_format_error": "At least 10 characters, must include letters and numbers, allowed symbols: !#$%^&*()",
   "login": "Login",
   "register": "Register",
   "reg_log_accept": "By registering or logging in, you agree to the",

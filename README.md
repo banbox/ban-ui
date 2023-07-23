@@ -3,7 +3,7 @@
 
 
 # 技术架构
-本项目使用[Next 3](https://nuxt.com/docs/getting-started/introduction)和[VUE 3](https://vuejs.org/guide/introduction.html)
+本项目使用[Nuxt 3](https://nuxt.com/docs/getting-started/introduction)和[VUE 3](https://vuejs.org/guide/introduction.html)
 
 
 # K线图

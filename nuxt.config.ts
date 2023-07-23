@@ -48,16 +48,18 @@ export default defineNuxtConfig({
     ],
   },
   i18n: {
-    strategy: 'prefix_and_default',
+    legacy: false,
+    strategy: 'prefix',
     defaultLocale: 'en-US',
+    langDir: 'locales',
     detectBrowserLanguage: {
       useCookie: true,
       cookieKey: 'i18n_redirected',
-      redirectOn: 'root',
+      redirectOn: 'all',
     },
     locales: [
-      {code: 'en-US', name: 'English'},
-      {code: 'zh-CN', name: '简体中文'},
+      {code: 'zh-CN', name: '简体中文', file: 'zh-CN.json'},
+      {code: 'en-US', name: 'English', file: 'en-US.json'},
     ]
   }
 })

@@ -10,7 +10,7 @@
   "this_is_required": "此项是必填项",
   "this_is_number": "此项必须是数字",
   "two_pwd_not_match": "两次输入密码不一致",
-  "pwd_format_error": "至少10位，必须包含字母和数字，允许!@#$%^&*()",
+  "pwd_format_error": "至少10位，必须包含字母和数字，允许!#$%^&*()",
   "login": "登录",
   "register": "注册",
   "reg_log_accept": "注册或登录即同意",

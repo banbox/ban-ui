@@ -14,11 +14,12 @@
 
 import { OverlayTemplate } from 'klinecharts'
 import {getArrowLine} from './utils'
-import {useI18n} from "vue-i18n";
+import {useNuxtApp} from "#app";
 
 
 function getIntervalText(interval: number){
-  const {t} = useI18n()
+  const {$i18n} = useNuxtApp()
+  const t = $i18n.t
   const minSecs = 60
   const hourSecs = 3600
   const daySecs = 24 * 3600
@@ -57,7 +58,8 @@ const ruler: OverlayTemplate = {
     }
   },
   createPointFigures: ({ coordinates, overlay, precision, barSpace }) => {
-    const {t} = useI18n()
+    const {$i18n} = useNuxtApp()
+    const t = $i18n.t
     if (coordinates.length > 1) {
       const pt1 = coordinates[0]
       const pt2 = coordinates[1]

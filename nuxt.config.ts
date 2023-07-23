@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url'
 import VueI18nVitePlugin from '@intlify/unplugin-vue-i18n/vite'
 
 const backendHost = process.env.inter_aipp_host || 'http://127.0.0.1:8000'
+const defaultLocale = process.env.NODE_ENV == 'production' ? 'en-US': 'zh-CN'
 
 
 export default defineNuxtConfig({
@@ -50,7 +51,7 @@ export default defineNuxtConfig({
   i18n: {
     legacy: false,
     strategy: 'prefix',
-    defaultLocale: 'en-US',
+    defaultLocale,
     langDir: 'locales',
     detectBrowserLanguage: {
       useCookie: true,

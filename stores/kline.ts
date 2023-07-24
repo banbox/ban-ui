@@ -4,8 +4,9 @@ import {PaneInds, Period, SymbolInfo} from "~/components/kline/types";
 import {periodMap} from "~/composables/kline/coms";
 import {reactive, toRaw} from "vue";
 import _ from "lodash";
-import {Defaults} from "~/config";
+import {getDefaults} from "~/config";
 
+const defaults = getDefaults();
 const defStyle = {
     candle: {
         type: 'candle_solid',
@@ -36,8 +37,8 @@ const defStyle = {
 }
 
 export const useKlineStore = defineStore('kline', () => {
-    const period = reactive<Period>(Defaults.period)
-    const symbol = reactive<SymbolInfo>(Defaults.symbol)
+    const period = reactive<Period>(defaults.period)
+    const symbol = reactive<SymbolInfo>(defaults.symbol)
     const chartStyle = reactive(defStyle)
     const mainInds = ref<string>('')
     const subInds = ref<string>('VOL')

@@ -72,7 +72,7 @@ import Icon from "~/components/kline/icon"
 import {Period, SymbolInfo} from "~/components/kline/types"
 import {AllPeriods} from "~/composables/kline/coms";
 import {useKlineStore} from "~/stores/kline";
-import {Defaults} from "~/config";
+import {getDefaults} from "~/config";
 
 const period_bar = ref()
 
@@ -97,9 +97,10 @@ function isFullscreen() {
   return fullscreenElement != undefined;
 }
 
+const defaults = getDefaults();
 var fullScreen = ref(isFullscreen());
-const showName = ref(Defaults.symbol.shortName)
-const activeTF = ref(Defaults.period.timeframe)
+const showName = ref(defaults.symbol.shortName)
+const activeTF = ref(defaults.period.timeframe)
 
 onMounted(() => {
   watch(store.symbol, (symbol) => {

@@ -49,7 +49,7 @@ export default class MyDatafeed implements Datafeed{
       ticker: data.symbol,
       name: data.symbol,
       shortName: data.short_name,
-      market: 'spot',
+      market: data.market ?? 'spot',
       exchange: data.exchange,
       priceCurrency: 'USDT',
       type: data.type,

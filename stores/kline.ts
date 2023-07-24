@@ -4,6 +4,7 @@ import {PaneInds, Period, SymbolInfo} from "~/components/kline/types";
 import {periodMap} from "~/composables/kline/coms";
 import {reactive, toRaw} from "vue";
 import _ from "lodash";
+import {Defaults} from "~/config";
 
 const defStyle = {
     candle: {
@@ -35,8 +36,8 @@ const defStyle = {
 }
 
 export const useKlineStore = defineStore('kline', () => {
-    const period = reactive<Period>({ multiplier: 3, timespan: 'day', text: '3D', timeframe: '3d' })
-    const symbol = reactive<SymbolInfo>({ticker: 'BTC/USDT.P', exchange: 'binance'})
+    const period = reactive<Period>(Defaults.period)
+    const symbol = reactive<SymbolInfo>(Defaults.symbol)
     const chartStyle = reactive(defStyle)
     const mainInds = ref<string>('')
     const subInds = ref<string>('VOL')
@@ -55,7 +56,12 @@ export const useKlineStore = defineStore('kline', () => {
         Object.assign(symbol, val)
     }
     function setSymbolTicker(ticker: string){
-        Object.assign(symbol, {...symbol, ticker: ticker})
+        Object.assign(symbol, {
+            ...symbol,
+            ticker: ticker,
+            name: ticker,
+            shortName: ticker
+        })
     }
     function setStyleItem(key: string, val: any){
         _.set(chartStyle, key, val)

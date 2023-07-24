@@ -7,7 +7,10 @@
     </div>
     <div class="drop-down-container">
       <ul @click.prevent="open = false">
-        <li v-for="item in dataSource" @click="$emit('change', item)">{{item[value_key]}}</li>
+        <li v-for="item in dataSource" @click="$emit('change', item)">
+          <span v-if="translate">{{$t(item[value_key])}}</span>
+          <span v-else>{{item[value_key]}}</span>
+        </li>
       </ul>
     </div>
   </div>
@@ -21,11 +24,13 @@ type PropType = {
   className?: string,
   value?: string,
   value_key?: string,
+  translate?: boolean,
   dataSource: any[]
 }
 
 const props = withDefaults(defineProps<PropType>(), {
-  value_key: 'text'
+  value_key: 'text',
+  translate: false
 })
 
 const emit = defineEmits<{

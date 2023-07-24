@@ -1,12 +1,13 @@
 <template>
-  <Modal :title="$t('language')" :width="560" :buttons="['restore_default']"
+  <Modal :title="$t('language')" :width="660" :buttons="['restore_default']"
          v-model="showModal" @click="resetStyle">
     <div class="klinecharts-pro-setting-modal-content">
       <template v-for="(item, index) in options" :key="item.key">
         <span>{{$t(item.text)}}</span>
-        <Select v-if="item.component == 'select'" :data-source="item.dataSource" css-vars="width: 120px"
-                :value="$t(kc.utils.formatValue(styles, item.key))" @change="update(item.key, $event.key)"/>
-        <Switch v-else-if="item.component == 'switch'" :open="!!kc.utils.formatValue(styles, item.key)"
+        <Select v-if="item.component == 'select'" :data-source="item.dataSource"
+                css-vars="width: 120px" :translate="true"
+                :value="$t(kc.utils.formatValue(store.chartStyle, item.key))" @change="update(item.key, $event.key)"/>
+        <Switch v-else-if="item.component == 'switch'" :open="!!kc.utils.formatValue(store.chartStyle, item.key)"
                 @change="update(item.key, $event)"/>
       </template>
     </div>
@@ -19,16 +20,15 @@ import {getOptions} from "~/components/kline/setting_opts";
 import Select from "~/components/kline/select.vue"
 import Switch from "~/components/kline/switch.vue"
 import {computed, defineEmits, defineProps, reactive, watch} from "vue";
-import {useNuxtApp} from "#app";
 import {Chart, Styles} from "klinecharts";
 import kc from "klinecharts"
 import _ from "lodash"
-import {getDefStyles} from "~/composables/kline/coms";
 import {useI18n} from "vue-i18n";
+import {useKlineStore} from "~/stores/kline";
 const {t} = useI18n()
+const store = useKlineStore()
 const props = defineProps<{
   chart: Chart,
-  currentStyles: Styles,
   modelValue: boolean
 }>()
 
@@ -45,17 +45,16 @@ const showModal = computed({
   }
 })
 
-const styles = reactive(props.currentStyles ?? {})
 const options = reactive(getOptions())
 
 function update(key: string, value: any){
-  _.set(styles, key, value)
-  props.chart.setStyles(styles as Styles)
+  store.setStyleItem(key, value)
+  props.chart.setStyles(store.chartStyle as Styles)
 }
 
 function resetStyle(){
-  Object.assign(styles, getDefStyles(t))
-  props.chart.setStyles(styles as Styles)
+  store.resetStyle()
+  props.chart.setStyles(store.chartStyle as Styles)
 }
 
 </script>

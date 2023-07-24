@@ -4,11 +4,11 @@ import {Pinia} from "pinia";
 
 
 export default defineNuxtPlugin(({ $pinia }) => {
-  const store = useMainStore($pinia as Pinia)
+  const main = useMainStore($pinia as Pinia)
   // store.$patch({})
   return {
     provide: {
-      store
+      main
     }
   }
 })

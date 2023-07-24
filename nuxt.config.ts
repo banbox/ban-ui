@@ -13,6 +13,7 @@ export default defineNuxtConfig({
     '@nuxtjs/i18n',
     '@element-plus/nuxt',
     '@pinia/nuxt',
+    '@pinia-plugin-persistedstate/nuxt',
     'nuxt-lodash'
   ],
   // @ts-ignore
@@ -62,5 +63,12 @@ export default defineNuxtConfig({
       {code: 'zh-CN', name: '简体中文', file: 'zh-CN.json'},
       {code: 'en-US', name: 'English', file: 'en-US.json'},
     ]
-  }
+  },
+  piniaPersistedstate: {
+    // pinia默认使用cookie进行持久化
+    cookieOptions: {
+      sameSite: 'strict',
+    },
+    storage: 'cookies'
+  },
 })

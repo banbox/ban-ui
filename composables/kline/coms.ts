@@ -7,7 +7,18 @@ export const formatDate = kc.utils.formatDate
 export const formatBigNumber = kc.utils.formatBigNumber
 const FormatDateType = kc.FormatDateType
 const TooltipIconPosition = kc.TooltipIconPosition
-
+export const AllPeriods: Period[] = [
+  { multiplier: 1, timespan: 'minute', text: '1m', timeframe: '1m' },
+  { multiplier: 5, timespan: 'minute', text: '5m', timeframe: '5m' },
+  { multiplier: 15, timespan: 'minute', text: '15m', timeframe: '15m' },
+  { multiplier: 1, timespan: 'hour', text: '1H', timeframe: '1h' },
+  { multiplier: 2, timespan: 'hour', text: '2H', timeframe: '2h' },
+  { multiplier: 4, timespan: 'hour', text: '4H', timeframe: '4h' },
+  { multiplier: 1, timespan: 'day', text: 'D', timeframe: '1d' },
+  { multiplier: 3, timespan: 'day', text: '3D', timeframe: '3d' },
+  { multiplier: 1, timespan: 'week', text: 'W', timeframe: '1w' },
+]
+export const periodMap = Object.fromEntries(AllPeriods.map(obj => [obj.timeframe, obj]))
 
 export function GetNumberDotOffset(value: number){
   value = Math.abs(value)
@@ -76,30 +87,9 @@ function makeCandleTooltipCustom(t: Translate) {
 export function getDefStyles(t: Translate) {
   return {
     candle: {
-      type: 'candle_solid',
-      priceMark: {
-        last: {
-          show: true
-        },
-        high: {
-          show: true
-        },
-        low: {
-          show: true
-        }
-      },
       tooltip: {
         custom: makeCandleTooltipCustom(t)
       }
-    },
-    indicator: {
-      lastValueMark: {
-        show: false
-      }
-    },
-    yAxis: {
-      type: 'normal',
-      reverse: false
     },
   }
 }

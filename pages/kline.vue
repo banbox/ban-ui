@@ -1,30 +1,30 @@
 <template>
-  <div class="kline-body klinecharts-pro" :data-theme="theme">
+  <div class="kline-body klinecharts-pro" :data-theme="main.theme">
     <i class="icon-close klinecharts-pro-load-icon"/>
     <LoginBox v-model="showLoginBox"/>
-    <KlineSymbolModal v-model="showSymbolModal" :datafeed="datafeed" @select="Object.assign(symbol, $event)"/>
-    <KlineIndSearchModal v-model="showIndSearchModal" :panes="_panes" @change="setIndicator"/>
-    <KlineSettingModal v-model="showSettingModal" :chart="chart" :currentStyles="styles"/>
+    <KlineSymbolModal v-model="showSymbolModal" :datafeed="datafeed"/>
+    <KlineIndSearchModal v-model="showIndSearchModal" @change="setIndicator"/>
+    <KlineSettingModal v-model="showSettingModal" :chart="chart"/>
     <KlineScreenshotModal v-model="showScreenShotModal" :url="screenShotUrl" @close="screenShotUrl = ''"/>
     <KlineIndCfgModal v-model="showIndCfgModal" :chart="chart" :indName="editIndName" :paneId="editPaneId"/>
-    <KlineTimezoneModal v-model="showTimezoneModal" :chart="chart" :timezone="timezone"/>
+    <KlineTimezoneModal v-model="showTimezoneModal"/>
     <KlineI18nModal v-model="showI18nModal"/>
     <div class="kline-main">
-      <KlinePeriodBar :spread="showDrawingBar" :symbol="symbol" :period="period" :periods="periods"
-          @clickSymbol="showSymbolModal = true" @clickPeriod="clickPeriod(periods[$event])"
+      <KlinePeriodBar :spread="showDrawingBar"
+          @clickSymbol="showSymbolModal = true" @clickPeriod="clickPeriod($event)"
           @clickMenu="showDrawingBar = !showDrawingBar" @clickInd="showIndSearchModal = true"
           @clickSetting="showSettingModal = true" @clickShot="clickScreenShot"
           @clickTZ="showTimezoneModal = true" @clickLang="showI18nModal = true"
           @clickTheme="toggleTheme"/>
       <div class="klinecharts-pro-content">
         <KlineLoading v-if="loadingChart"/>
-        <KlineDrawBar ref="drawBar" :chart="chart" v-if="showDrawingBar" :symbol="symbol" :period="period"/>
+        <KlineDrawBar ref="drawBar" :chart="chart" v-if="showDrawingBar"/>
         <div ref="chartRef" class='klinecharts-pro-widget' :data-drawing-bar-visible="showDrawingBar"
            @keydown.delete="drawBar.clickRemove()"/>
       </div>
     </div>
     <div class="kline-slide">
-      <TopChange :symbol="symbol.ticker" @select="symbol.ticker = $event"/>
+      <TopChange/>
       <OpinionFlow/>
     </div>
   </div>
@@ -48,6 +48,8 @@ import {MyDatafeed} from "~/composables/kline/datafeeds"
 import {PaneInds, Period, SymbolInfo, Datafeed} from '~/components/kline/types'
 import {computed, defineProps, onMounted, onUnmounted, reactive, ref, toRaw, watch} from "vue";
 import {
+  AllPeriods,
+  periodMap,
   getDefStyles,
   getThemeStyles,
   adjustFromTo,
@@ -59,6 +61,8 @@ import overlays from '~/composables/kline/overlays'
 import figures from '~/composables/kline/figure'
 import {useAuthState} from "~/composables/auth";
 import {GetIndDefaults} from "~/components/kline/inds";
+import {useMainStore} from "~/stores/main";
+import {useKlineStore} from "~/stores/kline";
 import {useI18n} from "vue-i18n";
 const {t} = useI18n()
 
@@ -67,8 +71,9 @@ figures.forEach(o => { kc.registerFigure(o) })
 
 const authTimeframes = ['1m', '5m', '15m', '1h', '2h', '4h', '1d']
 
+const main = useMainStore()
+const store = useKlineStore()
 const {authDoing, authStatus} = useAuthState()
-const theme = ref('light')
 const showSymbolModal = ref(false)
 const showIndSearchModal = ref(false)
 const showSettingModal = ref(false)
@@ -83,55 +88,29 @@ const chartRef = ref<HTMLElement>()
 const chart = ref<Nullable<Chart>>(null)
 const drawBar = ref<any>(null)
 const screenShotUrl = ref('')
-const timezone = ref(Intl.DateTimeFormat().resolvedOptions().timeZone)
 const editIndName = ref('')
 const editPaneId = ref('')
 const batch_num = ref(500)
-const _panes = reactive<PaneInds[]>([
-    {name: 'candle_pane', inds: []},
-    {name: 'pane_VOL', inds: ['VOL']}
-])
-const period = reactive<Period>({ multiplier: 3, timespan: 'day', text: '3D', timeframe: '3d' })
 const sigOvers = reactive<OverlayCreate[]>([])
 let priceUnitDom: HTMLElement
 let loading = false
 let tf_msecs = 0
 
-const styles = reactive({})
-
 const watermark = ref('<img width="432" src="/watermark.png"/>')
 const datafeed = new MyDatafeed()
 
-const symbol = reactive<SymbolInfo>(datafeed.getDefaultSymbol())
-const periods = reactive<Period[]>(datafeed.getAllPeriods())
+const periods = reactive<Period[]>(AllPeriods)
 
 
-function setIndicator(paneId: string, ind_name: string, is_add: boolean){
+function setIndicator(is_main: boolean, ind_name: string, is_add: boolean){
   if(!chart.value)return
-  let matches = _panes.filter(i => i.name == paneId);
-  let target = matches[0] ?? {name: paneId, inds: []};
-  if(!matches.length && is_add){
-    if(paneId == 'candle_pane'){
-      _panes.unshift(target)
-    }else{
-      _panes.push(target)
-    }
-  }
+  const paneId = is_main ? 'candle_pane' : 'pane_' + ind_name
+  store.setInd(is_main, ind_name, is_add)
   if(is_add){
     createIndicator(chart.value, ind_name, true, {id: paneId})
-    if(!target.inds.includes(ind_name)){
-      target.inds.push(ind_name)
-    }
   }
   else{
     chart.value?.removeIndicator(paneId, ind_name)
-    let index = target.inds.indexOf(ind_name)
-    if(index >= 0){
-      target.inds.splice(index, 1)
-    }
-    if(!target.inds.length && matches.length){
-      _panes.splice(_panes.indexOf(target), 1)
-    }
   }
 }
 
@@ -152,7 +131,7 @@ function createIndicator (widget: Nullable<Chart>, indicatorName: string, isStac
 }
 
 function clickScreenShot(){
-  let bgColor = theme.value === 'dark' ? '#151517' : '#ffffff'
+  let bgColor = main.theme === 'dark' ? '#151517' : '#ffffff'
   screenShotUrl.value = chart.value?.getConvertPictureUrl(true, 'jpeg', bgColor) ?? ''
   showScreenShotModal.value = true
 }
@@ -162,24 +141,24 @@ function clickPeriod(item: Period){
     showLoginBox.value = true
     return
   }
-  Object.assign(period, item)
+  store.setPeriod(item)
   chart.value?.setCustomApi({
-    formatDate: makeFormatDate(period.timespan)
+    formatDate: makeFormatDate(store.period.timespan)
   })
 }
 
 function toggleTheme(){
-  if(theme.value === 'light'){
-    theme.value = 'dark'
+  if(main.theme === 'light'){
+    main.setTheme('dark')
   }
   else{
-    theme.value = 'light'
+    main.setTheme('light')
   }
 }
 
 async function loadKlineData(from: number, to: number, isNewData?: boolean){
   loading = true
-  const kdata = await datafeed.getHistoryKLineData(symbol, period, from, to)
+  const kdata = await datafeed.getHistoryKLineData(store.symbol, store.period, from, to)
   if(isNewData){
     kdata.data.forEach(bar => {
       chart.value?.updateData(bar)
@@ -207,7 +186,7 @@ onMounted(() => {
   window.addEventListener('resize', documentResize)
   chart.value = kc.init(chartRef.value!, {
     customApi: {
-      formatDate: makeFormatDate(period.timespan)
+      formatDate: makeFormatDate(store.period.timespan)
     }
   })
   if(chart.value){
@@ -233,20 +212,22 @@ function initChart(chartObj: Chart){
   priceUnitDom.className = 'klinecharts-pro-price-unit'
   priceUnitContainer?.appendChild(priceUnitDom)
 
-  _panes.forEach(pane => {
-    pane.inds.forEach(ind => {
-      createIndicator(chartObj, ind, true, {id: pane.name})
-    })
+  store.mainInds.split(',').forEach(ind => {
+    createIndicator(chartObj, ind, true, {id: 'candle_pane'})
   })
+  store.subInds.split(',').forEach(ind => {
+    createIndicator(chartObj, ind, true, {id: 'pane_' + ind})
+  })
+  const styles = toRaw(store.chartStyle)
   _.merge(styles, getDefStyles(t))
-  _.merge(styles, getThemeStyles(theme.value))
-  chartObj.setStyles(toRaw(styles) as Styles)
+  _.merge(styles, getThemeStyles(main.theme))
+  chartObj.setStyles(styles as Styles)
 
-  chartObj.setTimezone(timezone.value)
+  chartObj.setTimezone(main.timezone)
 
   chartObj.loadMore(timestamp => {
-    const [to] = adjustFromTo(period, timestamp!, 1)
-    const [from] = adjustFromTo(period, to, batch_num.value)
+    const [to] = adjustFromTo(store.period, timestamp!, 1)
+    const [from] = adjustFromTo(store.period, to, batch_num.value)
     loadKlineData(from, to)
   })
 
@@ -282,19 +263,9 @@ onUnmounted(() => {
   }
 })
 
-watch(symbol, (new_val) => {
-  if(!priceUnitDom)return
-  if (new_val.priceCurrency) {
-    priceUnitDom.innerHTML = new_val.priceCurrency.toLocaleUpperCase()
-    priceUnitDom.style.display = 'flex'
-  } else {
-    priceUnitDom.style.display = 'none'
-  }
-})
-
 function loadSymbolPeriod(symbol_chg: boolean, period_chg: boolean){
-  const s = symbol
-  const p = period
+  const s = store.symbol
+  const p = store.period
   loading = true
   loadingChart.value = true
   const get = async () => {
@@ -319,7 +290,7 @@ function loadSymbolPeriod(symbol_chg: boolean, period_chg: boolean){
         sigOvers.push({id: oid, name: o.name, extendData: o.extendData})
       }
     })
-    tf_msecs = tf_to_secs(period.timeframe) * 1000
+    tf_msecs = tf_to_secs(store.period.timeframe) * 1000
     datafeed.subscribe(s, p, result => {
       if(!chart.value)return
       const kline = chart.value.getDataList()
@@ -345,18 +316,29 @@ function loadSymbolPeriod(symbol_chg: boolean, period_chg: boolean){
   get()
 }
 
-watch([period, symbol], ([new_period, new_symbol], [prev_period, prev_symbol]) => {
-  if (!loading) {
-    const symbol_chg = new_symbol != prev_symbol
-    const period_chg = new_period != prev_period
-    if (symbol_chg) {
-      datafeed.unsubscribe(prev_symbol!, prev_period!)
-    }
-    loadSymbolPeriod(symbol_chg, period_chg)
+watch(store.period, (new_period, prev_period) => {
+  if(loading)return
+  loadSymbolPeriod(false, true)
+})
+
+function updateSymbolPriceUnit(new_val: SymbolInfo){
+  if(!priceUnitDom)return
+  if (new_val.priceCurrency) {
+    priceUnitDom.innerHTML = new_val.priceCurrency.toLocaleUpperCase()
+    priceUnitDom.style.display = 'flex'
+  } else {
+    priceUnitDom.style.display = 'none'
   }
+}
+
+watch(store.symbol, (new_symbol, prev_symbol) => {
+  updateSymbolPriceUnit(new_symbol)
+  if(loading)return
+  datafeed.unsubscribe(prev_symbol!, store.period)
+  loadSymbolPeriod(true, false)
 }, {immediate: true})
 
-watch(theme, (new_val) => {
+watch(() => main.theme, (new_val) => {
   // 加载新指标时，修改默认颜色
   if(new_val == 'light'){
     datafeed.longColor = 'green'
@@ -374,7 +356,7 @@ watch(theme, (new_val) => {
   chart.value?.setStyles(getThemeStyles(new_val))
 })
 
-watch(timezone, (new_val) => {
+watch(() => main.timezone, (new_val) => {
   chart.value?.setTimezone(new_val)
 })
 

@@ -30,7 +30,7 @@
     </div>
     <div class="list-box">
       <div class="tg-row item" v-for="(item, index) in data_list" :key="index"
-        :class="[item.symbol === symbol ? 'selected': '']" @click="clickRow(item)">
+        :class="[item.symbol === store.symbol.ticker ? 'selected': '']" @click="clickRow(item)">
         <span class="field symbol">
           <span class="base">{{item.base_s}}</span>
           <span class="quote">/{{item.quote_s}}</span>
@@ -47,9 +47,10 @@
 <script setup lang="ts">
 import {SortDown, SortUp, Switch} from "@element-plus/icons-vue";
 import {useNuxtApp} from "#app";
-import {defineProps, defineEmits, onMounted, reactive, ref} from "vue";
+import {onMounted, reactive, ref} from "vue";
 import {getApi} from "~/utils/netio";
 import {formatBigNumber, formatPrecision} from "~/composables/kline/coms";
+import {useKlineStore} from "~/stores/kline";
 const {t} = useNuxtApp()
 const symbol_down = ref(true)
 const price_down = ref(true)
@@ -59,15 +60,7 @@ const sort_key = ref('chg')
 const main_col = ref('chg')
 const data_list = reactive<any[]>([])
 let loop_timer: ReturnType<typeof setTimeout>
-
-const props = defineProps<{
-  symbol: string
-}>()
-
-const emit = defineEmits<{
-  select: [symbol: string]
-}>()
-
+const store = useKlineStore()
 
 onMounted(async () => {
   await updateWrap()
@@ -148,7 +141,7 @@ function clickSort(key: string){
 }
 
 function clickRow(row: any){
-  emit('select', `${row.base_s}/${row.quote_s}`)
+  store.setSymbolTicker(`${row.base_s}/${row.quote_s}`)
 }
 </script>
 

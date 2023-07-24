@@ -69,6 +69,7 @@ import {Chart, Overlay, OverlayEvent, OverlayMode, OverlayRemove} from "klinecha
 import {postApi} from "~/utils/netio";
 import {useAuthState} from "~/composables/auth";
 import {Period, SymbolInfo} from "~/components/kline/types";
+import {useKlineStore} from "~/stores/kline";
 
 const popoverKey = ref('')
 const modeIcon = ref('weakMagnet')
@@ -80,11 +81,10 @@ const selectDraw = ref('')
 const delOverlayIds: string[] = []
 const layIdMap: Record<string, any> = {}
 const {authStatus} = useAuthState()
+const store = useKlineStore()
 
 const props = defineProps<{
   chart: Chart,
-  symbol: SymbolInfo,
-  period: Period
 }>()
 
 const GROUP_ID = 'drawing_tools'
@@ -268,9 +268,9 @@ function editOverlay(overlay: any){
   const data = Object.fromEntries(keys.map(k => [k, overlay[k]]))
   data['ban_id'] = layIdMap[overlay['id']]
   postApi('/kline/save_overlay', {
-    exchange: props.symbol.exchange,
-    symbol: props.symbol.ticker,
-    timeframe: props.period.timeframe,
+    exchange: store.symbol.exchange,
+    symbol: store.symbol.ticker,
+    timeframe: store.period.timeframe,
     data
   }).then(res => {
     if(res.oid){

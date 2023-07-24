@@ -13,7 +13,9 @@ K线UI工具栏可参考：[AICoin](https://www.aicoin.com/chart/okcoinfutures_b
 # 其他注意
  **多语言i18n**  
 [官方文档](https://v8.i18n.nuxtjs.org/)  
-目前已知无法根据识别的语言自动跳转，等待i18n更新
+目前已知无法根据识别的语言自动跳转，等待i18n更新  
+**pinia持久化**  
+如果使用`localStorage`时，应注意在component使用`state`时应使用`client-only`，否则部分内容不会被正确地响应式更新。  
 **watch与watchEffect**  
 尽量使用watch，显示指定依赖。极端情况下，watchEffect收集了不希望监听的依赖，自身执行又会导致依赖对象改变，造成无限循环。  
 

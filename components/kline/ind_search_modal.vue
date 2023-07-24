@@ -22,16 +22,16 @@ import Checkbox from "~/components/kline/checkbox.vue"
 import {PaneInds} from "~/components/kline/types";
 import {computed, defineEmits, defineProps, reactive, watch} from "vue";
 import {Chart} from "klinecharts";
+import {useKlineStore} from "~/stores/kline";
 
 
 const props = defineProps<{
   modelValue: boolean,
-  panes: PaneInds[]
 }>()
 
 
 const emit = defineEmits<{
-  'change': [paneId: string, ind_name: string, is_add: boolean],
+  'change': [is_main: boolean, ind_name: string, is_add: boolean],
   'update:modelValue': [value: boolean]
 }>()
 
@@ -44,93 +44,20 @@ const showModal = computed({
   }
 })
 
+const store = useKlineStore()
+
 const main_inds = reactive(['MA', 'EMA', 'SMA', 'BOLL', 'SAR', 'BBI'])
 
 const sub_inds = reactive(['VOL', 'MACD', 'KDJ', 'RSI', 'BIAS', 'BRAR',
   'CCI', 'DMI', 'CR', 'PSY', 'DMA', 'TRIX', 'OBV', 'VR', 'WR', 'MTM', 'EMV',
   'SAR', 'ROC', 'PVT', 'AO'])
 
-const checked_inds = reactive<string[]>([])
+const checked_inds = computed((): string[] => {
+  return [...store.mainInds.split(','), ...store.subInds.split(',')]
+})
 
 function toggleInd(is_main: boolean, name: string, val: any){
-  if(val){
-    checked_inds.push(name);
-  }else{
-    const delId = checked_inds.indexOf(name);
-    if(delId >= 0){
-      checked_inds.splice(delId, 1)
-    }
-  }
-  const pane_name = is_main ? 'candle_pane': `pane_${name}`
-  emit('change', pane_name, name, val as boolean)
-}
-
-watch(() => props.panes, (new_panes) => {
-  checked_inds.splice(0, checked_inds.length)
-  new_panes.forEach(p => {
-    checked_inds.push(...p.inds)
-  })
-}, {immediate: true, deep: true})
-
-
-/**
- * 下面是旧的单窗口多指标处理代码，保留以后可能需要
- *
- */
-
-function paneTitle(pane: PaneInds){
-  let result = [];
-  if(pane.name == 'candle_pane'){
-    result.push('main_pane')
-  }
-  else {
-    result.push(pane.name + ':')
-  }
-  for(let ind_name of pane.inds){
-    result.push(ind_name)
-    result.push(' ')
-  }
-  return result.join('')
-}
-
-/**
- * _panes和active_pane是针对单窗口多指标功能开发的，目前暂时不需要
- */
-const _panes = reactive(props.panes ?? [])
-if(!_panes.find(i => i.name == 'candle_pane')){
-  _panes.unshift({name: 'candle_pane', inds: []})
-}
-const active_pane = ref('candle_pane')
-
-function addActiveInd(ind_name: string){
-  for(let pane of _panes){
-    if(pane.name == active_pane.value){
-      pane.inds.push(ind_name)
-      emit('change', active_pane.value, ind_name, true)
-      break
-    }
-  }
-}
-
-function clickIndDelete(ind_name: string){
-  for(let pane of _panes){
-    if(pane.name == active_pane.value){
-      pane.inds.splice(pane.inds.indexOf(ind_name), 1)
-      emit('change', active_pane.value, ind_name, false)
-      break
-    }
-  }
-}
-
-function addSubPane(){
-  let last = _panes[_panes.length - 1]
-  let cur_id = 1
-  if(last.name.startsWith('pane')){
-    cur_id = parseInt(last.name.substring(4)) + 1
-  }
-  let name = 'pane' + cur_id;
-  _panes.push({name, inds: []})
-  active_pane.value = name
+  emit('change', is_main, name, val as boolean)
 }
 
 </script>

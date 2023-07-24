@@ -1,7 +1,7 @@
 <template>
-  <Modal :title="$t('timezone')" :buttons="['confirm']" :width="400" class="timezone"
-         v-model="showModal" @click="clickModal">
-    <Select :data-source="timeZoneOpts" :value="$t(timezone_text)" @change="clickTimeZone"/>
+  <Modal :title="$t('timezone')" :buttons="['close']" :width="400" class="timezone" v-model="showModal">
+    <Select :data-source="timeZoneOpts" :value="$t(timezone_text)" :translate="true"
+            @change="store.setTimezone($event.key)"/>
   </Modal>
 </template>
 
@@ -11,18 +11,16 @@ import Select from "~/components/kline/select.vue"
 import {computed, defineProps, ref, watch} from "vue";
 import {defineEmits} from "vue/dist/vue";
 import {translateTimezone, getTimezoneSelectOptions} from "~/components/kline/timezone_opts";
-import {Chart} from "klinecharts";
+import {useMainStore} from "~/stores/main";
 
+const store = useMainStore()
 const props = defineProps<{
-  chart: Chart,  // 绘图对象
-  timezone: string,
   modelValue: boolean
 }>()
 
 const timeZoneOpts = ref(getTimezoneSelectOptions())
-const timezone_ = ref(props.timezone)
 const timezone_text = computed(() => {
-  return translateTimezone(timezone_.value)
+  return translateTimezone(store.timezone)
 })
 
 
@@ -39,15 +37,6 @@ const showModal = computed({
   }
 })
 
-function clickTimeZone(item: any){
-  timezone_.value = item.key
-}
-
-function clickModal(from: string){
-  if(from !== 'confirm')return;
-  props.chart.setTimezone(timezone_.value)
-  showModal.value = false
-}
 
 </script>
 

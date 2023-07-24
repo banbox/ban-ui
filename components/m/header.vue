@@ -27,7 +27,7 @@ function setLocale(code: string){
 
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
 .header{
   display: flex;
   flex-direction: row;

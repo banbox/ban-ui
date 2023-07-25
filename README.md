@@ -41,10 +41,12 @@ yarn build
 解压缩得到`.output`文件夹：`unzip -o .output.zip`  
 docker启动nodejs：  
 ```shell
-docker run -d -it --name banui --rm -v /root:/root -p 3000:3000 banuibase /root/ban-ui/run_server.sh
+docker rm -f banui || true
+docker run -d -it --name banui -v /root:/root -p 3000:3000 banuibase /root/ban-ui/run_server.sh
 ```
 ### banuibase基础镜像的构建
 ```dockerfile
 FROM node:18.16.1
-RUN pip install supervisor
+RUN apt update
+RUN apt install supervisor
 ```

@@ -32,4 +32,19 @@ yarn install
 yarn dev
 ```
 ### 打包部署到生产环境
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+编译项目到`.output`文件夹：
+```shell
+yarn build
+```
+压缩`.output`文件夹到`.output.zip`  
+通过`winscp`将`.output.zip`上传到服务器的`/root/ban-ui`目录下  
+解压缩得到`.output`文件夹：`unzip -y .output.zip`  
+docker启动nodejs：  
+```shell
+docker run -d -it --name banui --rm -v /root:/root -p 3000:3000 banuibase /root/ban-ui/run_server.sh
+```
+### banuibase基础镜像的构建
+```dockerfile
+FROM node:18.16.1
+RUN pip install supervisor
+```

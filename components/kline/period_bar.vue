@@ -40,20 +40,17 @@
       <svg viewBox="0 0 20 20">
         <path d="M6.50977,1L13.4902,1C13.6406,1,13.7695,1.1104910000000001,13.7969,1.2631700000000001L14.0273,2.52277C14.1387,3.13147,14.6543,3.57143,15.2559,3.57143L17.5,3.57143C18.8809,3.57143,20,4.72254,20,6.14286L20,16.4286C20,17.8489,18.8809,19,17.5,19L2.5,19C1.11914,19,0,17.8489,0,16.4286L0,6.14286C0,4.72254,1.11914,3.57143,2.5,3.57143L4.74414,3.57143C5.3457,3.57143,5.86133,3.13147,5.97266,2.52277L6.20312,1.2631700000000001C6.23047,1.1104910000000001,6.35937,1,6.50977,1ZM15.2559,4.857139999999999C14.0547,4.857139999999999,13.0215,3.97522,12.7988,2.75982L12.7129,2.28571L7.28711,2.28571L7.20117,2.75982C6.98047,3.97522,5.94727,4.857139999999999,4.74414,4.857139999999999L2.5,4.857139999999999C1.81055,4.857139999999999,1.25,5.43371,1.25,6.14286L1.25,16.4286C1.25,17.1377,1.81055,17.7143,2.5,17.7143L17.5,17.7143C18.1895,17.7143,18.75,17.1377,18.75,16.4286L18.75,6.14286C18.75,5.43371,18.1895,4.857139999999999,17.5,4.857139999999999L15.2559,4.857139999999999ZM4.375,6.78571L3.125,6.78571C2.7793,6.78571,2.5,6.49844,2.5,6.14286C2.5,5.78728,2.7793,5.5,3.125,5.5L4.375,5.5C4.7207,5.5,5,5.78728,5,6.14286C5,6.49844,4.7207,6.78571,4.375,6.78571ZM10,6.14286C7.06641,6.14286,4.6875,8.58973,4.6875,11.6071C4.6875,14.6246,7.06641,17.0714,10,17.0714C12.9336,17.0714,15.3125,14.6246,15.3125,11.6071C15.3125,8.58973,12.9336,6.14286,10,6.14286ZM10,7.42857C11.0859,7.42857,12.1055,7.8625,12.873,8.65201C13.6406,9.44152,14.0625,10.49018,14.0625,11.6071C14.0625,12.7241,13.6406,13.7728,12.873,14.5623C12.1055,15.3518,11.0859,15.7857,10,15.7857C8.91406,15.7857,7.89453,15.3518,7.12695,14.5623C6.35937,13.7728,5.9375,12.7241,5.9375,11.6071C5.9375,10.49018,6.35938,9.44152,7.12695,8.65201C7.89453,7.8625,8.91406,7.42857,10,7.42857ZM10,9.67857C8.96484,9.67857,8.125,10.54241,8.125,11.6071C8.125,12.6719,8.96484,13.5357,10,13.5357C11.0352,13.5357,11.875,12.6719,11.875,11.6071C11.875,10.54241,11.0352,9.67857,10,9.67857ZM10,10.96429C10.3438,10.96429,10.625,11.2536,10.625,11.6071C10.625,11.9607,10.3438,12.25,10,12.25C9.65625,12.25,9.375,11.9607,9.375,11.6071C9.375,11.2536,9.65625,10.96429,10,10.96429Z"/>
       </svg>
-      <span>{{$t('screenshot')}}</span>
     </div>
     <div class='item tools' @click="toggleFullscreen">
       <template v-if="fullScreen">
         <svg viewBox="0 0 20 20">
           <path d="M1.08108,0L0,1.079L4.18919,5.27938L2.54826,6.91715L6.9112,6.91715L6.9112,2.56262L5.28957,4.18112L1.08108,0ZM15.8108,5.27938L20,1.079L18.9189,0L14.7104,4.18112L13.0888,2.56262L13.0888,6.91715L17.4517,6.91715L15.8108,5.27938ZM4.16988,14.7014L0.07722,18.8054L1.1583,20L5.27027,15.7996L6.9112,17.4374L6.9112,13.0829L2.54826,13.0829L4.16988,14.7014ZM17.4517,13.0829L13.0888,13.0829L13.0888,17.4374L14.7297,15.7996L18.8417,20L19.9228,18.8054L15.8301,14.7013L17.4517,13.0829Z" />
         </svg>
-        <span>{{$t('exit_full_screen')}}</span>
       </template>
       <template v-else>
         <svg viewBox="0 0 20 20">
           <path d="M2.93444,1.76899L7.57544,6.40999L6.38918,7.59626L1.76899,2.93444L0,4.70343L0,0L4.70343,0L2.93444,1.76899ZM6.40999,12.4037L1.76899,17.0447L0,15.2758L0,19.9792L4.70343,19.9792L2.93444,18.2102L7.57544,13.5692L6.40999,12.4037ZM15.2758,0L17.0447,1.76899L12.4037,6.40999L13.59,7.59626L18.231,2.95526L20,4.72425L20,0L15.2758,0ZM13.5692,12.4037L12.3829,13.59L17.0239,18.231L15.2549,20L19.9792,20L19.9792,15.2758L18.2102,17.0447L13.5692,12.4037Z"/>
         </svg>
-        <span>{{$t('full_screen')}}</span>
       </template>
     </div>
     <div class='item tools big120' @click="$emit('clickLang')">
@@ -61,6 +58,21 @@
     </div>
     <div class='item tools big120' @click="$emit('clickTheme')">
       <Icon name="theme"/>
+    </div>
+    <div class="right-area">
+      <el-dropdown class="user" v-if="authStatus > 0">
+        <div class='item tools big120'>
+          <Icon name="user"/>
+        </div>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item @click="exitLogin">{{$t('exit_login')}}</el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+      <div class="item tools" v-else @click="emit('update:showLogin', true)">
+        <span>{{$t('login')}}</span>
+      </div>
     </div>
   </div>
 </template>
@@ -73,17 +85,22 @@ import {Period, SymbolInfo} from "~/components/kline/types"
 import {AllPeriods} from "~/composables/kline/coms";
 import {useKlineStore} from "~/stores/kline";
 import {getDefaults} from "~/config";
+import {useAuthState} from "~/composables/auth";
 
 const period_bar = ref()
 
 const props = defineProps<{
   spread: boolean,
+  showLogin: boolean
 }>()
 const emit = defineEmits<{
-  clickPeriod: [period: Period]
+  clickPeriod: [period: Period],
+  'update:showLogin': [val: boolean]
 }>()
+
 const periods = reactive(AllPeriods)
 const store = useKlineStore()
+const {authData, authToken, authStatus} = useAuthState()
 
 function isFullscreen() {
   if(!process.client)return false;
@@ -110,6 +127,11 @@ onMounted(() => {
     activeTF.value = period.timeframe
   }, {immediate: true})
 })
+
+function exitLogin(){
+  authData.value = null
+  authToken.value = null
+}
 
 function enterFullscreen() {
   if(!process.client)return;
@@ -148,6 +170,7 @@ function toggleFullscreen() {
 @import "~/assets/klinebase.scss";
 
 .#{$prefix-cls}-period-bar {
+  position: relative;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -237,12 +260,28 @@ function toggleFullscreen() {
       margin-left: 4px;
     }
     &.big120{
-      transform: scale(1.2);
+      svg {
+        width: 20px;
+        height: 20px;
+      }
     }
   }
   .period + .tools {
     border-left: solid 1px var(--klinecharts-pro-border-color);
     margin-left: 8px;
+  }
+  .right-area{
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+  }
+}
+.el-dropdown.user{
+  display: flex;
+  height: 100%;
+  .item{
+    outline: none;
   }
 }
 

@@ -54,7 +54,7 @@ export const useAuthState = (): UseAuthStateReturn => {
     if (authDoing.value) {
       return 0
     }
-    return authData.value ? 1: -1
+    return authData.value && authToken.value ? 1: -1
   })
 
   return {

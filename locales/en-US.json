@@ -22,6 +22,7 @@
   "exg_uid_invalid": "Invalid or already bound UID",
   "user_pwd_invald": "Invalid username or password",
   "user_exist_login": "Username already exists, please login",
+  "exit_login": "Exit Login",
   
   "indicator": "Indicator",
   "main_indicator": "Main Indicator",
@@ -34,8 +35,6 @@
   "setting": "Settings",
   "timezone": "Timezone",
   "screenshot": "Screenshot",
-  "full_screen": "Full Screen",
-  "exit_full_screen": "Exit Full Screen",
   "save": "Save",
   "confirm": "Confirm",
   "cancel": "Cancel",

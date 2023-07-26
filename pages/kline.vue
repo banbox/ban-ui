@@ -10,7 +10,7 @@
     <KlineTimezoneModal v-model="showTimezoneModal"/>
     <KlineI18nModal v-model="showI18nModal"/>
     <div class="kline-main">
-      <KlinePeriodBar :spread="showDrawingBar"
+      <KlinePeriodBar :spread="showDrawingBar" v-model:showLogin="showLoginBox"
           @clickSymbol="showSymbolModal = true" @clickPeriod="clickPeriod($event)"
           @clickMenu="showDrawingBar = !showDrawingBar" @clickInd="showIndSearchModal = true"
           @clickSetting="showSettingModal = true" @clickShot="clickScreenShot"

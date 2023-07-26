@@ -181,5 +181,16 @@
   "copy_link_open_pc": "复制后使用电脑打开链接",
   "copy_not_support": "浏览器不支持，请手动复制",
   "copy_fail": "复制失败，请手动复制",
-  "copy_success": "复制成功"
+  "copy_success": "复制成功",
+
+  "how_get_uid": "如何获取币安UID？",
+  "guide_title": "创建个人加密货币投资组合",
+  "guide_tip": "轻松几步，开启首笔交易",
+  "reg_step1": "向账户充值",
+  "step1_tip": "充值加密货币账户，即可开启加密货币交易。您可选取多种支付方式进行充值。",
+  "reg_step2": "完成身份验证",
+  "step2_tip": "完成身份验证，确保个人账户和交易安全。",
+  "reg_step3": "开始交易",
+  "step3_tip": "一切准备就绪！买卖加密货币，设置定投，探索币安产品与服务。",
+  "start_using": "开始使用"
 }

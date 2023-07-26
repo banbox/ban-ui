@@ -180,5 +180,16 @@
   "copy_link_open_pc": "Copy the link and open it on computer",
   "copy_not_support": "The browser is not supported, please manually copy.",
   "copy_fail": "Copy failed, please copy manually.",
-  "copy_success": "Copy Success"
+  "copy_success": "Copy Success",
+
+  "how_get_uid": "How to obtain Binance UID?",
+  "guide_title": "Create a Personal Cryptocurrency Investment Portfolio",
+  "guide_tip": "Start your first transaction with just a few steps",
+  "reg_step1": "Deposit to Your Account",
+  "step1_tip": "Deposit cryptocurrency into your account to start trading. You can choose from various payment methods for depositing.",
+  "reg_step2": "Complete Identity Verification",
+  "step2_tip": "Complete the identity verification process to ensure the security of your personal account and transactions.",
+  "reg_step3": "Start Trading",
+  "step3_tip": "Everything is ready! Buy and sell cryptocurrencies, set up recurring investments, and explore Binance's products and services.",
+  "start_using": "Start Using"
 }

@@ -1,4 +1,5 @@
 <template>
+  <RegGuide v-model="showRegModal"/>
   <Modal :title="$t(form_mode)" :width="500" v-model="showModal">
     <div class="login-box">
       <div class="logo-box">
@@ -12,6 +13,7 @@
               <el-icon><Connection /></el-icon>
             </template>
           </el-input>
+          <el-link :underline="false" @click="showRegModal=true">{{$t('how_get_uid')}}</el-link>
         </el-form-item>
         <el-form-item prop="username">
           <el-input v-model="regForm.username" :placeholder="$t('input_username')">
@@ -79,6 +81,7 @@ import {computed, defineEmits, defineProps, reactive, ref, toRaw} from "vue";
 import type {FormRules, FormInstance} from "element-plus";
 import {useI18n} from "vue-i18n";
 const {locale, t} = useI18n()
+const showRegModal = ref(false)
 
 const {authData, authStatus, authToken, authDoing} = useAuthState()
 interface RegRuleForm{

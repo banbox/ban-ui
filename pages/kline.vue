@@ -64,7 +64,9 @@ import {GetIndDefaults} from "~/components/kline/inds";
 import {useMainStore} from "~/stores/main";
 import {useKlineStore} from "~/stores/kline";
 import {useI18n} from "vue-i18n";
+import {useRoute} from "#app";
 const {t} = useI18n()
+const route = useRoute()
 
 overlays.forEach(o => { kc.registerOverlay(o) })
 figures.forEach(o => { kc.registerFigure(o) })
@@ -158,7 +160,9 @@ function toggleTheme(){
 
 async function loadKlineData(from: number, to: number, isNewData?: boolean){
   loading = true
-  const kdata = await datafeed.getHistoryKLineData(store.symbol, store.period, from, to)
+  const strategy = route.query.strategy?.toString()
+  const kdata = await datafeed.getHistoryKLineData({
+    symbol: store.symbol, period: store.period, from, to, strategy})
   if(isNewData){
     kdata.data.forEach(bar => {
       chart.value?.updateData(bar)
@@ -271,7 +275,9 @@ function loadSymbolPeriod(symbol_chg: boolean, period_chg: boolean){
   const get = async () => {
     const curTime = new Date().getTime()
     const [from, to] = adjustFromTo(p, curTime, batch_num.value)
-    const kdata = await datafeed.getHistoryKLineData(s, p, from, curTime)
+    const strategy = route.query.strategy?.toString()
+    const kdata = await datafeed.getHistoryKLineData({
+      symbol: s, period: p, from, to: curTime, strategy})
     const klines = kdata.data
     if(klines.length > 0){
       const pricePrec = GetNumberDotOffset(Math.min(klines[0].low, klines[klines.length - 1].low)) + 3

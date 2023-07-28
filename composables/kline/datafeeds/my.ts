@@ -1,5 +1,5 @@
 import {KLineData} from "klinecharts";
-import {Datafeed, SymbolInfo, Period, DatafeedSubscribeCallback, KData} from "~/components/kline/types";
+import {Datafeed, SymbolInfo, Period, DatafeedSubscribeCallback, KData, GetKlineArgs} from "~/components/kline/types";
 import {$fetch} from "ofetch";
 import {getApi} from "~/utils/netio";
 import {useAppConfig} from "#app";
@@ -12,8 +12,13 @@ export default class MyDatafeed implements Datafeed{
   private _prevSymbol?: string
   private _ws?: WebSocket
 
-  async getHistoryKLineData(symbol: SymbolInfo, period: Period, from: number, to: number): Promise<KData> {
-    const query = {symbol: symbol.ticker, timeframe: period.timeframe, exchange: symbol.exchange, from, to}
+  async getHistoryKLineData({symbol, period, from, to, strategy}: GetKlineArgs): Promise<KData> {
+    const query = {
+      symbol: symbol.ticker,
+      timeframe: period.timeframe,
+      exchange: symbol.exchange,
+      from, to, strategy
+    }
     const rsp = await getApi('/kline/hist', query)
     const kline_data = (rsp.data || []).map((data: any) => ({
       timestamp: data[0],

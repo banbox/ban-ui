@@ -33,9 +33,17 @@ export type KData = {
 
 export type DatafeedSubscribeCallback = (data: any) => void
 
+export type GetKlineArgs = {
+  symbol: SymbolInfo,
+  period: Period,
+  from: number,
+  to: number,
+  strategy?: string
+}
+
 export interface Datafeed {
   getSymbols (): Promise<SymbolInfo[]>
-  getHistoryKLineData (symbol: SymbolInfo, period: Period, from: number, to: number): Promise<KData>
+  getHistoryKLineData (args: GetKlineArgs): Promise<KData>
   subscribe (symbol: SymbolInfo, period: Period, callback: DatafeedSubscribeCallback): void
   unsubscribe (symbol: SymbolInfo, period: Period): void
 }

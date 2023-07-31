@@ -24,7 +24,7 @@ const defStyle = {
     },
     indicator: {
         lastValueMark: {
-            show: true
+            show: false
         }
     },
     yAxis: {

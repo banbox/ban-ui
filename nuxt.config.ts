@@ -2,9 +2,16 @@
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'url'
 import VueI18nVitePlugin from '@intlify/unplugin-vue-i18n/vite'
+const heapdump = require('heapdump')
 
 const backendHost = process.env.inter_aipp_host || 'http://127.0.0.1:8000'
 const defaultLocale = process.env.NODE_ENV == 'production' ? 'en-US': 'zh-CN'
+
+setInterval(() => {
+  heapdump.writeSnapshot(function(err: any, filename: string) {
+    console.log('dump written to', filename);
+  });
+}, 3600 * 1000)
 
 
 export default defineNuxtConfig({

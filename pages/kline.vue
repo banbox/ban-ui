@@ -23,7 +23,7 @@
            @keydown.delete="drawBar.clickRemove()"/>
       </div>
     </div>
-    <div class="kline-slide">
+    <div class="kline-slide" v-show="store.showRight">
       <TopChange/>
       <OpinionFlow/>
     </div>
@@ -366,6 +366,12 @@ watch(() => main.timezone, (new_val) => {
   chart.value?.setTimezone(new_val)
 })
 
+watch(() => store.showRight, () => {
+  setTimeout(() => {
+    documentResize()
+  }, 30)
+})
+
 </script>
 
 <style lang="scss">
@@ -383,6 +389,7 @@ body{
 }
 .kline-body{
   height: 100%;
+  width: 100%;
   .kline-main{
     flex-grow: 1;
   }

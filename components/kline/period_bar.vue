@@ -73,6 +73,14 @@
       <div class="item tools" v-else @click="emit('update:showLogin', true)">
         <span>{{$t('login')}}</span>
       </div>
+      <div class="item tools big120">
+        <svg
+          :class="{rotate: store.showRight}"
+          viewBox="0 0 1024 1024"
+          @click="store.showRight = !store.showRight">
+          <path d="M192.037 287.953h640.124c17.673 0 32-14.327 32-32s-14.327-32-32-32H192.037c-17.673 0-32 14.327-32 32s14.327 32 32 32zM832.161 479.169H438.553c-17.673 0-32 14.327-32 32s14.327 32 32 32h393.608c17.673 0 32-14.327 32-32s-14.327-32-32-32zM832.161 735.802H192.037c-17.673 0-32 14.327-32 32s14.327 32 32 32h640.124c17.673 0 32-14.327 32-32s-14.327-32-32-32zM319.028 351.594l-160 160 160 160z"/>
+        </svg>
+      </div>
     </div>
   </div>
 </template>
@@ -193,11 +201,11 @@ function toggleFullscreen() {
       height: 28px;
       cursor: pointer;
       transition: all .2s;
-      &.rotate {
-        transform: rotate(180deg);
-        transform-origin: center;
-      }
     }
+  }
+  svg.rotate{
+    transform: rotate(180deg);
+    transform-origin: center;
   }
   .symbol {
     display: flex;
@@ -271,6 +279,7 @@ function toggleFullscreen() {
     margin-left: 8px;
   }
   .right-area{
+    display: flex;
     position: absolute;
     right: 0;
     top: 0;

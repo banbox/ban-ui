@@ -67,6 +67,7 @@ onMounted(async () => {
 })
 
 async function updateData(){
+  if(!store.showRight)return
   const rsp = await getApi('/kline/top_chg')
   const new_list = (rsp.data ?? []) as any[]
   const map_list = new_list.map(row => {

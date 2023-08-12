@@ -42,6 +42,7 @@ export const useKlineStore = defineStore('kline', () => {
     const chartStyle = reactive(defStyle)
     const mainInds = ref<string>('')
     const subInds = ref<string>('VOL')
+    const showRight = ref(true)
 
     function setPeriod(val: Period){
         Object.assign(period, val)
@@ -87,7 +88,8 @@ export const useKlineStore = defineStore('kline', () => {
             pane.value = result
         }
     }
-    return {period, symbol, chartStyle, mainInds, subInds, setPeriod, setTimeframe, setSymbol, setSymbolTicker,
+    return {period, symbol, chartStyle, mainInds, subInds, showRight,
+        setPeriod, setTimeframe, setSymbol, setSymbolTicker,
         setStyleItem, resetStyle, setInd}
 }, {
     persist: {

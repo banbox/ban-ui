@@ -59,7 +59,6 @@ import {
 } from "~/composables/kline/coms";
 import overlays from '~/composables/kline/overlays'
 import figures from '~/composables/kline/figure'
-import indicators from "~/composables/kline/indicators";
 import {useAuthState} from "~/composables/auth";
 import {GetIndDefaults} from "~/components/kline/inds";
 import {useMainStore} from "~/stores/main";
@@ -71,7 +70,6 @@ const route = useRoute()
 
 overlays.forEach(o => { kc.registerOverlay(o) })
 figures.forEach(o => { kc.registerFigure(o) })
-indicators.forEach(o => { kc.registerIndicator(o) })
 
 const authTimeframes = ['1m', '5m', '15m', '1h', '2h', '4h', '1d']
 
@@ -124,7 +122,7 @@ function createIndicator (widget: Nullable<Chart>, indicatorName: string, isStac
   }
   return widget?.createIndicator({
     name: indicatorName,
-    ...GetIndDefaults(indicatorName),
+    calcParams: GetIndDefaults(indicatorName),
     // @ts-expect-error
     createTooltipDataSource: ({ indicator, defaultStyles }) => {
       const icon_ids = [indicator.visible ? 1: 0, 2, 3];

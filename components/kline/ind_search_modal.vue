@@ -2,12 +2,16 @@
   <Modal :title="$t('indicator')" :width="400" v-model="showModal">
     <List class="klinecharts-pro-ind-box">
       <div class="row title">{{$t('main_indicator')}}</div>
-      <div class="row" v-for="(item, index) in main_inds" :key="item.name">
+      <div class="row" v-for="(item, index) in main_inds" :key="index">
         <Checkbox :model-value="checked_inds.includes(item)" :label="$t(item.toLowerCase())"
                   @change="toggleInd(true, item, $event)"/>
       </div>
+      <div class="row" v-for="(item, index) in main_cloud_inds" :key="index">
+        <Checkbox :model-value="checked_inds.includes(item)" :label="item"
+                  @change="toggleInd(true, item, $event)"/>
+      </div>
       <div class="row title">{{$t('sub_indicator')}}</div>
-      <div class="row" v-for="(item, index) in sub_inds" :key="item.name">
+      <div class="row" v-for="(item, index) in sub_inds" :key="index">
         <Checkbox :model-value="checked_inds.includes(item)" :label="$t(item.toLowerCase())"
                   @change="toggleInd(false, item, $event)"/>
       </div>
@@ -21,8 +25,10 @@ import List from "~/components/kline/list.vue"
 import Checkbox from "~/components/kline/checkbox.vue"
 import {PaneInds} from "~/components/kline/types";
 import {computed, defineEmits, defineProps, reactive, watch} from "vue";
-import {Chart} from "klinecharts";
+import kc, {Chart} from "klinecharts";
 import {useKlineStore} from "~/stores/kline";
+import {awaitExpression} from "@babel/types";
+import makeCloudInds from "~/composables/kline/indicators/cloudInds";
 
 
 const props = defineProps<{
@@ -46,11 +52,25 @@ const showModal = computed({
 
 const store = useKlineStore()
 
-const main_inds = reactive(['MA', 'EMA', 'SMA', 'BOLL', 'SAR', 'BBI', 'TEST'])
+const main_inds = reactive(['MA', 'EMA', 'SMA', 'BOLL', 'SAR', 'BBI'])
+const main_cloud_inds = reactive<string[]>([])
 
 const sub_inds = reactive(['VOL', 'MACD', 'KDJ', 'RSI', 'BIAS', 'BRAR',
   'CCI', 'DMI', 'CR', 'PSY', 'DMA', 'TRIX', 'OBV', 'VR', 'WR', 'MTM', 'EMV',
   'SAR', 'ROC', 'PVT', 'AO'])
+
+
+async function loadCloudInds() {
+  const rsp = await getApi('/kline/all_stgy')
+  if (!rsp.data) {
+    console.error('load cloud inds fail')
+    return
+  }
+  const stg_names = rsp.data.map((d: any) => d.name)
+  main_cloud_inds.splice(0, main_cloud_inds.length, ...stg_names)
+  makeCloudInds(rsp.data).forEach(o => { kc.registerIndicator(o) })
+}
+loadCloudInds()
 
 const checked_inds = computed((): string[] => {
   return [...store.mainInds.split(','), ...store.subInds.split(',')]

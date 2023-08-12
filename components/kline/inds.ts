@@ -121,10 +121,14 @@ export const GetIndFields = (): Record<string, Record<string, any>[]> => ({
   ]
 })
 
-export const GetIndDefaults = (name: string): any[] | undefined => {
+export const GetIndDefaults = (name: string): Record<any, any> => {
   switch (name) {
-    case "MA": return [5, 10, 30];
-    case "EMA": return [5, 10, 30];
-    default: return undefined
+    case "MA": return {calcParams: [5, 10, 30]};
+    case "EMA": return {calcParams: [5, 10, 30]};
+    case "TEST": return {
+      calcParams: ['exm_ma'],
+      extendData: 'Ban1'
+    };
+    default: return {}
   }
 }

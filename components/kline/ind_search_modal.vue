@@ -46,7 +46,7 @@ const showModal = computed({
 
 const store = useKlineStore()
 
-const main_inds = reactive(['MA', 'EMA', 'SMA', 'BOLL', 'SAR', 'BBI'])
+const main_inds = reactive(['MA', 'EMA', 'SMA', 'BOLL', 'SAR', 'BBI', 'TEST'])
 
 const sub_inds = reactive(['VOL', 'MACD', 'KDJ', 'RSI', 'BIAS', 'BRAR',
   'CCI', 'DMI', 'CR', 'PSY', 'DMA', 'TRIX', 'OBV', 'VR', 'WR', 'MTM', 'EMV',

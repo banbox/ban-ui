@@ -43,6 +43,8 @@ export const useKlineLocal = defineStore('klocal', () => {
     const mainInds = ref<string>('')
     const subInds = ref<string>('VOL')
     const showRight = ref(true)
+    const dt_start = ref('20230601')
+    const dt_stop = ref('20230701')
 
     function setPeriod(val: Period){
         Object.assign(period, val)
@@ -88,7 +90,7 @@ export const useKlineLocal = defineStore('klocal', () => {
             pane.value = result
         }
     }
-    return {period, symbol, chartStyle, mainInds, subInds, showRight,
+    return {period, symbol, chartStyle, mainInds, subInds, showRight, dt_start, dt_stop,
         setPeriod, setTimeframe, setSymbol, setSymbolTicker,
         setStyleItem, resetStyle, setInd}
 }, {

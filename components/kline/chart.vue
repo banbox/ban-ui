@@ -23,7 +23,7 @@ import {
   adjustFromTo,
   makeFormatDate,
   GetNumberDotOffset,
-  build_ohlcvs, tf_to_secs, BarArr, AddDelInd
+  build_ohlcvs, tf_to_secs, BarArr, AddDelInd, getTimestamp, getDateStr
 } from "~/composables/kline/coms";
 import overlays from '~/composables/kline/overlays'
 import figures from '~/composables/kline/figure'
@@ -34,12 +34,23 @@ import {useKlineLocal} from "~/stores/klineLocal";
 import {useI18n} from "vue-i18n";
 import {useRoute, useNuxtApp} from "#app";
 import {useKlineStore} from "~/stores/kline";
+import {getDefaults} from "~/config";
 const {t} = useI18n()
 const route = useRoute()
+const defaults = getDefaults()
 
 overlays.forEach(o => { kc.registerOverlay(o) })
 figures.forEach(o => { kc.registerFigure(o) })
 
+interface ChartProp{
+  hasRight?: boolean,
+  customLoad: boolean
+}
+
+const props = withDefaults(defineProps<ChartProp>(), {
+  hasRight: false,
+  customLoad: false
+})
 
 const kcookie = useKlineCookie()
 const klocal = useKlineLocal()
@@ -187,7 +198,8 @@ function initChart(chartObj: Chart){
           break
         }
         case 'close': {
-          setIndicator(data.paneId, data.indicatorName, false)
+          const is_main = data.paneId == 'candle_pane'
+          setIndicator({is_main, ind_name: data.indicatorName, is_add: false})
         }
       }
     }
@@ -201,46 +213,43 @@ onUnmounted(() => {
   }
 })
 
-function loadSymbolPeriod(symbol_chg: boolean, period_chg: boolean){
-  const s = klocal.symbol
-  const p = klocal.period
-  loading = true
-  loadingChart.value = true
-  const get = async () => {
-    const curTime = new Date().getTime()
-    const [from, to] = adjustFromTo(p, curTime, batch_num.value)
-    const strategy = route.query.strategy?.toString()
-    const kdata = await datafeed.getHistoryKLineData({
-      symbol: s, period: p, from, to: curTime, strategy})
-    const klines = kdata.data
-    if(klines.length > 0){
-      const pricePrec = GetNumberDotOffset(Math.min(klines[0].low, klines[klines.length - 1].low)) + 3
-      chart.value?.setPriceVolumePrecision(pricePrec, 0)
+async function loadKlineRange(symbol: SymbolInfo, period: Period, start_ms: number, stop_ms: number,
+                              loadMore: boolean = true) {
+  if(!chart.value)return
+  const chartObj: Chart = chart.value!;
+  const strategy = route.query.strategy?.toString()
+  const kdata = await datafeed.getHistoryKLineData({
+    symbol, period, from: start_ms, to: stop_ms, strategy
+  })
+  const klines = kdata.data
+  if (klines.length > 0) {
+    const pricePrec = GetNumberDotOffset(Math.min(klines[0].low, klines[klines.length - 1].low)) + 3
+    chartObj.setPriceVolumePrecision(pricePrec, 0)
+  }
+  sigOvers.splice(0, sigOvers.length)
+  const delArgs: Partial<Pick<kc.Overlay, "id" | "groupId" | "name">> = {groupId: 'klineSigs'}
+  chartObj.removeOverlay(delArgs)
+  const hasMore = loadMore && klines.length > 0;
+  chartObj.applyNewData(klines, hasMore)
+  kdata.lays?.forEach(o => {
+    const oid = drawBarRef.value?.addOverlay(o)
+    if (o.groupId == 'klineSigs') {
+      sigOvers.push({id: oid, name: o.name, extendData: o.extendData})
     }
-    sigOvers.splice(0, sigOvers.length)
-    const delArgs: Partial<Pick<kc.Overlay, "id" | "groupId" | "name">> = {}
-    if(!symbol_chg){
-      delArgs.groupId = 'klineSigs'
-    }
-    chart.value?.removeOverlay(delArgs)
-    chart.value?.applyNewData(klines, klines.length > 0)
-    kdata.lays?.forEach(o => {
-      const oid = drawBarRef.value?.addOverlay(o)
-      if(o.groupId == 'klineSigs') {
-        sigOvers.push({id: 'oid', name: o.name, extendData: o.extendData})
-      }
-    })
-    tf_msecs = tf_to_secs(klocal.period.timeframe) * 1000
-    datafeed.subscribe(s, p, result => {
-      if(!chart.value)return
-      const kline = chart.value.getDataList()
+  })
+  tf_msecs = tf_to_secs(period.timeframe) * 1000
+  const curTime = new Date().getTime()
+  if(klines.length && klines[klines.length - 1].timestamp + tf_msecs > curTime){
+    // 加载的是最新的bar，则自动开启websocket监听
+    datafeed.subscribe(symbol, period, result => {
+      const kline = chartObj.getDataList()
       const last = kline[kline.length - 1]
       const lastBar: BarArr | null = last && last.timestamp ? [
-          last.timestamp, last.open, last.high, last.low, last.close, last.volume ?? 0
+        last.timestamp, last.open, last.high, last.low, last.close, last.volume ?? 0
       ] : null
       const ohlcvArr = build_ohlcvs(result.bars, result.secs * 1000, tf_msecs, lastBar)
       ohlcvArr.forEach((row: any) => {
-        chart.value?.updateData({
+        chartObj.updateData({
           timestamp: row[0],
           open: row[1],
           high: row[2],
@@ -250,33 +259,76 @@ function loadSymbolPeriod(symbol_chg: boolean, period_chg: boolean){
         })
       })
     })
+  }
+}
+
+/**
+ * 根据输入的参数，自定义加载K线数据
+ */
+async function customLoadKline(){
+  const start_ms = getTimestamp(klocal.dt_start)
+  let stop_ms = getTimestamp(klocal.dt_stop)
+  if(!start_ms || !stop_ms){
+    ElMessageBox.alert('时间无效，请使用：202301011200')
+    return;
+  }
+  tf_msecs = tf_to_secs(klocal.period.timeframe) * 1000
+  const totalNum = (stop_ms - start_ms) / tf_msecs;
+  if(totalNum > defaults.maxBarNum){
+    stop_ms = start_ms + tf_msecs * defaults.maxBarNum;
+    const stop_str = getDateStr(stop_ms)
+    ElMessage({
+      message: `长度${totalNum}, 已截取${defaults.maxBarNum}, 截止时间：${stop_str}`,
+      type: 'warning',
+      duration: 5000
+    })
+  }
+  loading = true
+  loadingChart.value = true
+  await loadKlineRange(klocal.symbol, klocal.period, start_ms, stop_ms, false)
+  loading = false
+  loadingChart.value = false
+}
+
+function loadSymbolPeriod(symbol_chg: boolean, period_chg: boolean){
+  const s = klocal.symbol
+  const p = klocal.period
+  loading = true
+  loadingChart.value = true
+  const get = async () => {
+    const curTime = new Date().getTime()
+    const [from, to] = adjustFromTo(p, curTime, batch_num.value)
+    loadKlineRange(s, p, from, curTime, !props.customLoad)
     loading = false
     loadingChart.value = false
   }
   get()
 }
 
-watch(klocal.period, (new_period, prev_period) => {
-  if(loading)return
-  loadSymbolPeriod(false, true)
-})
+if(!props.customLoad) {
+  // 手动加载模式下，不监听币种和周期变化自动加载。
+  watch(klocal.period, (new_period, prev_period) => {
+    if (loading) return
+    loadSymbolPeriod(false, true)
+  })
 
-function updateSymbolPriceUnit(new_val: SymbolInfo){
-  if(!priceUnitDom)return
-  if (new_val.priceCurrency) {
-    priceUnitDom.innerHTML = new_val.priceCurrency.toLocaleUpperCase()
-    priceUnitDom.style.display = 'flex'
-  } else {
-    priceUnitDom.style.display = 'none'
+  function updateSymbolPriceUnit(new_val: SymbolInfo) {
+    if (!priceUnitDom) return
+    if (new_val.priceCurrency) {
+      priceUnitDom.innerHTML = new_val.priceCurrency.toLocaleUpperCase()
+      priceUnitDom.style.display = 'flex'
+    } else {
+      priceUnitDom.style.display = 'none'
+    }
   }
-}
 
-watch(klocal.symbol, (new_symbol, prev_symbol) => {
-  updateSymbolPriceUnit(new_symbol)
-  if(loading)return
-  datafeed.unsubscribe(prev_symbol!, klocal.period)
-  loadSymbolPeriod(true, false)
-}, {immediate: true})
+  watch(klocal.symbol, (new_symbol, prev_symbol) => {
+    updateSymbolPriceUnit(new_symbol)
+    if (loading) return
+    datafeed.unsubscribe(prev_symbol!, klocal.period)
+    loadSymbolPeriod(true, false)
+  }, {immediate: true})
+}
 
 watch(() => kcookie.theme, (new_val) => {
   // 加载新指标时，修改默认颜色
@@ -311,16 +363,14 @@ watch(() => klocal.showRight, () => {
   <div class="kline-body klinecharts-pro" :data-theme="kcookie.theme">
     <i class="icon-close klinecharts-pro-load-icon"/>
     <div class="kline-main">
-      <KlineMenuBar :chart="chart" :datafeed="datafeed"/>
+      <KlineMenuBar :chart="chart" :datafeed="datafeed" :has-right="hasRight" :custom-load="customLoad"
+        @loadData="customLoadKline"/>
       <div class="klinecharts-pro-content">
         <KlineLoading v-if="loadingChart"/>
         <KlineDrawBar ref="drawBarRef" :chart="chart" v-if="main.showDrawBar"/>
         <div ref="chartRef" class='klinecharts-pro-widget' :data-has-left="main.showDrawBar"
            @keydown.delete="drawBarRef.clickRemove()"/>
       </div>
-    </div>
-    <div class="kline-slide" v-show="klocal.showRight">
-      <slot name="aslide"/>
     </div>
     <slot/>
   </div>

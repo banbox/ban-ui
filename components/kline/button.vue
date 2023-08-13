@@ -29,7 +29,6 @@ const props = defineProps<{
   border: solid 1px var(--klinecharts-pro-primary-color);
   cursor: pointer;
   background-color: transparent;
-  margin-left: 20px;
   box-sizing: border-box;
   &.confirm {
     color: #ffffff;

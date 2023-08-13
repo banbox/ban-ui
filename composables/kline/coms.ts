@@ -1,6 +1,11 @@
 import {Datafeed, Period, SymbolInfo} from "~/components/kline/types";
 import {CandleTooltipCustomCallbackData, CandleStyle} from "klinecharts";
 import kc from "klinecharts";
+import * as dayjs from "dayjs"
+import utc from "dayjs/plugin/utc"
+import timezone from "dayjs/plugin/timezone"
+dayjs.extend(utc)
+dayjs.extend(timezone)
 export const formatPrecision = kc.utils.formatPrecision
 export const formatThousands = kc.utils.formatThousands
 export const formatDate = kc.utils.formatDate
@@ -98,6 +103,61 @@ export function getDefStyles(t: Translate) {
       }
     },
   }
+}
+
+/**
+ * 将字符串的时间转为13位时间戳
+ * @param date_str 10位/13位时间戳、YYYYMMDD YYYYMMDDHHmm YYYYMMDDHHmmss
+ */
+export function getTimestamp(date_str: string): number{
+  if(!date_str)return 0
+  date_str = date_str.trim();
+  const isNumOnly = /^\d+$/.test(date_str);
+  let result: dayjs.Dayjs | null = null
+  if(isNumOnly){
+    // 是纯数字
+    const numLen = date_str.length;
+    if(numLen == 4){
+      result = dayjs.utc(date_str, 'MMdd')
+    }
+    else if(numLen == 6){
+      result = dayjs.utc(date_str, 'YYMMdd')
+    }
+    else if(numLen == 8){
+      result = dayjs.utc(date_str, 'YYYYMMdd')
+    }
+    else if(numLen == 10){
+      // 秒时间戳
+      result = dayjs.unix(parseInt(date_str))
+    }
+    else if(numLen == 12){
+      result = dayjs.utc(date_str, 'YYYYMMddHHmm')
+    }
+    else if(numLen == 13){
+      // 毫秒时间戳
+      result = dayjs(parseInt(date_str))
+    }
+    else if(numLen == 14){
+      result = dayjs.utc(date_str, 'YYYYMMddHHmmss')
+    }
+    else{
+      console.error('invalid date format:', date_str)
+      return 0;
+    }
+  }
+  else{
+    result = dayjs(date_str, ['YYYY/MM/dd', 'YYYY/MM/dd HH:mm', 'YYYY/MM/dd HH:mm:ss',
+      'YYYY-MM-dd', 'YYYY-MM-dd HH:mm', 'YYYY-MM-dd HH:mm:ss']).tz('UTC', true)
+  }
+  if(!result)return 0
+  return result.valueOf()
+}
+
+export function getDateStr(date_ts: number): string{
+  if(date_ts > 1000000000000){
+    return dayjs(date_ts).format('YYYY-MM-DD HH:mm:ss')
+  }
+  return dayjs.unix(date_ts).format('YYYY-MM-DD HH:mm:ss')
 }
 
 export function getThemeStyles(theme: string) {

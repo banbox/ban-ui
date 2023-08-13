@@ -50,7 +50,7 @@ import {useNuxtApp} from "#app";
 import {onMounted, reactive, ref} from "vue";
 import {getApi} from "~/utils/netio";
 import {formatBigNumber, formatPrecision} from "~/composables/kline/coms";
-import {useKlineStore} from "~/stores/kline";
+import {useKlineLocal} from "~/stores/klineLocal";
 const {t} = useNuxtApp()
 const symbol_down = ref(true)
 const price_down = ref(true)
@@ -60,7 +60,7 @@ const sort_key = ref('chg')
 const main_col = ref('chg')
 const data_list = reactive<any[]>([])
 let loop_timer: ReturnType<typeof setTimeout>
-const store = useKlineStore()
+const store = useKlineLocal()
 
 onMounted(async () => {
   await updateWrap()

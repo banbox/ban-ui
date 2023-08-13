@@ -26,9 +26,10 @@ import Checkbox from "~/components/kline/checkbox.vue"
 import {PaneInds} from "~/components/kline/types";
 import {computed, defineEmits, defineProps, reactive, watch} from "vue";
 import kc, {Chart} from "klinecharts";
-import {useKlineStore} from "~/stores/kline";
+import {useKlineLocal} from "~/stores/klineLocal";
 import {awaitExpression} from "@babel/types";
 import makeCloudInds from "~/composables/kline/indicators/cloudInds";
+import {useNuxtApp} from "#app"
 
 
 const props = defineProps<{
@@ -37,7 +38,6 @@ const props = defineProps<{
 
 
 const emit = defineEmits<{
-  'change': [is_main: boolean, ind_name: string, is_add: boolean],
   'update:modelValue': [value: boolean]
 }>()
 
@@ -50,7 +50,8 @@ const showModal = computed({
   }
 })
 
-const store = useKlineStore()
+const {$emit} = useNuxtApp()
+const store = useKlineLocal()
 
 const main_inds = reactive(['MA', 'EMA', 'SMA', 'BOLL', 'SAR', 'BBI'])
 const main_cloud_inds = reactive<string[]>([])
@@ -77,7 +78,7 @@ const checked_inds = computed((): string[] => {
 })
 
 function toggleInd(is_main: boolean, name: string, val: any){
-  emit('change', is_main, name, val as boolean)
+  $emit('set_ind', {is_main, ind_name: name, is_add: val as boolean})
 }
 
 </script>
@@ -106,34 +107,17 @@ function toggleInd(is_main: boolean, name: string, val: any){
     box-sizing: border-box;
     cursor: pointer;
     justify-content: space-between;
+    .#{$prefix-cls}-checkbox{
+      flex-grow: 1;
+    }
   }
   .row:hover {
+    background: var(--klinecharts-pro-hover-background-color);
     .checkbox {
       fill: var(--klinecharts-pro-primary-color);
       color: var(--klinecharts-pro-primary-color);
     }
   }
-}
-
-.pane-box{
-  border: 1px solid $c-text-second-dark;
-  border-radius: 10px;
-  margin: 10px;
-  .title{
-    background-color: #eeeeee;
-  }
-}
-
-.add-pane{
-  padding: 0 20px;
-  text-align: center;
-  height: 40px;
-  line-height: 40px;
-  color: $c-primary;
-  margin: 0 30px;
-  border-radius: 30px;
-  border: 1px solid $c-primary;
-  cursor: pointer;
 }
 
 </style>

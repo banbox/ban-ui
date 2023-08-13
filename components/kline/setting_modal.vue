@@ -24,9 +24,9 @@ import {Chart, Styles} from "klinecharts";
 import kc from "klinecharts"
 import _ from "lodash"
 import {useI18n} from "vue-i18n";
-import {useKlineStore} from "~/stores/kline";
+import {useKlineLocal} from "~/stores/klineLocal";
 const {t} = useI18n()
-const store = useKlineStore()
+const store = useKlineLocal()
 const props = defineProps<{
   chart: Chart,
   modelValue: boolean

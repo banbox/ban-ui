@@ -29,7 +29,7 @@ import List from "~/components/kline/list.vue"
 import {defineEmits, defineProps, reactive, ref, computed} from "vue";
 import {Datafeed, SymbolInfo} from "~/components/kline/types";
 import {useSymbols} from "~/composables/kline/coms"
-import {useKlineStore} from "~/stores/kline";
+import {useKlineLocal} from "~/stores/klineLocal";
 
 const props = defineProps<{
   datafeed: Datafeed
@@ -38,7 +38,7 @@ const props = defineProps<{
 
 const keyword = ref('')
 const {symbols, error, loading} = useSymbols(props.datafeed)
-const store = useKlineStore()
+const store = useKlineLocal()
 
 const matchSymbols = computed(() => {
   if(!keyword.value)return symbols.value

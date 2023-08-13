@@ -69,7 +69,7 @@ import {Chart, Overlay, OverlayEvent, OverlayMode, OverlayRemove} from "klinecha
 import {postApi} from "~/utils/netio";
 import {useAuthState} from "~/composables/auth";
 import {Period, SymbolInfo} from "~/components/kline/types";
-import {useKlineStore} from "~/stores/kline";
+import {useKlineLocal} from "~/stores/klineLocal";
 
 const popoverKey = ref('')
 const modeIcon = ref('weakMagnet')
@@ -81,7 +81,7 @@ const selectDraw = ref('')
 const delOverlayIds: string[] = []
 const layIdMap: Record<string, any> = {}
 const {authStatus} = useAuthState()
-const store = useKlineStore()
+const store = useKlineLocal()
 
 const props = defineProps<{
   chart: Chart,

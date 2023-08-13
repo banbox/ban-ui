@@ -1,7 +1,7 @@
 <template>
   <Modal :title="$t('timezone')" :buttons="['close']" :width="400" class="timezone" v-model="showModal">
     <Select :data-source="timeZoneOpts" :value="$t(timezone_text)" :translate="true"
-            @change="store.setTimezone($event.key)"/>
+            @change="store.timezone = $event.key"/>
   </Modal>
 </template>
 
@@ -11,9 +11,9 @@ import Select from "~/components/kline/select.vue"
 import {computed, defineProps, ref, watch} from "vue";
 import {defineEmits} from "vue/dist/vue";
 import {translateTimezone, getTimezoneSelectOptions} from "~/components/kline/timezone_opts";
-import {useMainStore} from "~/stores/main";
+import {useKlineCookie} from "~/stores/klineCookie";
 
-const store = useMainStore()
+const store = useKlineCookie()
 const props = defineProps<{
   modelValue: boolean
 }>()

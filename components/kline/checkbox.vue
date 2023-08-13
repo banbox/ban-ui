@@ -44,7 +44,6 @@ const showModal = computed({
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
   font-size: 14px;
   color: var(--klinecharts-pro-text-color);
   fill: var(--klinecharts-pro-text-color);

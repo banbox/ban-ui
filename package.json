@@ -24,6 +24,7 @@
   "dependencies": {
     "@pinia/nuxt": "^0.4.11",
     "klinecharts": "^9.4.0",
+    "mitt": "^3.0.1",
     "pinia": "^2.1.3"
   }
 }

@@ -20,6 +20,12 @@ export const AllPeriods: Period[] = [
 ]
 export const periodMap = Object.fromEntries(AllPeriods.map(obj => [obj.timeframe, obj]))
 
+export type AddDelInd = {
+  is_main: boolean,
+  ind_name: string,
+  is_add: boolean
+}
+
 export function GetNumberDotOffset(value: number){
   value = Math.abs(value)
   if(value >= 1)return 0

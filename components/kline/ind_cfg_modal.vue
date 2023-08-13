@@ -1,5 +1,5 @@
 <template>
-  <Modal v-model="showModal" :title="indName" :buttons="['confirm']" @click="clickModel" :width="360">
+  <Modal v-model="showModal" :title="store.editIndName" :buttons="['confirm']" @click="clickModel" :width="360">
     <div class="empty-msg" v-if="!fields.length">
       <div class="text-block">{{$t('no_ind_params')}}</div>
     </div>
@@ -20,11 +20,10 @@ import { Chart, Indicator } from 'klinecharts'
 import kc from "klinecharts"
 import {GetIndFields} from "~/components/kline/inds"
 import {defineEmits, reactive, computed, watch} from "vue";
+import {useKlineStore} from "~/stores/kline";
 
 const props = defineProps<{
   chart?: Chart,  // 绘图对象
-  indName: string,  // 指标ID
-  paneId: string,  // 指标所属面板
   modelValue: boolean
 }>()
 
@@ -41,11 +40,12 @@ const showModal = computed({
   }
 })
 
+const store = useKlineStore()
 const IndFieldsMap = GetIndFields();
 const params = reactive<any[]>([])
 const fields = reactive<any[]>([])
 
-watch(() => [props.paneId, props.indName], ([new_pid, new_ind]) => {
+watch(() => [store.editPaneId, store.editIndName], ([new_pid, new_ind]) => {
   if(!props.chart)return
   fields.splice(0, fields.length)
   fields.push(...(IndFieldsMap[new_ind] ?? []))
@@ -72,7 +72,7 @@ function clickModel(from: string){
       result.push(Number(param))
     }
   })
-  props.chart?.overrideIndicator({name: props.indName, calcParams: result}, props.paneId)
+  props.chart?.overrideIndicator({name: store.editIndName, calcParams: result}, store.editPaneId)
 }
 
 </script>

@@ -1,7 +1,6 @@
-import {$fetch, $Fetch, FetchOptions, SearchParameters, FetchError} from "ofetch";
+import {$fetch, SearchParameters, FetchError} from "ofetch";
 import _ from "lodash"
 import {useAuthState} from "~/composables/auth";
-import {useMainStore} from "~/stores/main";
 import {useNuxtApp} from "#app";
 
 export type ApiResult = Record<string, any> & {

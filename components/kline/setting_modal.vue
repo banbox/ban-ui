@@ -5,7 +5,7 @@
       <template v-for="(item, index) in options" :key="item.key">
         <span>{{$t(item.text)}}</span>
         <Select v-if="item.component == 'select'" :data-source="item.dataSource"
-                css-vars="width: 120px" :translate="true"
+                style="width: 120px" :translate="true"
                 :value="$t(kc.utils.formatValue(store.chartStyle, item.key))" @change="update(item.key, $event.key)"/>
         <Switch v-else-if="item.component == 'switch'" :open="!!kc.utils.formatValue(store.chartStyle, item.key)"
                 @change="update(item.key, $event)"/>

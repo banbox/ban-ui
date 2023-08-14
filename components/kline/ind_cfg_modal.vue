@@ -6,8 +6,7 @@
     <div class="klinecharts-pro-indicator-setting-modal-content" v-else>
       <template v-for="(d, i) in fields">
         <span>{{$t(d.paramNameKey)}}</span>
-        <Input :value="params[i]" css-vars="width: '200px'" :precision="d.precision"
-               :min="d.min" @change="params[i] = $event"/>
+        <Input v-model="params[i]" style="width: '200px'" :precision="d.precision" :min="d.min"/>
       </template>
     </div>
   </Modal>

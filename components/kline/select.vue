@@ -1,6 +1,6 @@
 <template>
-  <div class="klinecharts-pro-select" :style="cssVars" @blur="open = false" tabIndex="0"
-       :class="[className, open ? 'klinecharts-pro-select-show': '']">
+  <div class="klinecharts-pro-select" @blur="open = false" tabIndex="0"
+       :class="[open ? 'klinecharts-pro-select-show': '']">
     <div class="selector-container" @click="open = !open">
       <span class="value">{{value}}</span>
       <i class="arrow"/>
@@ -20,8 +20,6 @@
 import {defineEmits, defineProps, ref} from "vue";
 
 type PropType = {
-  cssVars?: string,
-  className?: string,
   value?: string,
   value_key?: string,
   translate?: boolean,

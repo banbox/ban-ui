@@ -1,15 +1,12 @@
 <template>
-  <button :style="cssVars" class="klinecharts-pro-button"
-          :class="[(type || 'confirm'), className]">
+  <button class="klinecharts-pro-button" :class="[(type || 'confirm')]">
     <slot/>
   </button>
 </template>
 
 <script setup lang="ts">
 const props = defineProps<{
-  cssVars?: string,
-  type?: string,
-  className?: string
+  type?: string
 }>()
 </script>
 

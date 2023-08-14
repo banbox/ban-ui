@@ -1,7 +1,7 @@
 <template>
   <Modal :title="$t('symbol_search')" :width="460" v-model="showModal">
-    <Input :value="keyword" class-name="klinecharts-pro-symbol-search-modal-input"
-           :placeholder="$t('symbol_code')" @keyup="keyword = $event">
+    <Input v-model="keyword" class="klinecharts-pro-symbol-search-modal-input"
+           :placeholder="$t('symbol_code')">
       <template #suffix>
         <span class="suffix">
           <svg viewBox="0 0 1024 1024">
@@ -10,7 +10,7 @@
         </span>
       </template>
     </Input>
-    <List class-name="klinecharts-pro-symbol-search-modal-list" :loading="loading">
+    <List class="klinecharts-pro-symbol-search-modal-list" :loading="loading">
       <li v-for="symbol in matchSymbols" :key="symbol.name" @click="clickSymbol(symbol)">
         <div>
           <img v-if="symbol.logo" :src="symbol.logo" />

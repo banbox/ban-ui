@@ -24,14 +24,14 @@
       {{period.text}}
     </span>
     <template v-if="customLoad">
-      <div class="symbol" style="width: 150px; padding: 0">
-        <KlineInput :value="klocal.dt_start" @change="klocal.dt_start = $event" placeholder="20230601"/>
+      <div class="item" style="width: 150px; padding: 0">
+        <KlineInput v-model="klocal.dt_start" placeholder="20230601"/>
       </div>
-      <span class="item period" style="width: 150px; margin-left: 0; padding: 0">
-        <KlineInput :value="klocal.dt_stop" @change="klocal.dt_stop = $event" placeholder="20230801"/>
+      <span class="item" style="width: 150px; margin-left: 0; padding: 0">
+        <KlineInput v-model="klocal.dt_stop" placeholder="20230801"/>
       </span>
-      <span class="item period" style="padding: 0;margin: 0">
-        <KlineButton @click="$emit('loadData')">加载</KlineButton>
+      <span class="item" style="padding: 0;margin: 0">
+        <KlineButton style="width: 60px" @click="$emit('loadData')">加载</KlineButton>
       </span>
     </template>
     <div class='item tools' @click="showIndSearchModal = true">
@@ -289,20 +289,18 @@ function toggleFullscreen() {
       background-color: var(--klinecharts-pro-selected-color)!important;
       color: var(--klinecharts-pro-primary-color);
     }
+    .#{$prefix-cls}-input{
+      padding: 0 6px;
+    }
   }
   .period {
-    padding: 2px 6px;
-    margin: 0 4px;
-    border-radius: 2px;
+    padding: 0 10px;
+    height: 100%;
+    display: flex;
+    align-items: center;
     &:hover {
       background-color: var(--klinecharts-pro-hover-background-color);
     }
-    &:first-child {
-      margin-left: 8px;
-    }
-  }
-  .symbol + .period, .menu-container + .period {
-    margin-left: 12px;
   }
   .tools {
     display: flex;

@@ -394,6 +394,7 @@ body{
   width: 100%;
   .kline-main{
     flex-grow: 1;
+    width: 100%;
   }
 }
 .kline-slide{
@@ -478,6 +479,7 @@ body{
     width: $widget-width;
     height: 100%;
     margin-left: 0;
+    overflow-x: hidden;
     &[data-has-left="false"] {
       width: 100%;
     }

@@ -28,6 +28,7 @@ const requestApi = async function(method: string, url: string,
     const msg = err.data && err.data.detail ? `${err.status}: ${err.data.detail}` : err.toString()
     const result = {code: err.status ?? 400, msg}
     if(result.code == 401){
+      console.error('auth token invalid, reset..', authToken.value)
       authToken.value = null
       authData.value = undefined
     }

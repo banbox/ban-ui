@@ -76,31 +76,35 @@ const periods = reactive<Period[]>(AllPeriods)
 function setIndicator({is_main, ind_name, is_add}: AddDelInd){
   if(!chart.value)return
   const paneId = is_main ? 'candle_pane' : 'pane_' + ind_name
-  klocal.setInd(is_main, ind_name, is_add)
   if(is_add){
-    createIndicator(chart.value, ind_name, true, {id: paneId})
+    const ind = createIndicator(chart.value, ind_name, undefined, true, {id: paneId})
+    ind && klocal.save_inds.push(ind)
   }
   else{
     chart.value?.removeIndicator(paneId, ind_name)
+    klocal.removeInd(paneId, ind_name)
   }
 }
 // 这个事件由ind_search_modal触发
 $on('set_ind', setIndicator)
 
-function createIndicator (widget: Nullable<Chart>, indicatorName: string, isStack?: boolean, paneOptions?: PaneOptions): Nullable<string> {
-  if (indicatorName === 'VOL') {
+function createIndicator (widget: Nullable<Chart>, name: string, params?: any[], isStack?: boolean, paneOptions?: PaneOptions): Nullable<any> {
+  if (name === 'VOL') {
     paneOptions = { gap: { bottom: 2 }, ...paneOptions }
   }
-  return widget?.createIndicator({
-    name: indicatorName,
-    calcParams: GetIndDefaults(indicatorName),
+  const calcParams = params ?? GetIndDefaults(name);
+  const ind_id = widget?.createIndicator({
+    name, calcParams,
     // @ts-expect-error
     createTooltipDataSource: ({ indicator, defaultStyles }) => {
       const icon_ids = [indicator.visible ? 1: 0, 2, 3];
       const icons = icon_ids.map(i => defaultStyles.tooltip.icons[i])
       return { icons }
     }
-  }, isStack, paneOptions) ?? null
+  }, isStack, paneOptions)
+  if(!ind_id)return null
+  const pane_id = paneOptions?.id ?? ''
+  return {name, pane_id, params: calcParams}
 }
 
 async function loadKlineData(from: number, to: number, isNewData?: boolean){
@@ -161,11 +165,8 @@ function initChart(chartObj: Chart){
   priceUnitDom.className = 'klinecharts-pro-price-unit'
   priceUnitContainer?.appendChild(priceUnitDom)
 
-  klocal.mainInds.split(',').forEach(ind => {
-    createIndicator(chartObj, ind, true, {id: 'candle_pane'})
-  })
-  klocal.subInds.split(',').forEach(ind => {
-    createIndicator(chartObj, ind, true, {id: 'pane_' + ind})
+  klocal.save_inds.forEach(ind => {
+    createIndicator(chartObj, ind.name, ind.params, true, {id: ind.pane_id})
   })
   const styles = toRaw(klocal.chartStyle)
   _.merge(styles, getDefStyles(t))
@@ -280,7 +281,7 @@ async function customLoadKline(){
     ElMessage({
       message: `长度${totalNum}, 已截取${defaults.maxBarNum}, 截止时间：${stop_str}`,
       type: 'warning',
-      duration: 5000
+      duration: 2000
     })
   }
   loading = true

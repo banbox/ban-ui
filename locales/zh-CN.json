@@ -35,7 +35,10 @@
   "confirm": "确定",
   "cancel": "取消",
   "close": "关闭",
+  "search": "搜索",
 
+  "local_inds": "本地指标",
+  "cloud_inds": "云端指标",
   "ma": "MA(移动平均线)",
   "ema": "EMA(指数平滑移动平均线)",
   "sma": "SMA(简单移动平均线)",

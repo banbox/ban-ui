@@ -35,7 +35,10 @@
   "confirm": "Confirm",
   "cancel": "Cancel",
   "close": "Close",
-  
+  "search": "Search",
+
+  "local_inds": "Local Indicators",
+  "cloud_inds": "Cloud Indicators",
   "ma": "Moving Average (MA)",
   "ema": "Exponential Moving Average (EMA)",
   "sma": "Simple Moving Average (SMA)",

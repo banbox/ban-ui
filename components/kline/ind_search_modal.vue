@@ -1,21 +1,33 @@
 <template>
-  <Modal :title="$t('indicator')" :width="400" v-model="showModal">
-    <List class="klinecharts-pro-ind-box">
-      <div class="row title">{{$t('main_indicator')}}</div>
-      <div class="row" v-for="(item, index) in main_inds" :key="index">
-        <Checkbox :model-value="checked_inds.includes(item)" :label="$t(item.toLowerCase())"
-                  @change="toggleInd(true, item, $event)"/>
+  <Modal :title="$t('indicator')" :width="600" v-model="showModal">
+    <Input v-model="keyword" class="klinecharts-pro-symbol-search-modal-input"
+           :placeholder="$t('search')">
+      <template #suffix>
+        <span class="suffix">
+          <svg viewBox="0 0 1024 1024">
+            <path d="M945.066667 898.133333l-189.866667-189.866666c55.466667-64 87.466667-149.333333 87.466667-241.066667 0-204.8-168.533333-373.333333-373.333334-373.333333S96 264.533333 96 469.333333 264.533333 842.666667 469.333333 842.666667c91.733333 0 174.933333-34.133333 241.066667-87.466667l189.866667 189.866667c6.4 6.4 14.933333 8.533333 23.466666 8.533333s17.066667-2.133333 23.466667-8.533333c8.533333-12.8 8.533333-34.133333-2.133333-46.933334zM469.333333 778.666667C298.666667 778.666667 160 640 160 469.333333S298.666667 160 469.333333 160 778.666667 298.666667 778.666667 469.333333 640 778.666667 469.333333 778.666667z"/>
+          </svg>
+        </span>
+      </template>
+    </Input>
+    <div class="res-body">
+      <div class="menu-box">
+        <div class="item" @click="activeTab = 'local'" :class="{active: activeTab == 'local'}">
+          <el-icon><TakeawayBox /></el-icon>
+          <span>{{$t('local_inds')}}</span>
+        </div>
+        <div class="item" @click="activeTab = 'cloud'" :class="{active: activeTab == 'cloud'}">
+          <el-icon><Cloudy /></el-icon>
+          <span>{{$t('cloud_inds')}}</span>
+        </div>
       </div>
-      <div class="row" v-for="(item, index) in main_cloud_inds" :key="index">
-        <Checkbox :model-value="checked_inds.includes(item)" :label="item"
-                  @change="toggleInd(true, item, $event)"/>
-      </div>
-      <div class="row title">{{$t('sub_indicator')}}</div>
-      <div class="row" v-for="(item, index) in sub_inds" :key="index">
-        <Checkbox :model-value="checked_inds.includes(item)" :label="$t(item.toLowerCase())"
-                  @change="toggleInd(false, item, $event)"/>
-      </div>
-    </List>
+      <List class="klinecharts-pro-ind-box">
+        <div class="row" v-for="(item, index) in show_inds" :key="index">
+          <Checkbox :model-value="checked_inds.includes(item.name)" :label="item.title"
+                    @change="toggleInd(item.is_main, item.name, $event)"/>
+        </div>
+      </List>
+    </div>
   </Modal>
 </template>
 
@@ -30,6 +42,10 @@ import {useKlineLocal} from "~/stores/klineLocal";
 import {awaitExpression} from "@babel/types";
 import makeCloudInds from "~/composables/kline/indicators/cloudInds";
 import {useNuxtApp} from "#app"
+import Input from "~/components/kline/input.vue";
+import {useI18n} from "vue-i18n";
+const {t} = useI18n()
+import {TakeawayBox, Cloudy} from "@element-plus/icons-vue";
 
 
 const props = defineProps<{
@@ -53,28 +69,53 @@ const showModal = computed({
 const {$emit} = useNuxtApp()
 const store = useKlineLocal()
 
-const main_inds = reactive(['MA', 'EMA', 'SMA', 'BOLL', 'SAR', 'BBI'])
-const main_cloud_inds = reactive<string[]>([])
-
-const sub_inds = reactive(['VOL', 'MACD', 'KDJ', 'RSI', 'BIAS', 'BRAR',
+const keyword = ref('')
+const activeTab = ref('local')
+const local_mains = ['MA', 'EMA', 'SMA', 'BOLL', 'SAR', 'BBI']
+const local_subs = ['VOL', 'MACD', 'KDJ', 'RSI', 'BIAS', 'BRAR',
   'CCI', 'DMI', 'CR', 'PSY', 'DMA', 'TRIX', 'OBV', 'VR', 'WR', 'MTM', 'EMV',
-  'SAR', 'ROC', 'PVT', 'AO'])
+  'SAR', 'ROC', 'PVT', 'AO']
+
+type BanInd = {
+  name: string,
+  title: string,
+  cloud: boolean,
+  is_main: boolean
+}
+// 所有的指标列表
+const all_inds: BanInd[] = []
+for(let name of local_mains){
+  all_inds.push({name, title: t(name.toLowerCase()), cloud: false, is_main: true})
+}
+for(let name of local_subs){
+  all_inds.push({name, title: t(name.toLowerCase()), cloud: false, is_main: false})
+}
+const show_inds = computed(() => {
+  if(keyword.value){
+    const word = keyword.value.toUpperCase()
+    return all_inds.filter(i => i.name.includes(word) || i.title.includes(word))
+  }
+  if(activeTab.value == 'local'){
+    return all_inds.filter(i => !i.cloud)
+  }
+  return all_inds.filter(i => i.cloud)
+})
 
 
 async function loadCloudInds() {
-  const rsp = await getApi('/kline/all_stgy')
+  const rsp = await getApi('/kline/all_inds')
   if (!rsp.data) {
     console.error('load cloud inds fail')
     return
   }
-  const stg_names = rsp.data.map((d: any) => d.name)
-  main_cloud_inds.splice(0, main_cloud_inds.length, ...stg_names)
+  const cloud_inds = rsp.data.map((v: any) => {return {cloud: true, ...v}})
+  all_inds.push(...cloud_inds)
   makeCloudInds(rsp.data).forEach(o => { kc.registerIndicator(o) })
 }
 loadCloudInds()
 
 const checked_inds = computed((): string[] => {
-  return [...store.mainInds.split(','), ...store.subInds.split(',')]
+  return store.save_inds.map(d => d.name)
 })
 
 function toggleInd(is_main: boolean, name: string, val: any){
@@ -85,11 +126,12 @@ function toggleInd(is_main: boolean, name: string, val: any){
 
 <style lang="scss">
 @import '~/assets/klinebase.scss';
-
+.#{$prefix-cls}-symbol-search-modal-input{
+  margin: 10px 0;
+}
 .#{$prefix-cls}-ind-box {
-  min-height: 0;
-  max-height: 500px;
-  margin: 0 -20px;
+  flex-grow: 1;
+
   .title {
     position: sticky;
     top: 0;
@@ -116,6 +158,32 @@ function toggleInd(is_main: boolean, name: string, val: any){
     .checkbox {
       fill: var(--klinecharts-pro-primary-color);
       color: var(--klinecharts-pro-primary-color);
+    }
+  }
+}
+.res-body{
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 500px;
+}
+.menu-box{
+  width: 20%;
+  border-right: 1px solid var(--klinecharts-pro-border-color);
+  .item{
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    border: 1px solid var(--klinecharts-pro-border-color);
+    .el-icon{
+      margin-right: 7px;
+    }
+    &.active{
+      color: var(--klinecharts-pro-primary-color);
+    }
+    &:hover{
+      background: var(--klinecharts-pro-hover-background-color);
     }
   }
 }

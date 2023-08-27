@@ -36,12 +36,19 @@ const defStyle = {
     }
 }
 
+type SaveInd = {
+    name: string,
+    pane_id: string
+    params?: any[]
+}
+
 export const useKlineLocal = defineStore('klocal', () => {
     const period = reactive<Period>(defaults.period)
     const symbol = reactive<SymbolInfo>(defaults.symbol)
     const chartStyle = reactive(defStyle)
-    const mainInds = ref<string>('')
-    const subInds = ref<string>('VOL')
+    const save_inds = reactive<SaveInd[]>([
+        {name: 'VOL', pane_id: 'pane_VOL'}
+    ])
     const showRight = ref(true)
     const dt_start = ref('20230601')
     const dt_stop = ref('20230701')
@@ -73,26 +80,16 @@ export const useKlineLocal = defineStore('klocal', () => {
     function resetStyle(){
         Object.assign(chartStyle, defStyle)
     }
-    function setInd(is_main: boolean, ind_name: string, is_add: boolean) {
-        const pane = is_main ? mainInds : subInds;
-        const old_idx = pane.value.indexOf(ind_name);
-        if (is_add && old_idx < 0) {
-            if (pane.value) {
-                pane.value += ','
-            }
-            pane.value += ind_name
-        } else if (!is_add && old_idx >= 0) {
-            let result = ''
-            if (old_idx > 0) {
-                result = pane.value.substring(0, old_idx - 1)
-            }
-            result += pane.value.substring(old_idx + ind_name.length)
-            pane.value = result
-        }
+
+    function removeInd(paneId: string, name?: string) {
+        const mat_idx = save_inds.findIndex(d =>
+          d.pane_id == paneId && (!name || d.name == name))
+        if(mat_idx < 0)return
+        save_inds.splice(mat_idx, 1)
     }
-    return {period, symbol, chartStyle, mainInds, subInds, showRight, dt_start, dt_stop,
+    return {period, symbol, chartStyle, save_inds, showRight, dt_start, dt_stop,
         setPeriod, setTimeframe, setSymbol, setSymbolTicker,
-        setStyleItem, resetStyle, setInd}
+        setStyleItem, resetStyle, removeInd}
 }, {
     persist: {
         storage: persistedState.localStorage

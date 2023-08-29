@@ -44,7 +44,7 @@ figures.forEach(o => { kc.registerFigure(o) })
 
 interface ChartProp{
   hasRight?: boolean,
-  customLoad: boolean
+  customLoad?: boolean
 }
 
 const props = withDefaults(defineProps<ChartProp>(), {
@@ -363,7 +363,7 @@ watch(() => klocal.showRight, () => {
 <template>
   <div class="kline-body klinecharts-pro" :data-theme="kcookie.theme">
     <i class="icon-close klinecharts-pro-load-icon"/>
-    <div class="kline-main">
+    <div class="kline-main" :data-right="klocal.showRight">
       <KlineMenuBar :chart="chart" :datafeed="datafeed" :has-right="hasRight" :custom-load="customLoad"
         @loadData="customLoadKline"/>
       <div class="klinecharts-pro-content">
@@ -396,15 +396,17 @@ body{
   .kline-main{
     flex-grow: 1;
     width: 100%;
+    &[data-right=true]{
+      width: calc(100% - 300px);
+    }
   }
 }
 .kline-slide{
+  height: 100%;
+  overflow: hidden;
   width: 300px;
   display: flex;
   flex-direction: column;
-  .opinion-box{
-    flex-grow: 1;
-  }
 }
 
 .#{$prefix-cls} {
@@ -480,7 +482,7 @@ body{
     width: $widget-width;
     height: 100%;
     margin-left: 0;
-    overflow-x: hidden;
+    overflow: hidden;
     &[data-has-left="false"] {
       width: 100%;
     }

@@ -1,11 +1,9 @@
 <template>
   <KlineChart :has-right="true">
-    <template>
-      <div class="kline-slide" v-show="klocal.showRight">
-        <TopChange/>
-        <OpinionFlow/>
-      </div>
-    </template>
+    <div class="kline-slide" v-show="klocal.showRight">
+      <TopChange/>
+      <OpinionFlow/>
+    </div>
   </KlineChart>
 </template>
 
@@ -16,5 +14,9 @@ const klocal = useKlineLocal()
 </script>
 
 <style lang="scss">
-
+.kline-slide{
+  .opinion-box{
+    flex-grow: 1;
+  }
+}
 </style>

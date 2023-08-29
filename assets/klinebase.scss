@@ -32,6 +32,7 @@ $c-active-color: #1677ff;
 * {
   scrollbar-width: thin;
   scrollbar-color: #777 #ddd;
+  box-sizing: border-box;
 }
 
 /* Works on Chrome, Edge, and Safari */

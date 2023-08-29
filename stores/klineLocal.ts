@@ -50,8 +50,8 @@ export const useKlineLocal = defineStore('klocal', () => {
         {name: 'VOL', pane_id: 'pane_VOL'}
     ])
     const showRight = ref(true)
-    const dt_start = ref('20230601')
-    const dt_stop = ref('20230701')
+    const dt_start = ref('20230801')
+    const dt_stop = ref('20230820')
 
     function setPeriod(val: Period){
         Object.assign(period, val)

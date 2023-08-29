@@ -106,7 +106,7 @@ export function getDefStyles(t: Translate) {
 }
 
 /**
- * 将字符串的时间转为13位时间戳
+ * 将字符串的时间转为13位时间戳，要求输入的是UTC时区字符串
  * @param date_str 10位/13位时间戳、YYYYMMDD YYYYMMDDHHmm YYYYMMDDHHmmss
  */
 export function getTimestamp(date_str: string): number{
@@ -118,27 +118,27 @@ export function getTimestamp(date_str: string): number{
     // 是纯数字
     const numLen = date_str.length;
     if(numLen == 4){
-      result = dayjs.utc(date_str, 'MMdd')
+      result = dayjs.utc(date_str, 'MMDD')
     }
     else if(numLen == 6){
-      result = dayjs.utc(date_str, 'YYMMdd')
+      result = dayjs.utc(date_str, 'YYMMDD')
     }
     else if(numLen == 8){
-      result = dayjs.utc(date_str, 'YYYYMMdd')
+      result = dayjs.utc(date_str, 'YYYYMMDD')
     }
     else if(numLen == 10){
       // 秒时间戳
       result = dayjs.unix(parseInt(date_str))
     }
     else if(numLen == 12){
-      result = dayjs.utc(date_str, 'YYYYMMddHHmm')
+      result = dayjs.utc(date_str, 'YYYYMMDDHHmm')
     }
     else if(numLen == 13){
       // 毫秒时间戳
       result = dayjs(parseInt(date_str))
     }
     else if(numLen == 14){
-      result = dayjs.utc(date_str, 'YYYYMMddHHmmss')
+      result = dayjs.utc(date_str, 'YYYYMMDDHHmmss')
     }
     else{
       console.error('invalid date format:', date_str)
@@ -146,19 +146,47 @@ export function getTimestamp(date_str: string): number{
     }
   }
   else{
-    result = dayjs(date_str, ['YYYY/MM/dd', 'YYYY/MM/dd HH:mm', 'YYYY/MM/dd HH:mm:ss',
-      'YYYY-MM-dd', 'YYYY-MM-dd HH:mm', 'YYYY-MM-dd HH:mm:ss']).tz('UTC', true)
+    result = dayjs(date_str, ['YYYY/MM/DD', 'YYYY/MM/DD HH:mm', 'YYYY/MM/DD HH:mm:ss',
+      'YYYY-MM-DD', 'YYYY-MM-DD HH:mm', 'YYYY-MM-DD HH:mm:ss']).tz('UTC', true)
   }
   if(!result)return 0
   return result.valueOf()
 }
 
-export function getDateStr(date_ts: number): string{
+export function getDateStr(date_ts: number, tz: string | undefined = undefined): string{
+  let result: dayjs.Dayjs | null = null
   if(date_ts > 1000000000000){
-    return dayjs(date_ts).format('YYYY-MM-DD HH:mm:ss')
+    result = dayjs(date_ts)
   }
-  return dayjs.unix(date_ts).format('YYYY-MM-DD HH:mm:ss')
+  else{
+    result = dayjs.unix(date_ts)
+  }
+  if(tz){
+    result = result.tz(tz, true)
+  }
+  return result.format('YYYY-MM-DD HH:mm:ss')
 }
+
+export function isNumber (value: any): value is number {
+  return typeof value === 'number' && !isNaN(value)
+}
+
+export function readableNumber (value: string | number, keepLen=2): string {
+  const v = +value
+  if (isNumber(v)) {
+    if (v > 1000000000) {
+      return `${+((v / 1000000000).toFixed(keepLen))}B`
+    }
+    if (v > 1000000) {
+      return `${+((v / 1000000).toFixed(keepLen))}M`
+    }
+    if (v > 1000) {
+      return `${+((v / 1000).toFixed(keepLen))}K`
+    }
+  }
+  return `${value}`
+}
+
 
 export function getThemeStyles(theme: string) {
   const color = theme === 'dark' ? '#929AA5' : '#76808F'

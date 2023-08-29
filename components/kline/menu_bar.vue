@@ -25,10 +25,10 @@
     </span>
     <template v-if="customLoad">
       <div class="item" style="width: 150px; padding: 0">
-        <KlineInput v-model="klocal.dt_start" placeholder="20230601"/>
+        <KlineInput v-model="klocal.dt_start" placeholder="%Y%m%d"/>
       </div>
       <span class="item" style="width: 150px; margin-left: 0; padding: 0">
-        <KlineInput v-model="klocal.dt_stop" placeholder="20230801"/>
+        <KlineInput v-model="klocal.dt_stop" placeholder="%Y%m%d"/>
       </span>
       <span class="item" style="padding: 0;margin: 0">
         <KlineButton style="width: 60px" @click="$emit('loadData')">加载</KlineButton>

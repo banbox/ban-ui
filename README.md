@@ -20,6 +20,8 @@ K线UI工具栏可参考：[AICoin](https://www.aicoin.com/chart/okcoinfutures_b
 使用固定值初始化，然后浏览器端在onMounted中读取最新值更新。  
 **watch与watchEffect**  
 尽量使用watch，显示指定依赖。极端情况下，watchEffect收集了不希望监听的依赖，自身执行又会导致依赖对象改变，造成无限循环。  
+**导出组件中的函数供父组件调用**  
+使用`defineExpose`
 
 # Nuxt 3 配置
 

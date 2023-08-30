@@ -1,16 +1,10 @@
 import {Datafeed, Period, SymbolInfo} from "~/components/kline/types";
 import {CandleTooltipCustomCallbackData, CandleStyle} from "klinecharts";
 import kc from "klinecharts";
-import * as dayjs from "dayjs"
-import utc from "dayjs/plugin/utc"
-import timezone from "dayjs/plugin/timezone"
-dayjs.extend(utc)
-dayjs.extend(timezone)
 export const formatPrecision = kc.utils.formatPrecision
 export const formatThousands = kc.utils.formatThousands
 export const formatDate = kc.utils.formatDate
 export const formatBigNumber = kc.utils.formatBigNumber
-const FormatDateType = kc.FormatDateType
 const TooltipIconPosition = kc.TooltipIconPosition
 export const AllPeriods: Period[] = [
   { multiplier: 1, timespan: 'minute', text: '1m', timeframe: '1m' },
@@ -30,6 +24,18 @@ export type AddDelInd = {
   ind_name: string,
   is_add: boolean
 }
+
+export type TrendItemType = {
+  time: number,
+  start_dt: string,
+  symbol: string,
+  base_s: string,
+  quote_s: string,
+  rate: number,
+  quote_vol: number,
+  vol_text: string
+}
+
 
 export function GetNumberDotOffset(value: number){
   value = Math.abs(value)
@@ -105,67 +111,6 @@ export function getDefStyles(t: Translate) {
   }
 }
 
-/**
- * 将字符串的时间转为13位时间戳，要求输入的是UTC时区字符串
- * @param date_str 10位/13位时间戳、YYYYMMDD YYYYMMDDHHmm YYYYMMDDHHmmss
- */
-export function getTimestamp(date_str: string): number{
-  if(!date_str)return 0
-  date_str = date_str.trim();
-  const isNumOnly = /^\d+$/.test(date_str);
-  let result: dayjs.Dayjs | null = null
-  if(isNumOnly){
-    // 是纯数字
-    const numLen = date_str.length;
-    if(numLen == 4){
-      result = dayjs.utc(date_str, 'MMDD')
-    }
-    else if(numLen == 6){
-      result = dayjs.utc(date_str, 'YYMMDD')
-    }
-    else if(numLen == 8){
-      result = dayjs.utc(date_str, 'YYYYMMDD')
-    }
-    else if(numLen == 10){
-      // 秒时间戳
-      result = dayjs.unix(parseInt(date_str))
-    }
-    else if(numLen == 12){
-      result = dayjs.utc(date_str, 'YYYYMMDDHHmm')
-    }
-    else if(numLen == 13){
-      // 毫秒时间戳
-      result = dayjs(parseInt(date_str))
-    }
-    else if(numLen == 14){
-      result = dayjs.utc(date_str, 'YYYYMMDDHHmmss')
-    }
-    else{
-      console.error('invalid date format:', date_str)
-      return 0;
-    }
-  }
-  else{
-    result = dayjs(date_str, ['YYYY/MM/DD', 'YYYY/MM/DD HH:mm', 'YYYY/MM/DD HH:mm:ss',
-      'YYYY-MM-DD', 'YYYY-MM-DD HH:mm', 'YYYY-MM-DD HH:mm:ss']).tz('UTC', true)
-  }
-  if(!result)return 0
-  return result.valueOf()
-}
-
-export function getDateStr(date_ts: number, tz: string | undefined = undefined): string{
-  let result: dayjs.Dayjs | null = null
-  if(date_ts > 1000000000000){
-    result = dayjs(date_ts)
-  }
-  else{
-    result = dayjs.unix(date_ts)
-  }
-  if(tz){
-    result = result.tz(tz, true)
-  }
-  return result.format('YYYY-MM-DD HH:mm:ss')
-}
 
 export function isNumber (value: any): value is number {
   return typeof value === 'number' && !isNaN(value)
@@ -188,6 +133,28 @@ export function readableNumber (value: string | number, keepLen=2): string {
 }
 
 
+function getIconTool(id: string, icon: string, color: string, ){
+  return{
+    id,
+    position: TooltipIconPosition.Middle,
+    marginLeft: 8,
+    marginTop: 7,
+    marginRight: 0,
+    marginBottom: 0,
+    paddingLeft: 0,
+    paddingTop: 0,
+    paddingRight: 0,
+    paddingBottom: 0,
+    icon,
+    fontFamily: 'icomoon',
+    size: 14,
+    color: color,
+    activeColor: color,
+    backgroundColor: 'transparent',
+    activeBackgroundColor: 'rgba(22, 119, 255, 0.15)'
+  }
+}
+
 export function getThemeStyles(theme: string) {
   const color = theme === 'dark' ? '#929AA5' : '#76808F'
   const lineColor = theme === 'dark' ? '#555555' : '#dddddd'
@@ -203,173 +170,19 @@ export function getThemeStyles(theme: string) {
     indicator: {
       tooltip: {
         icons: [
-          {
-            id: 'visible',
-            position: TooltipIconPosition.Middle,
-            marginLeft: 8,
-            marginTop: 7,
-            marginRight: 0,
-            marginBottom: 0,
-            paddingLeft: 0,
-            paddingTop: 0,
-            paddingRight: 0,
-            paddingBottom: 0,
-            icon: '\ue903',
-            fontFamily: 'icomoon',
-            size: 14,
-            color: color,
-            activeColor: color,
-            backgroundColor: 'transparent',
-            activeBackgroundColor: 'rgba(22, 119, 255, 0.15)'
-          },
-          {
-            id: 'invisible',
-            position: TooltipIconPosition.Middle,
-            marginLeft: 8,
-            marginTop: 7,
-            marginRight: 0,
-            marginBottom: 0,
-            paddingLeft: 0,
-            paddingTop: 0,
-            paddingRight: 0,
-            paddingBottom: 0,
-            icon: '\ue901',
-            fontFamily: 'icomoon',
-            size: 14,
-            color: color,
-            activeColor: color,
-            backgroundColor: 'transparent',
-            activeBackgroundColor: 'rgba(22, 119, 255, 0.15)'
-          },
-          {
-            id: 'setting',
-            position: TooltipIconPosition.Middle,
-            marginLeft: 6,
-            marginTop: 7,
-            marginBottom: 0,
-            marginRight: 0,
-            paddingLeft: 0,
-            paddingTop: 0,
-            paddingRight: 0,
-            paddingBottom: 0,
-            icon: '\ue902',
-            fontFamily: 'icomoon',
-            size: 14,
-            color: color,
-            activeColor: color,
-            backgroundColor: 'transparent',
-            activeBackgroundColor: 'rgba(22, 119, 255, 0.15)'
-          },
-          {
-            id: 'close',
-            position: TooltipIconPosition.Middle,
-            marginLeft: 6,
-            marginTop: 7,
-            marginRight: 0,
-            marginBottom: 0,
-            paddingLeft: 0,
-            paddingTop: 0,
-            paddingRight: 0,
-            paddingBottom: 0,
-            icon: '\ue900',
-            fontFamily: 'icomoon',
-            size: 14,
-            color: color,
-            activeColor: color,
-            backgroundColor: 'transparent',
-            activeBackgroundColor: 'rgba(22, 119, 255, 0.15)'
-          }
+          getIconTool('visible', '\ue903', color),
+          getIconTool('invisible', '\ue901', color),
+          getIconTool('setting', '\ue902', color),
+          getIconTool('close', '\ue900', color),
         ]
       }
     }
   }
 }
 
-export function adjustFromTo(period: Period, toTimestamp: number, count: number) {
-  let to = toTimestamp
-  let from = to
-  switch (period.timespan) {
-    case 'minute': {
-      to = to - (to % (60 * 1000))
-      from = to - count * period.multiplier * 60 * 1000
-      break
-    }
-    case 'hour': {
-      to = to - (to % (60 * 60 * 1000))
-      from = to - count * period.multiplier * 60 * 60 * 1000
-      break
-    }
-    case 'day': {
-      to = to - (to % (60 * 60 * 1000))
-      from = to - count * period.multiplier * 24 * 60 * 60 * 1000
-      break
-    }
-    case 'week': {
-      const date = new Date(to)
-      const week = date.getDay()
-      const dif = week === 0 ? 6 : week - 1
-      to = to - dif * 60 * 60 * 24
-      const newDate = new Date(to)
-      to = new Date(`${newDate.getFullYear()}-${newDate.getMonth() + 1}-${newDate.getDate()}`).getTime()
-      from = count * period.multiplier * 7 * 24 * 60 * 60 * 1000
-      break
-    }
-    case 'month': {
-      const date = new Date(to)
-      const year = date.getFullYear()
-      const month = date.getMonth() + 1
-      to = new Date(`${year}-${month}-01`).getTime()
-      from = count * period.multiplier * 30 * 24 * 60 * 60 * 1000
-      const fromDate = new Date(from)
-      from = new Date(`${fromDate.getFullYear()}-${fromDate.getMonth() + 1}-01`).getTime()
-      break
-    }
-    case 'year': {
-      const date = new Date(to)
-      const year = date.getFullYear()
-      to = new Date(`${year}-01-01`).getTime()
-      from = count * period.multiplier * 365 * 24 * 60 * 60 * 1000
-      const fromDate = new Date(from)
-      from = new Date(`${fromDate.getFullYear()}-01-01`).getTime()
-      break
-    }
-  }
-  return [from, to]
-}
 
 export type BarArr = [number, number, number, number, number, number]
 
-export function tf_to_secs(timeframe?: string): number{
-  if(!timeframe)return 0
-  const unit = timeframe.substring(timeframe.length - 1);
-  const amount = parseInt(timeframe.substring(0, timeframe.length - 1))
-  let scale = 0
-  if(unit == 'y'){
-    scale = 31536000 // 60 * 60 * 24 * 365
-  }
-  else if(unit == 'M'){
-    scale = 2592000  // 60 * 60 * 24 * 30
-  }
-  else if(unit == 'w'){
-    scale = 604800 // 60 * 60 * 24 * 7
-  }
-  else if(unit == 'd'){
-    scale = 86400 // 60 * 60 * 24
-  }
-  else if(unit == 'h'){
-    scale = 3600
-  }
-  else if(unit == 'm'){
-    scale = 60
-  }
-  else if(unit == 's'){
-    scale = 1
-  }
-  else{
-    throw Error(`unsupport timeframe: ${timeframe}`)
-  }
-  return scale * amount
-}
 
 export function build_ohlcvs(details: BarArr[], in_msecs: number, tf_msecs: number, last_bar: BarArr | null = null): BarArr[] {
   if(last_bar){
@@ -398,43 +211,6 @@ export function build_ohlcvs(details: BarArr[], in_msecs: number, tf_msecs: numb
     }
   })
   return result
-}
-
-export function makeFormatDate(timespan: string) {
-  function doFormatDate(dateTimeFormat: Intl.DateTimeFormat, timestamp: number,
-                      format: string, type: kc.FormatDateType) {
-    switch (timespan) {
-      case 'minute': {
-        if (type === FormatDateType.XAxis) {
-          return formatDate(dateTimeFormat, timestamp, 'HH:mm')
-        }
-        return formatDate(dateTimeFormat, timestamp, 'YYYY-MM-DD HH:mm')
-      }
-      case 'hour': {
-        if (type === FormatDateType.XAxis) {
-          return formatDate(dateTimeFormat, timestamp, 'MM-DD HH:mm')
-        }
-        return formatDate(dateTimeFormat, timestamp, 'YYYY-MM-DD HH:mm')
-      }
-      case 'day':
-      case 'week':
-        return formatDate(dateTimeFormat, timestamp, 'YYYY-MM-DD')
-      case 'month': {
-        if (type === FormatDateType.XAxis) {
-          return formatDate(dateTimeFormat, timestamp, 'YYYY-MM')
-        }
-        return formatDate(dateTimeFormat, timestamp, 'YYYY-MM-DD')
-      }
-      case 'year': {
-        if (type === FormatDateType.XAxis) {
-          return formatDate(dateTimeFormat, timestamp, 'YYYY')
-        }
-        return formatDate(dateTimeFormat, timestamp, 'YYYY-MM-DD')
-      }
-    }
-    return formatDate(dateTimeFormat, timestamp, 'YYYY-MM-DD HH:mm')
-  }
-  return doFormatDate;
 }
 
 export function useSymbols(feeder: Datafeed){

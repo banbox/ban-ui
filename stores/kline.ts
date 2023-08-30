@@ -9,5 +9,6 @@ export const useKlineStore = defineStore('kline', () => {
   const editPaneId = ref('')
   const editIndName = ref('')
   const authTFList = reactive(['1m', '5m', '15m', '1h', '2h', '4h', '1d'])
-  return {showLogin, showDrawBar, modalIndCfg, editPaneId, editIndName, authTFList}
+  const version = ref(1)
+  return {showLogin, showDrawBar, modalIndCfg, editPaneId, editIndName, authTFList, version}
 })

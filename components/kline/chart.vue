@@ -20,16 +20,14 @@ import {
   periodMap,
   getDefStyles,
   getThemeStyles,
-  adjustFromTo,
-  makeFormatDate,
   GetNumberDotOffset,
-  build_ohlcvs, tf_to_secs, BarArr, AddDelInd, getTimestamp, getDateStr
+  build_ohlcvs, BarArr, AddDelInd
 } from "~/composables/kline/coms";
+import {adjustFromTo, tf_to_secs, getTimestamp, getDateStr, makeFormatDate} from "~/composables/dateutil"
 import overlays from '~/composables/kline/overlays'
 import figures from '~/composables/kline/figure'
 import {useAuthState} from "~/composables/auth";
 import {GetIndDefaults} from "~/components/kline/inds";
-import {useKlineCookie} from "~/stores/klineCookie";
 import {useKlineLocal} from "~/stores/klineLocal";
 import {useI18n} from "vue-i18n";
 import {useRoute, useNuxtApp} from "#app";
@@ -52,7 +50,6 @@ const props = withDefaults(defineProps<ChartProp>(), {
   customLoad: false
 })
 
-const kcookie = useKlineCookie()
 const klocal = useKlineLocal()
 const main = useKlineStore()
 const {authDoing, authStatus} = useAuthState()
@@ -170,10 +167,8 @@ function initChart(chartObj: Chart){
   })
   const styles = toRaw(klocal.chartStyle)
   _.merge(styles, getDefStyles(t))
-  _.merge(styles, getThemeStyles(kcookie.theme))
+  _.merge(styles, getThemeStyles(klocal.theme))
   chartObj.setStyles(styles as Styles)
-
-  chartObj.setTimezone(kcookie.timezone)
 
   chartObj.loadMore(timestamp => {
     const [to] = adjustFromTo(klocal.period, timestamp!, 1)
@@ -217,6 +212,8 @@ onUnmounted(() => {
 async function loadKlineRange(symbol: SymbolInfo, period: Period, start_ms: number, stop_ms: number,
                               loadMore: boolean = true) {
   if(!chart.value)return
+  loading = true
+  loadingChart.value = true
   const chartObj: Chart = chart.value!;
   const strategy = route.query.strategy?.toString()
   const kdata = await datafeed.getHistoryKLineData({
@@ -238,6 +235,8 @@ async function loadKlineRange(symbol: SymbolInfo, period: Period, start_ms: numb
       sigOvers.push({id: oid, name: o.name, extendData: o.extendData})
     }
   })
+  loading = false
+  loadingChart.value = false
   tf_msecs = tf_to_secs(period.timeframe) * 1000
   const curTime = new Date().getTime()
   if(klines.length && klines[klines.length - 1].timestamp + tf_msecs > curTime){
@@ -284,54 +283,48 @@ async function customLoadKline(){
       duration: 2000
     })
   }
-  loading = true
-  loadingChart.value = true
   await loadKlineRange(klocal.symbol, klocal.period, start_ms, stop_ms, false)
-  loading = false
-  loadingChart.value = false
 }
 
 function loadSymbolPeriod(symbol_chg: boolean, period_chg: boolean){
   const s = klocal.symbol
   const p = klocal.period
-  loading = true
-  loadingChart.value = true
-  const get = async () => {
-    const curTime = new Date().getTime()
-    const [from, to] = adjustFromTo(p, curTime, batch_num.value)
-    loadKlineRange(s, p, from, curTime, !props.customLoad)
-    loading = false
-    loadingChart.value = false
-  }
-  get()
+  const curTime = new Date().getTime()
+  const [from, to] = adjustFromTo(p, curTime, batch_num.value)
+  loadKlineRange(s, p, from, curTime, !props.customLoad)
 }
 
-if(!props.customLoad) {
-  // 手动加载模式下，不监听币种和周期变化自动加载。
-  watch(klocal.period, (new_period, prev_period) => {
-    if (loading) return
-    loadSymbolPeriod(false, true)
+// 监听周期变化
+watch(klocal.period, (new_period, prev_period) => {
+  chart.value?.setCustomApi({
+    formatDate: makeFormatDate(klocal.period.timespan)
   })
+  if (loading || props.customLoad) return
+  // 手动加载模式下，不监听币种和周期变化自动加载。
+  loadSymbolPeriod(false, true)
+})
 
-  function updateSymbolPriceUnit(new_val: SymbolInfo) {
-    if (!priceUnitDom) return
-    if (new_val.priceCurrency) {
-      priceUnitDom.innerHTML = new_val.priceCurrency.toLocaleUpperCase()
-      priceUnitDom.style.display = 'flex'
-    } else {
-      priceUnitDom.style.display = 'none'
-    }
+function updateSymbolPriceUnit(new_val: SymbolInfo) {
+  if (!priceUnitDom) return
+  if (new_val.priceCurrency) {
+    priceUnitDom.innerHTML = new_val.priceCurrency.toLocaleUpperCase()
+    priceUnitDom.style.display = 'flex'
+  } else {
+    priceUnitDom.style.display = 'none'
   }
-
-  watch(klocal.symbol, (new_symbol, prev_symbol) => {
-    updateSymbolPriceUnit(new_symbol)
-    if (loading) return
-    datafeed.unsubscribe(prev_symbol!, klocal.period)
-    loadSymbolPeriod(true, false)
-  }, {immediate: true})
 }
 
-watch(() => kcookie.theme, (new_val) => {
+// 监听币种变化
+watch(klocal.symbol, (new_symbol, prev_symbol) => {
+  updateSymbolPriceUnit(new_symbol)
+  if (loading || props.customLoad) return
+  // 手动加载模式下，不监听币种和周期变化自动加载。
+  datafeed.unsubscribe(prev_symbol!, klocal.period)
+  loadSymbolPeriod(true, false)
+}, {immediate: true})
+
+// 监听主题变化
+watch(() => klocal.theme, (new_val) => {
   // 加载新指标时，修改默认颜色
   if(new_val == 'light'){
     datafeed.longColor = 'green'
@@ -349,19 +342,27 @@ watch(() => kcookie.theme, (new_val) => {
   chart.value?.setStyles(getThemeStyles(new_val))
 })
 
-watch(() => kcookie.timezone, (new_val) => {
+// 监听时区变化
+watch(() => klocal.timezone, (new_val) => {
   chart.value?.setTimezone(new_val)
-})
+}, {immediate: true})
 
+// 监听右侧边栏显示
 watch(() => klocal.showRight, () => {
   setTimeout(() => {
     documentResize()
   }, 50)
 })
+
+// 监听数据加载动作
+watch(() => main.version, () => {
+  console.log('kline version change, loading ...')
+  customLoadKline()
+})
 </script>
 
 <template>
-  <div class="kline-body klinecharts-pro" :data-theme="kcookie.theme">
+  <div class="kline-body klinecharts-pro" :data-theme="klocal.theme">
     <i class="icon-close klinecharts-pro-load-icon"/>
     <div class="kline-main" :data-right="klocal.showRight">
       <KlineMenuBar :chart="chart" :datafeed="datafeed" :has-right="hasRight" :custom-load="customLoad"

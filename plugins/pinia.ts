@@ -1,11 +1,10 @@
-import { useKlineCookie } from '~/stores/klineCookie'
 import {defineNuxtPlugin} from "#app";
 import {Pinia} from "pinia";
+import {useKlineStore} from "~/stores/kline";
 
 
 export default defineNuxtPlugin(({ $pinia }) => {
-  const main = useKlineCookie($pinia as Pinia)
-  // store.$patch({})
+  const main = useKlineStore($pinia as Pinia)
   return {
     provide: {
       main

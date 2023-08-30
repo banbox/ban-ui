@@ -1,9 +1,6 @@
-import {KLineData} from "klinecharts";
 import {Datafeed, SymbolInfo, Period, DatafeedSubscribeCallback, KData, GetKlineArgs} from "~/components/kline/types";
-import {$fetch} from "ofetch";
 import {getApi} from "~/utils/netio";
 import {useAppConfig} from "#app";
-import {build_ohlcvs, tf_to_secs} from "~/composables/kline/coms";
 
 export default class MyDatafeed implements Datafeed{
 

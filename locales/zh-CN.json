@@ -83,7 +83,8 @@
   "shanghai": "(UTC+8) 上海",
   "tokyo": "(UTC+9) 东京",
   "sydney": "(UTC+10) 悉尼",
-  "norfolk": "(UTC+12) 诺福克岛",
+  "guadalcanal": "(UTC+11) 所罗门群岛",
+  "auckland": "(UTC+12) 奥克兰",
 
   "horizontal_straight_line": "水平直线",
   "horizontal_ray_line": "水平射线",

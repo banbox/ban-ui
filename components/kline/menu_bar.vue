@@ -110,9 +110,7 @@ import {computed, defineEmits, onMounted, reactive, ref, watch} from "vue"
 import {defineProps} from "vue";
 import Icon from "~/components/kline/icon"
 import {Period, SymbolInfo} from "~/components/kline/types"
-import {AllPeriods, makeFormatDate} from "~/composables/kline/coms";
 import {useKlineLocal} from "~/stores/klineLocal";
-import {useKlineCookie} from "~/stores/klineCookie";
 import {getDefaults} from "~/config";
 import {useAuthState} from "~/composables/auth";
 import {useKlineStore} from "~/stores/kline";
@@ -131,7 +129,6 @@ const emit = defineEmits<{
   loadData: []
 }>()
 const store = useKlineStore()
-const kcookie = useKlineCookie()
 const klocal = useKlineLocal()
 const {authData, authToken, authStatus} = useAuthState()
 
@@ -175,7 +172,7 @@ function exitLogin(){
 }
 
 function toggleTheme(){
-  kcookie.theme = kcookie.theme === 'light' ? 'dark' : 'light';
+  klocal.theme = klocal.theme === 'light' ? 'dark' : 'light';
 }
 
 
@@ -185,14 +182,11 @@ function clickPeriod(item: Period){
     return
   }
   klocal.setPeriod(item)
-  props.chart.setCustomApi({
-    formatDate: makeFormatDate(klocal.period.timespan)
-  })
 }
 
 
 function clickScreenShot(){
-  let bgColor = kcookie.theme === 'dark' ? '#151517' : '#ffffff'
+  let bgColor = klocal.theme === 'dark' ? '#151517' : '#ffffff'
   screenShotUrl.value = props.chart.getConvertPictureUrl(true, 'jpeg', bgColor) ?? ''
   showScreenShotModal.value = true
 }

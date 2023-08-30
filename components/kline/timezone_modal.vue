@@ -1,7 +1,7 @@
 <template>
   <Modal :title="$t('timezone')" :buttons="['close']" :width="400" class="timezone" v-model="showModal">
     <Select :data-source="timeZoneOpts" :value="$t(timezone_text)" :translate="true"
-            @change="store.timezone = $event.key"/>
+            @change="setTimezone($event.key)"/>
   </Modal>
 </template>
 
@@ -10,10 +10,11 @@ import Modal from "~/components/kline/modal.vue"
 import Select from "~/components/kline/select.vue"
 import {computed, defineProps, ref, watch} from "vue";
 import {defineEmits} from "vue/dist/vue";
-import {translateTimezone, getTimezoneSelectOptions} from "~/components/kline/timezone_opts";
-import {useKlineCookie} from "~/stores/klineCookie";
+import {translateTimezone, getTimezoneSelectOptions, setTimezone} from "~/composables/dateutil";
+import {useKlineLocal} from "~/stores/klineLocal";
 
-const store = useKlineCookie()
+const store = useKlineLocal()
+setTimezone(store.timezone)
 const props = defineProps<{
   modelValue: boolean
 }>()
@@ -22,7 +23,6 @@ const timeZoneOpts = ref(getTimezoneSelectOptions())
 const timezone_text = computed(() => {
   return translateTimezone(store.timezone)
 })
-
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]

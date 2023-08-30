@@ -52,6 +52,8 @@ export const useKlineLocal = defineStore('klocal', () => {
     const showRight = ref(true)
     const dt_start = ref('20230801')
     const dt_stop = ref('20230820')
+    const timezone = ref(Intl.DateTimeFormat().resolvedOptions().timeZone)
+    const theme = ref('light')
 
     function setPeriod(val: Period){
         Object.assign(period, val)
@@ -88,7 +90,7 @@ export const useKlineLocal = defineStore('klocal', () => {
         save_inds.splice(mat_idx, 1)
     }
     return {period, symbol, chartStyle, save_inds, showRight, dt_start, dt_stop,
-        setPeriod, setTimeframe, setSymbol, setSymbolTicker,
+        timezone, theme, setPeriod, setTimeframe, setSymbol, setSymbolTicker,
         setStyleItem, resetStyle, removeInd}
 }, {
     persist: {

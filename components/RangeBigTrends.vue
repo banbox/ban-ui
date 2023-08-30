@@ -3,7 +3,14 @@
 import {SortDown, SortUp, Switch} from "@element-plus/icons-vue";
 import {useKlineLocal} from "~/stores/klineLocal";
 import {getApi} from "~/utils/netio";
-import {readableNumber, formatPrecision, getDateStr, getTimestamp} from "~/composables/kline/coms";
+import {tf_to_secs, getDateStr, getTimestamp, get_tz} from "~/composables/dateutil"
+import {
+  readableNumber,
+  formatPrecision,
+  TrendItemType
+} from "~/composables/kline/coms";
+import {useKlineStore} from "~/stores/kline";
+import {set} from "lodash-unified";
 const title_down = ref(false)
 const num_down = ref(true)
 const rate_down = ref(true)
@@ -21,22 +28,14 @@ type RangeType = {
   rate: number
 }
 
-type TrendItemType = {
-  start_dt: string,
-  symbol: string,
-  base_s: string,
-  quote_s: string,
-  rate: number,
-  quote_vol: number,
-  vol_text: string
-}
-
-const active_time = ref('')
+const active_time = ref(0)
 const range_list = reactive<RangeType[]>([])
 const all_items: TrendItemType[] = []
 const item_list = reactive<TrendItemType[]>([])
 const min_rate = ref(1.5)  // 最小变化率
 const klocal = useKlineLocal()
+const timeframe = ref('4h')
+const main = useKlineStore()
 
 onMounted(async () => {
   await updateData()
@@ -46,19 +45,20 @@ async function updateData(){
   if(!klocal.showRight)return
   const start_ms = getTimestamp(klocal.dt_start)
   const stop_ms = getTimestamp(klocal.dt_stop)
-  const data = {from: start_ms, to: stop_ms, timeframe: '4h', min_rate: min_rate.value * 0.01}
+  const data = {from: start_ms, to: stop_ms, timeframe: timeframe.value, min_rate: min_rate.value * 0.01}
   const rsp = await getApi('/kline/big_trends', data)
   const new_list = (rsp.data ?? []) as any[]
   const date_gps: Record<string, number[]> = {}
   const map_list = new_list.map(row => {
     const [base_s, quote_s] = row[0].split('/');
     const vol_text = readableNumber(formatPrecision(row[3], 2), 1)
-    const date_str = getDateStr(row[1], 'UTC');
+    const date_str = getDateStr(row[1]);
     if(!date_gps[date_str]){
       date_gps[date_str] = []
     }
     date_gps[date_str].push(row[2])
     return {
+      time: row[1],
       start_dt: date_str,
       symbol: row[0],
       base_s, quote_s,
@@ -86,13 +86,15 @@ async function updateData(){
     })
   }
   doRangeSort()
-  clickRange(range_list[0].title)
+  if(range_list[0]){
+    clickRange(range_list[0])
+  }
   doItemsSort()
 }
 
-function clickRange(range_val: string){
-  active_time.value = range_val
-  const show_items = all_items.filter(i => i.start_dt == range_val)
+function clickRange(range: RangeType){
+  active_time.value = range.time
+  const show_items = all_items.filter(i => i.time == active_time.value)
   item_list.splice(0, item_list.length, ...show_items)
   doItemsSort()
 }
@@ -146,6 +148,24 @@ function clickItemSort(key: number){
   doItemsSort()
 }
 
+function loadData(item: TrendItemType){
+  klocal.setSymbolTicker(item.symbol)
+  const tf_msecs = tf_to_secs(timeframe.value) * 1000;
+  const stop_ms = item.time + tf_msecs
+  klocal.dt_start = getDateStr(item.time - tf_msecs * 10)
+  klocal.dt_stop = getDateStr(stop_ms)
+  main.version += 1
+}
+
+watch(() => klocal.timezone, (new_tz) => {
+  range_list.forEach(it => {
+    it.title = getDateStr(it.time)
+  })
+  item_list.forEach(it => {
+    it.start_dt = getDateStr(it.time)
+  })
+})
+
 </script>
 
 <template>
@@ -172,7 +192,7 @@ function clickItemSort(key: number){
     </div>
     <div class="list-box">
       <div class="tg-row item" v-for="(item, index) in range_list" :key="index"
-           :class="{active: item.title == active_time}" @click="clickRange(item.title)">
+           :class="{active: item.time == active_time}" @click="clickRange(item)">
         <span class="field title">{{item.title}}</span>
         <span class="field count" >{{item.num}}</span>
         <span class="field main chg">{{(item.rate * 100).toFixed(2)}}%</span>
@@ -201,12 +221,13 @@ function clickItemSort(key: number){
       </div>
     </div>
     <div class="list-box">
-      <div class="tg-row item" v-for="(item, index) in item_list" :key="index">
+      <div class="tg-row item" v-for="(item, index) in item_list" :key="index"
+           @click="loadData(item)">
         <span class="field symbol">
           <span class="base">{{item.base_s}}</span>
           <span class="quote">/{{item.quote_s}}</span>
         </span>
-        <span class="field count" >{{(item.rate * 100).toFixed(2)}}%</span>
+        <span class="field count" :class="[item.rate > 0 ? 'up': 'down']">{{(item.rate * 100).toFixed(2)}}%</span>
         <span class="field main chg">{{item.vol_text}}</span>
       </div>
     </div>

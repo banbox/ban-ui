@@ -46,27 +46,27 @@ export function getTimestamp(date_str: string): number{
     // 是纯数字
     const numLen = date_str.length;
     if(numLen == 4){
-      result = dayjs.tz(date_str, 'MMDD')
+      result = dayjs(date_str, 'MMDD')
     }
     else if(numLen == 6){
-      result = dayjs.tz(date_str, 'YYMMDD')
+      result = dayjs(date_str, 'YYMMDD')
     }
     else if(numLen == 8){
-      result = dayjs.tz(date_str, 'YYYYMMDD')
+      result = dayjs(date_str, 'YYYYMMDD')
     }
     else if(numLen == 10){
       // 秒时间戳
       result = dayjs.unix(parseInt(date_str))
     }
     else if(numLen == 12){
-      result = dayjs.tz(date_str, 'YYYYMMDDHHmm')
+      result = dayjs(date_str, 'YYYYMMDDHHmm')
     }
     else if(numLen == 13){
       // 毫秒时间戳
       result = dayjs(parseInt(date_str))
     }
     else if(numLen == 14){
-      result = dayjs.tz(date_str, 'YYYYMMDDHHmmss')
+      result = dayjs(date_str, 'YYYYMMDDHHmmss')
     }
     else{
       console.error('invalid date format:', date_str)
@@ -74,14 +74,15 @@ export function getTimestamp(date_str: string): number{
     }
   }
   else{
-    if(!cur_tz){
-      const store = useKlineLocal()
-      applyTimezone(store.timezone)
-    }
     result = dayjs(date_str, ['YYYY/MM/DD', 'YYYY/MM/DD HH:mm', 'YYYY/MM/DD HH:mm:ss',
-      'YYYY-MM-DD', 'YYYY-MM-DD HH:mm', 'YYYY-MM-DD HH:mm:ss'], true).tz(cur_tz, true)
+      'YYYY-MM-DD', 'YYYY-MM-DD HH:mm', 'YYYY-MM-DD HH:mm:ss'], true)
   }
   if(!result)return 0
+  if(!cur_tz){
+    const store = useKlineLocal()
+    applyTimezone(store.timezone)
+  }
+  result = result.tz(cur_tz, true)
   return result.valueOf()
 }
 

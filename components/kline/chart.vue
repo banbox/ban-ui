@@ -162,6 +162,8 @@ function initChart(chartObj: Chart){
   priceUnitDom.className = 'klinecharts-pro-price-unit'
   priceUnitContainer?.appendChild(priceUnitDom)
 
+  chart.value?.setTimezone(klocal.timezone)
+
   klocal.save_inds.forEach(ind => {
     createIndicator(chartObj, ind.name, ind.params, true, {id: ind.pane_id})
   })
@@ -284,6 +286,7 @@ async function customLoadKline(){
     })
   }
   await loadKlineRange(klocal.symbol, klocal.period, start_ms, stop_ms, false)
+  main.fireKRange += 1
 }
 
 function loadSymbolPeriod(symbol_chg: boolean, period_chg: boolean){
@@ -345,7 +348,7 @@ watch(() => klocal.theme, (new_val) => {
 // 监听时区变化
 watch(() => klocal.timezone, (new_val) => {
   chart.value?.setTimezone(new_val)
-}, {immediate: true})
+})
 
 // 监听右侧边栏显示
 watch(() => klocal.showRight, () => {
@@ -355,9 +358,15 @@ watch(() => klocal.showRight, () => {
 })
 
 // 监听数据加载动作
-watch(() => main.version, () => {
-  console.log('kline version change, loading ...')
-  customLoadKline()
+watch(() => main.fireOhlcv, async () => {
+  if(main.start_ms && main.stop_ms){
+    await loadKlineRange(klocal.symbol, klocal.period, main.start_ms, main.stop_ms, false)
+    main.start_ms = 0
+    main.stop_ms = 0
+  }
+  else{
+    await customLoadKline()
+  }
 })
 </script>
 

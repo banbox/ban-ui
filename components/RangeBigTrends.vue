@@ -148,14 +148,18 @@ function clickItemSort(key: number){
   doItemsSort()
 }
 
-function loadData(item: TrendItemType){
+function loadKlineData(item: TrendItemType){
   klocal.setSymbolTicker(item.symbol)
   const tf_msecs = tf_to_secs(timeframe.value) * 1000;
   const stop_ms = item.time + tf_msecs
-  klocal.dt_start = getDateStr(item.time - tf_msecs * 10)
-  klocal.dt_stop = getDateStr(stop_ms)
-  main.version += 1
+  main.start_ms = item.time - tf_msecs * 10
+  main.stop_ms = stop_ms
+  main.fireOhlcv += 1
 }
+
+watch(() => main.fireKRange, () => {
+  updateData()
+})
 
 watch(() => klocal.timezone, (new_tz) => {
   range_list.forEach(it => {
@@ -195,7 +199,7 @@ watch(() => klocal.timezone, (new_tz) => {
            :class="{active: item.time == active_time}" @click="clickRange(item)">
         <span class="field title">{{item.title}}</span>
         <span class="field count" >{{item.num}}</span>
-        <span class="field main chg">{{(item.rate * 100).toFixed(2)}}%</span>
+        <span class="field main chg" :class="[item.rate > 0 ? 'up': 'down']">{{(item.rate * 100).toFixed(2)}}%</span>
       </div>
     </div>
   </div>
@@ -222,7 +226,7 @@ watch(() => klocal.timezone, (new_tz) => {
     </div>
     <div class="list-box">
       <div class="tg-row item" v-for="(item, index) in item_list" :key="index"
-           @click="loadData(item)">
+           @click="loadKlineData(item)">
         <span class="field symbol">
           <span class="base">{{item.base_s}}</span>
           <span class="quote">/{{item.quote_s}}</span>

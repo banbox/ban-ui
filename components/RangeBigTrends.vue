@@ -152,7 +152,7 @@ function loadKlineData(item: TrendItemType){
   klocal.setSymbolTicker(item.symbol)
   const tf_msecs = tf_to_secs(timeframe.value) * 1000;
   const stop_ms = item.time + tf_msecs
-  main.start_ms = item.time - tf_msecs * 10
+  main.start_ms = item.time - tf_msecs * 100
   main.stop_ms = stop_ms
   main.fireOhlcv += 1
 }

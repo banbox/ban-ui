@@ -194,7 +194,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
       post_url = '/user/reg_exg_uid'
       post_data = toRaw(regForm)
       post_data.exchange = 'binance'
-      post_data.exg_uid = post_data.binance_uid
+      post_data.exg_uid = post_data.binance_uid.toString()
     }
     postApi(post_url, post_data).then(rsp => {
       authDoing.value = false

@@ -2,8 +2,6 @@ import {
   IndicatorTemplate,
   KLineData,
   OverlayStyle,
-  LineType,
-  PolygonType,
 } from "klinecharts";
 import kc from "klinecharts";
 import {postApi} from "#imports";
@@ -14,6 +12,8 @@ interface VisibleData {
   data: KLineData,
   ind: any
 }
+const LineType = kc.LineType;
+const PolygonType = kc.PolygonType;
 
 /**
  * 按传入的参数生成云端指标。

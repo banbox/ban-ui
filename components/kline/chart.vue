@@ -202,6 +202,11 @@ function initChart(chartObj: Chart){
       }
     }
   })
+
+  if(!props.customLoad){
+    // 自动加载K线
+    loadSymbolPeriod(true, false)
+  }
 }
 
 onUnmounted(() => {
@@ -324,7 +329,7 @@ watch(klocal.symbol, (new_symbol, prev_symbol) => {
   // 手动加载模式下，不监听币种和周期变化自动加载。
   datafeed.unsubscribe(prev_symbol!, klocal.period)
   loadSymbolPeriod(true, false)
-}, {immediate: true})
+})
 
 // 监听主题变化
 watch(() => klocal.theme, (new_val) => {

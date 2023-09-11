@@ -19,7 +19,7 @@ export function getInOutFigures(coord: kc.Coordinate, position: 'bottom' | 'top'
       type: 'line',
       attrs: { coordinates: [{ x: startX, y: coord.y }, { x: horzEndX, y: coord.y }] },
       ignoreEvent: true,
-      styles: {...styles, style: kc.LineType.Dashed}
+      styles: {...styles}
     },
     {
       type: 'polygon',

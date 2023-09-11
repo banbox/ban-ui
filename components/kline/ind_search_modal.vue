@@ -23,7 +23,7 @@
       </div>
       <List class="klinecharts-pro-ind-box">
         <div class="row" v-for="(item, index) in show_inds" :key="index">
-          <Checkbox :model-value="checked_inds.includes(item.name)" :label="item.title"
+          <Checkbox :model-value="checked_inds.includes(item.name)" :label="$t(item.title)"
                     @change="toggleInd(item.is_main, item.name, $event)"/>
         </div>
       </List>
@@ -39,13 +39,12 @@ import {PaneInds} from "~/components/kline/types";
 import {computed, defineEmits, defineProps, reactive, watch} from "vue";
 import kc, {Chart} from "klinecharts";
 import {useKlineLocal} from "~/stores/klineLocal";
-import {awaitExpression} from "@babel/types";
-import makeCloudInds from "~/composables/kline/indicators/cloudInds";
 import {useNuxtApp} from "#app"
 import Input from "~/components/kline/input.vue";
 import {useI18n} from "vue-i18n";
 const {t} = useI18n()
 import {TakeawayBox, Cloudy} from "@element-plus/icons-vue";
+import {useKlineStore} from "~/stores/kline";
 
 
 const props = defineProps<{
@@ -68,51 +67,21 @@ const showModal = computed({
 
 const {$emit} = useNuxtApp()
 const store = useKlineLocal()
+const main = useKlineStore()
 
 const keyword = ref('')
 const activeTab = ref('local')
-const local_mains = ['MA', 'EMA', 'SMA', 'BOLL', 'SAR', 'BBI']
-const local_subs = ['VOL', 'MACD', 'KDJ', 'RSI', 'BIAS', 'BRAR',
-  'CCI', 'DMI', 'CR', 'PSY', 'DMA', 'TRIX', 'OBV', 'VR', 'WR', 'MTM', 'EMV',
-  'SAR', 'ROC', 'PVT', 'AO']
 
-type BanInd = {
-  name: string,
-  title: string,
-  cloud: boolean,
-  is_main: boolean
-}
-// 所有的指标列表
-const all_inds: BanInd[] = []
-for(let name of local_mains){
-  all_inds.push({name, title: t(name.toLowerCase()), cloud: false, is_main: true})
-}
-for(let name of local_subs){
-  all_inds.push({name, title: t(name.toLowerCase()), cloud: false, is_main: false})
-}
 const show_inds = computed(() => {
   if(keyword.value){
     const word = keyword.value.toUpperCase()
-    return all_inds.filter(i => i.name.includes(word) || i.title.includes(word))
+    return main.all_inds.filter(i => i.name.includes(word) || i.title.includes(word))
   }
   if(activeTab.value == 'local'){
-    return all_inds.filter(i => !i.cloud)
+    return main.all_inds.filter(i => !i.cloud)
   }
-  return all_inds.filter(i => i.cloud)
+  return main.all_inds.filter(i => i.cloud)
 })
-
-
-async function loadCloudInds() {
-  const rsp = await getApi('/kline/all_inds')
-  if (!rsp.data) {
-    console.error('load cloud inds fail')
-    return
-  }
-  const cloud_inds = rsp.data.map((v: any) => {return {cloud: true, ...v}})
-  all_inds.push(...cloud_inds)
-  makeCloudInds(rsp.data).forEach(o => { kc.registerIndicator(o) })
-}
-loadCloudInds()
 
 const checked_inds = computed((): string[] => {
   return store.save_inds.map(d => d.name)

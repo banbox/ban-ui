@@ -17,7 +17,6 @@ import {PaneInds, Period, SymbolInfo, Datafeed} from '~/components/kline/types'
 import {computed, defineProps, onMounted, onUnmounted, reactive, ref, toRaw, watch} from "vue";
 import {
   AllPeriods,
-  periodMap,
   getDefStyles,
   getThemeStyles,
   GetNumberDotOffset,
@@ -33,6 +32,8 @@ import {useI18n} from "vue-i18n";
 import {useRoute, useNuxtApp} from "#app";
 import {useKlineStore} from "~/stores/kline";
 import {getDefaults} from "~/config";
+import {ApiResult} from "~/utils/netio";
+import makeCloudInds from "~/composables/kline/indicators/cloudInds";
 const {t} = useI18n()
 const route = useRoute()
 const defaults = getDefaults()
@@ -63,11 +64,27 @@ const {$on} = useNuxtApp()
 let priceUnitDom: HTMLElement
 let loading = false
 let tf_msecs = 0
+let cloud_ind_loaded = false;
+type NoParamFunc = () => void
+let cloud_ind_cbs: NoParamFunc[] = [];
 
 const watermark = ref('<img width="432" src="/watermark.png"/>')
 const datafeed = new MyDatafeed()
 
 const periods = reactive<Period[]>(AllPeriods)
+
+
+function fireCloudIndCbs(){
+  cloud_ind_cbs.forEach(func => {func()})
+  cloud_ind_cbs.splice(0, cloud_ind_cbs.length)
+}
+
+
+function ensureCloudInd(cb: NoParamFunc){
+  cloud_ind_cbs.push(cb)
+  if(!cloud_ind_loaded)return
+  fireCloudIndCbs()
+}
 
 
 function setIndicator({is_main, ind_name, is_add}: AddDelInd){
@@ -164,8 +181,10 @@ function initChart(chartObj: Chart){
 
   chart.value?.setTimezone(klocal.timezone)
 
-  klocal.save_inds.forEach(ind => {
-    createIndicator(chartObj, ind.name, ind.params, true, {id: ind.pane_id})
+  ensureCloudInd(() => {
+    klocal.save_inds.forEach(ind => {
+      const res = createIndicator(chartObj, ind.name, ind.params, true, {id: ind.pane_id})
+    })
   })
   const styles = toRaw(klocal.chartStyle)
   _.merge(styles, getDefStyles(t))
@@ -215,6 +234,30 @@ onUnmounted(() => {
     kc.dispose(chartRef.value!)
   }
 })
+
+async function loadCloudInds() {
+  const rsp = await getApi('/kline/all_inds')
+  if (rsp.code != 200) {
+    console.error('load cloud inds net error', rsp)
+  } else {
+    const ind_arr = rsp.data as any[]
+    ind_arr.map((v: any) => {
+      return {cloud: true, ...v}
+    }).forEach((v: any) => {
+      if (!main.all_inds.filter(it => it.name == v.name).length) {
+        main.all_inds.push(v)
+      }
+    })
+    makeCloudInds(ind_arr).forEach(o => {
+      kc.registerIndicator(o)
+    })
+  }
+  cloud_ind_loaded = true
+  fireCloudIndCbs()
+}
+if(process.client){
+  await loadCloudInds()
+}
 
 async function loadKlineRange(symbol: SymbolInfo, period: Period, start_ms: number, stop_ms: number,
                               loadMore: boolean = true) {

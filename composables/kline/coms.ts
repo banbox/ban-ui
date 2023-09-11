@@ -6,18 +6,6 @@ export const formatThousands = kc.utils.formatThousands
 export const formatDate = kc.utils.formatDate
 export const formatBigNumber = kc.utils.formatBigNumber
 const TooltipIconPosition = kc.TooltipIconPosition
-export const AllPeriods: Period[] = [
-  { multiplier: 1, timespan: 'minute', text: '1m', timeframe: '1m' },
-  { multiplier: 5, timespan: 'minute', text: '5m', timeframe: '5m' },
-  { multiplier: 15, timespan: 'minute', text: '15m', timeframe: '15m' },
-  { multiplier: 1, timespan: 'hour', text: '1H', timeframe: '1h' },
-  { multiplier: 2, timespan: 'hour', text: '2H', timeframe: '2h' },
-  { multiplier: 4, timespan: 'hour', text: '4H', timeframe: '4h' },
-  { multiplier: 1, timespan: 'day', text: 'D', timeframe: '1d' },
-  { multiplier: 3, timespan: 'day', text: '3D', timeframe: '3d' },
-  { multiplier: 1, timespan: 'week', text: 'W', timeframe: '1w' },
-]
-export const periodMap = Object.fromEntries(AllPeriods.map(obj => [obj.timeframe, obj]))
 
 export type AddDelInd = {
   is_main: boolean,
@@ -36,6 +24,12 @@ export type TrendItemType = {
   vol_text: string
 }
 
+export type BanInd = {
+  name: string,
+  title: string,
+  cloud: boolean,
+  is_main: boolean
+}
 
 export function GetNumberDotOffset(value: number){
   value = Math.abs(value)
@@ -47,6 +41,46 @@ export function GetNumberDotOffset(value: number){
   }
   return count;
 }
+
+export function makePeriod(timeframe: string): Period{
+  const sep_id = timeframe.length - 1
+  const unit = timeframe.substring(sep_id);
+  const num = timeframe.substring(0, sep_id);
+  const num_val = parseInt(num);
+  let timespan = 'minute';
+  if(unit == 'w'){
+    timespan = 'week'
+  }
+  else if(unit == 'd'){
+    timespan = 'day'
+  }
+  else if(unit == 'h'){
+    timespan = 'hour'
+  }
+  else if(unit == 'm'){
+    timespan = 'minute'
+  }
+  else {
+    throw new Error(`unsupport period: ${timeframe}`)
+  }
+  let text = timeframe
+  if(unit != 'm'){
+    text = `${num}${unit.toUpperCase()}`
+  }
+  return {multiplier: num_val, timespan, text, timeframe}
+}
+
+export const AllPeriods: Period[] = [
+  makePeriod('1m'),
+  makePeriod('5m'),
+  makePeriod('15m'),
+  makePeriod('1h'),
+  makePeriod('2h'),
+  makePeriod('4h'),
+  makePeriod('1d'),
+  makePeriod('3d'),
+  makePeriod('1w'),
+]
 
 function buildDateTimeFormat (timezone?: string): Intl.DateTimeFormat | null {
   const options: Intl.DateTimeFormatOptions = {

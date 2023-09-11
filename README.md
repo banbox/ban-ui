@@ -16,6 +16,8 @@ K线UI工具栏可参考：[AICoin](https://www.aicoin.com/chart/okcoinfutures_b
 目前已知无法根据识别的语言自动跳转，等待i18n更新  
 **pinia持久化**  
 如果使用`localStorage`时，应注意在component使用`state`时应在`onMounted`中访问，不要直接访问，否则部分内容不会被正确地响应式更新。  
+使用@pinia-plugin-persistedstate/nuxt持久化到localStorage时，如果使用reactive以及array.splice，saved_inds在打开页面时不会被正确恢复。
+写了个demo测试是正常的，插件官方之前提过类似issue，但状态是已解决。目前暂时使用ref方式引用  
 **数据源不同导致Hydration text content mismatch**  
 使用固定值初始化，然后浏览器端在onMounted中读取最新值更新。  
 **watch与watchEffect**  

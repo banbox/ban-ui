@@ -8,6 +8,7 @@ const defaultLocale = process.env.NODE_ENV == 'production' ? 'en-US': 'zh-CN'
 
 
 export default defineNuxtConfig({
+  devtools: {enabled: true},
   // @ts-ignore
   modules: [
     '@nuxtjs/i18n',
@@ -50,7 +51,6 @@ export default defineNuxtConfig({
     ],
   },
   i18n: {
-    legacy: false,
     strategy: 'prefix',
     defaultLocale,
     langDir: 'locales',

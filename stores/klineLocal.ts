@@ -1,10 +1,10 @@
 import {defineStore} from "pinia";
 import {persistedState, ref} from "#imports";
-import {PaneInds, Period, SymbolInfo} from "~/components/kline/types";
-import {periodMap} from "~/composables/kline/coms";
+import {Period, SymbolInfo} from "~/components/kline/types";
 import {reactive, toRaw} from "vue";
 import _ from "lodash";
 import {getDefaults} from "~/config";
+import {makePeriod} from "~/composables/kline/coms";
 
 const defaults = getDefaults();
 const defStyle = {
@@ -46,7 +46,7 @@ export const useKlineLocal = defineStore('klocal', () => {
     const period = reactive<Period>(defaults.period)
     const symbol = reactive<SymbolInfo>(defaults.symbol)
     const chartStyle = reactive(defStyle)
-    const save_inds = reactive<SaveInd[]>([
+    const save_inds = ref<SaveInd[]>([
         {name: 'VOL', pane_id: 'pane_VOL'}
     ])
     const showRight = ref(true)
@@ -59,11 +59,7 @@ export const useKlineLocal = defineStore('klocal', () => {
         Object.assign(period, val)
     }
     function setTimeframe(timeframe: string){
-        const val = periodMap[timeframe]
-        if(!val){
-            throw Error(`unsupport timeframe: ${timeframe}`)
-        }
-        Object.assign(period, val)
+        Object.assign(period, makePeriod(timeframe))
     }
     function setSymbol(val: SymbolInfo){
         Object.assign(symbol, val)
@@ -84,16 +80,23 @@ export const useKlineLocal = defineStore('klocal', () => {
     }
 
     function removeInd(paneId: string, name?: string) {
-        const mat_idx = save_inds.findIndex(d =>
+        const mat_idx = save_inds.value.findIndex(d =>
           d.pane_id == paneId && (!name || d.name == name))
         if(mat_idx < 0)return
-        save_inds.splice(mat_idx, 1)
+        save_inds.value.splice(mat_idx, 1)
     }
     return {period, symbol, chartStyle, save_inds, showRight, dt_start, dt_stop,
         timezone, theme, setPeriod, setTimeframe, setSymbol, setSymbolTicker,
         setStyleItem, resetStyle, removeInd}
 }, {
     persist: {
-        storage: persistedState.localStorage
+        storage: persistedState.localStorage,
+        // beforeRestore({store}){
+        //     console.log('before restore', toRaw(store))
+        // },
+        // afterRestore({store}){
+        //     console.log('after restore', toRaw(store))
+        // },
+        // debug: true
     }
 })

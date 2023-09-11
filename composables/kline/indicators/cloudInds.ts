@@ -79,13 +79,13 @@ export const makeCloudInds = (params: Record<string, any>[]): IndicatorTemplate[
         const layStyles = getDefaultOverlayStyle()
         my_figures.forEach(figure => {
           if(figure.type == 'inout'){
-            viewKlines.filter(it => it.ind[figure.key]).forEach(it => {
-              const indValue = it.ind[figure.key]
-              const price = Math.abs(indValue)
+            const baseVal = figure.baseValue ?? 0
+            const position = baseVal >= 0 ? 'bottom': 'top';
+            const color = baseVal >= 0 ? upColor : downColor
+            viewKlines.filter(it => it.ind && it.ind[figure.key]).forEach(it => {
+              const price = it.ind[figure.key]
               const valueY = yAxis.convertToPixel(price)
-              const position = indValue > 0 ? 'bottom': 'top';
-              const text = indValue > 0 ? `buy:${price}`: `sell:${price}`;
-              const color = indValue > 0 ? upColor : downColor
+              const text = `${figure.key}:${price}`;
               getInOutFigures({x: it.x, y: valueY}, position, text, color).forEach(fg => {
                 const { type, styles, attrs } = fg
                 const Figure = kc.getFigureClass(type)

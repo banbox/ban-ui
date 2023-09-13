@@ -1,9 +1,21 @@
 <template>
   <Head>
-    <Title>DigoChain</Title>
+    <Title>{{$t('appTitle')}}</Title>
   </Head>
   <NuxtLayout>
     <NuxtPage/>
   </NuxtLayout>
 </template>
 
+<script setup lang="ts">
+import {useI18n} from "vue-i18n";
+const {locale, t} = useI18n()
+
+useSeoMeta({
+  title: t('appTitle'),
+  ogTitle: t('appTitle'),
+  description: t('appDescription'),
+  ogDescription: t('appDescription'),
+  ogImage: 'https://www.digochain.com/logo_200.png'
+})
+</script>

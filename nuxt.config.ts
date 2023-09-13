@@ -77,4 +77,9 @@ export default defineNuxtConfig({
     },
     storage: 'cookies'
   },
+  runtimeConfig:{
+    public: {
+      gtagId: 'G-FS4QCSW076'  // 谷歌统计
+    }
+  }
 })

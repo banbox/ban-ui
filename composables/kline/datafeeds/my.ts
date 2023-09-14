@@ -1,6 +1,7 @@
 import {Datafeed, SymbolInfo, Period, DatafeedSubscribeCallback, KData, GetKlineArgs} from "~/components/kline/types";
 import {getApi} from "~/utils/netio";
 import {useAppConfig} from "#app";
+import {BarArr} from "~/composables/kline/coms";
 
 export default class MyDatafeed implements Datafeed{
 
@@ -76,10 +77,17 @@ export default class MyDatafeed implements Datafeed{
         symbol: symbol.ticker
       }))
     }
+    let last_bar: BarArr | null = null;
     this._ws.onmessage = event => {
       const result = JSON.parse(event.data)
       const action = result.a as string
-      if(action == 'subscribe'){
+      if(action == 'subscribe' && result.bars && result.bars.length){
+        const first = result.bars[0] as BarArr
+        if(last_bar && first[0] == last_bar[0]){
+          // 如果和上一个推送的bar时间戳相同，则认为是其更新，减去上一个的volume，避免调用方错误累加
+          first[5] -= last_bar[5]
+        }
+        last_bar = result.bars[result.bars.length - 1]
         callback(result)
       }
       else{

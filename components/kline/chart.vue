@@ -34,6 +34,7 @@ import {useKlineStore} from "~/stores/kline";
 import {getDefaults} from "~/config";
 import {ApiResult} from "~/utils/netio";
 import makeCloudInds from "~/composables/kline/indicators/cloudInds";
+import {addChartBars, appendOhlcv} from "~/composables/kline/kc_exts";
 const {t} = useI18n()
 const route = useRoute()
 const defaults = getDefaults()
@@ -289,7 +290,7 @@ async function loadKlineRange(symbol: SymbolInfo, period: Period, start_ms: numb
   loadingChart.value = false
   tf_msecs = tf_to_secs(period.timeframe) * 1000
   const curTime = new Date().getTime()
-  if(klines.length && klines[klines.length - 1].timestamp + tf_msecs > curTime){
+  if(klines.length && klines[klines.length - 1].timestamp + tf_msecs > curTime) {
     // 加载的是最新的bar，则自动开启websocket监听
     datafeed.subscribe(symbol, period, result => {
       const kline = chartObj.getDataList()
@@ -298,16 +299,16 @@ async function loadKlineRange(symbol: SymbolInfo, period: Period, start_ms: numb
         last.timestamp, last.open, last.high, last.low, last.close, last.volume ?? 0
       ] : null
       const ohlcvArr = build_ohlcvs(result.bars, result.secs * 1000, tf_msecs, lastBar)
-      ohlcvArr.forEach((row: any) => {
-        chartObj.updateData({
+      addChartBars(chartObj, ohlcvArr.map(row => {
+        return {
           timestamp: row[0],
           open: row[1],
           high: row[2],
           low: row[3],
           close: row[4],
           volume: row[5]
-        })
-      })
+        }
+      }))
     })
   }
 }

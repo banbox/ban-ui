@@ -177,10 +177,11 @@ function toggleTheme(){
 
 
 function clickPeriod(item: Period){
-  if(authStatus.value < 0 && store.authTFList.includes(item.timeframe)){
-    store.showLogin = true
-    return
-  }
+  // 允许不登录查看所有数据
+  // if(authStatus.value < 0 && store.authTFList.includes(item.timeframe)){
+  //   store.showLogin = true
+  //   return
+  // }
   klocal.setPeriod(item)
 }
 

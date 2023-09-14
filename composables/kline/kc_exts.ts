@@ -15,13 +15,14 @@ export function addChartBars(chart: any, bar_arr: KLineData[]): void {
   const dataList = chart.getDataList()
   const store = chart.getChartStore()
   const curLast = dataList[dataList.length - 1];
-  let lastDataTimestamp = formatValue(curLast, 'timestamp', 0) as number
+  let last_ts = formatValue(curLast, 'timestamp', 0) as number
   bar_arr.forEach(bar => {
     const timestamp = bar.timestamp
-    if (timestamp < lastDataTimestamp) return
-    const pos = timestamp === lastDataTimestamp ? dataList.length - 1 : dataList.length;
+    if (timestamp < last_ts) return
+    const pos = timestamp === last_ts ? dataList.length - 1 : dataList.length;
     store.addData(bar, pos)
-    lastDataTimestamp = timestamp
+    last_ts = timestamp
   })
+  chart.adjustPaneViewport(false, true, true, true)
 }
 

@@ -7,3 +7,6 @@
   </NuxtLayout>
 </template>
 
+<style lang="scss">
+@import "assets/site";
+</style>

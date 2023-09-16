@@ -3,7 +3,7 @@
 import {SortDown, SortUp, Switch} from "@element-plus/icons-vue";
 import {useKlineLocal} from "~/stores/klineLocal";
 import {getApi} from "~/utils/netio";
-import {tf_to_secs, getDateStr, getTimestamp, get_tz} from "~/composables/dateutil"
+import {tf_to_secs, getDateStr, toUTCStamp, get_tz} from "~/composables/dateutil"
 import {
   readableNumber,
   formatPrecision,
@@ -43,8 +43,8 @@ onMounted(async () => {
 
 async function updateData(){
   if(!klocal.showRight)return
-  const start_ms = getTimestamp(klocal.dt_start)
-  const stop_ms = getTimestamp(klocal.dt_stop)
+  const start_ms = toUTCStamp(klocal.dt_start)
+  const stop_ms = toUTCStamp(klocal.dt_stop)
   const data = {from: start_ms, to: stop_ms, timeframe: timeframe.value, min_rate: min_rate.value * 0.01}
   const rsp = await getApi('/kline/big_trends', data)
   const new_list = (rsp.data ?? []) as any[]
@@ -79,7 +79,7 @@ async function updateData(){
     const big3 = rates.slice(-3)
     const avg_val = big3.reduce((a, b) => a + b, 0) / big3.length
     range_list.push({
-      time: getTimestamp(key),
+      time: toUTCStamp(key),
       title: key,
       num: date_gps[key].length,
       rate: avg_val * (num_sum >= 0 ? 1 : -1)

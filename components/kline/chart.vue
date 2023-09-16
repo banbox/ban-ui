@@ -23,7 +23,7 @@ import {
   GetNumberDotOffset,
   build_ohlcvs, BarArr, AddDelInd
 } from "~/composables/kline/coms";
-import {adjustFromTo, tf_to_secs, getTimestamp, getDateStr, makeFormatDate} from "~/composables/dateutil"
+import {adjustFromTo, tf_to_secs, toUTCStamp, getDateStr, makeFormatDate} from "~/composables/dateutil"
 import overlays from '~/composables/kline/overlays'
 import figures from '~/composables/kline/figure'
 import {useAuthState} from "~/composables/auth";
@@ -273,8 +273,8 @@ async function loadKlineRange(symbol: SymbolInfo, period: Period, start_ms: numb
  * 根据输入的参数，自定义加载K线数据
  */
 async function customLoadKline(){
-  const start_ms = getTimestamp(klocal.dt_start)
-  let stop_ms = getTimestamp(klocal.dt_stop)
+  const start_ms = toUTCStamp(klocal.dt_start)
+  let stop_ms = toUTCStamp(klocal.dt_stop)
   if(!start_ms || !stop_ms){
     ElMessageBox.alert('时间无效，请使用：202301011200')
     return;

@@ -196,5 +196,21 @@
   "step2_tip": "完成身份验证，确保个人账户和交易安全。",
   "reg_step3": "开始交易",
   "step3_tip": "一切准备就绪！买卖加密货币，设置定投，探索币安产品与服务。",
-  "start_using": "开始使用"
+  "start_using": "开始使用",
+
+  "dash_h1": "欢迎使用DigoChain后台",
+  "dash_desc": "您可以在这里管理您的交易机器人，所有信息都只保留在浏览器本地，无需担心信息泄露",
+  "dash_help": "如果您需要帮助，请",
+  "login_bot": "登录机器人",
+  "bot_url": "机器人URL",
+  "account": "用户名",
+  "password": "密码",
+  "not_url": "此项不是有效的url地址",
+  "add_bot_ok": "成功添加机器人",
+  "auto_refresh": "自动刷新",
+  "disable_refresh": "关闭刷新",
+  "delete": "删除",
+  "online": "在线",
+  "offline": "离线",
+  "confirm_logout_bot": "确定要移除机器人吗？"
 }

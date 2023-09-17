@@ -48,11 +48,11 @@ function goPage(path: string){
         <el-icon><Calendar /></el-icon>
         <template #title>收益统计</template>
       </el-menu-item>
-      <el-menu-item index="4">
+      <el-menu-item index="4" @click="goPage('/dash/order')">
         <el-icon><Memo /></el-icon>
         <template #title>订单</template>
       </el-menu-item>
-      <el-menu-item index="5">
+      <el-menu-item index="5" @click="goPage('/dash/symbol')">
         <el-icon><ShoppingTrolley /></el-icon>
         <template #title>交易对管理</template>
       </el-menu-item>

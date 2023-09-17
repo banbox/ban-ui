@@ -52,41 +52,20 @@ watch(tab_name, () => {
 </script>
 
 <template>
-  <el-tabs v-model="tab_name">
-    <el-tab-pane name="days" label="按天">
-      <el-table :data="stat_list">
-        <el-table-column prop="date_ms" label="日期">
-          <template #default="props">{{getDateStr(props.row.date_ms)}}</template>
-        </el-table-column>
-        <el-table-column prop="start_balance" label="初始余额" />
-        <el-table-column prop="order_num" label="订单数" />
-        <el-table-column prop="profit_sum" label="总利润" />
-        <el-table-column prop="profit_pct" label="利润率" />
-      </el-table>
-    </el-tab-pane>
-    <el-tab-pane name="weeks" label="按周">
-      <el-table :data="stat_list">
-        <el-table-column prop="date_ms" label="日期">
-          <template #default="props">{{getDateStr(props.row.date_ms)}}</template>
-        </el-table-column>
-        <el-table-column prop="start_balance" label="初始余额" />
-        <el-table-column prop="order_num" label="订单数" />
-        <el-table-column prop="profit_sum" label="总利润" />
-        <el-table-column prop="profit_pct" label="利润率" />
-      </el-table>
-    </el-tab-pane>
-    <el-tab-pane name="months" label="按月">
-      <el-table :data="stat_list">
-        <el-table-column prop="date_ms" label="日期">
-          <template #default="props">{{getDateStr(props.row.date_ms)}}</template>
-        </el-table-column>
-        <el-table-column prop="start_balance" label="初始余额" />
-        <el-table-column prop="order_num" label="订单数" />
-        <el-table-column prop="profit_sum" label="总利润" />
-        <el-table-column prop="profit_pct" label="利润率" />
-      </el-table>
-    </el-tab-pane>
-  </el-tabs>
+  <el-menu mode="horizontal" :default-active="tab_name" @select="tab_name = $event">
+    <el-menu-item index="days">按天</el-menu-item>
+    <el-menu-item index="weeks">按周</el-menu-item>
+    <el-menu-item index="months">按月</el-menu-item>
+  </el-menu>
+  <el-table :data="stat_list">
+    <el-table-column prop="date_ms" label="日期">
+      <template #default="props">{{getDateStr(props.row.date_ms)}}</template>
+    </el-table-column>
+    <el-table-column prop="start_balance" label="初始余额" />
+    <el-table-column prop="order_num" label="订单数" />
+    <el-table-column prop="profit_sum" label="总利润" />
+    <el-table-column prop="profit_pct" label="利润率" />
+  </el-table>
   <el-descriptions title="平均开单时长" border>
     <el-descriptions-item label="盈利时" align="center">{{durations.wins}}</el-descriptions-item>
     <el-descriptions-item label="盈利时" align="center">{{durations.draws}}</el-descriptions-item>

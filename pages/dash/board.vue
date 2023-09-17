@@ -59,7 +59,7 @@ async function loadData(){
   let rsp = await getApi('/bot_info')
   Object.assign(data, rsp)
   // 整体详细概况
-  rsp = await getApi('/profit')
+  rsp = await getApi('/statistics')
   Object.assign(data, rsp)
   // 显示余额情况
   rsp = await getApi('/balance')

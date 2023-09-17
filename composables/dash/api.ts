@@ -49,7 +49,12 @@ export function useApi(bot: TradeBot){
     return await requestApi('POST', path, query, body)
   }
 
-  return {getApi, postApi}
+  async function delApi(path: string, body: Record<string, any> | null,
+                         query: Record<string, any> | null = null): Promise<ApiResult>{
+    return await requestApi('POST', path, query, body)
+  }
+
+  return {getApi, postApi, delApi}
 }
 
 export function useCurApi(){

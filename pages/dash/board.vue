@@ -6,6 +6,7 @@ import {useDashLocal} from "~/stores/dashLocal";
 import {useCurApi} from "~/composables/dash/api";
 import {BotInfo} from "~/composables/dash/types";
 import {getUTCStamp} from "~/composables/dateutil";
+import {useLocalePath} from "#i18n";
 
 definePageMeta({
   layout: 'dash',
@@ -47,10 +48,17 @@ const data = reactive<BotInfo>({
   bot_start_timestamp: 0,
 
   balance_total: 0,
-  balance_items: []
+  balance_items: [],
+
+  run_tfs: [],
+  exchange: '',
+  market: '',
+  pairs: []
 })
 
 const delay_hours = ref(3)
+const value_style = 'cursor: pointer;'
+const localPath = useLocalePath()
 
 async function loadData(){
   const item = local.bot
@@ -102,7 +110,8 @@ onMounted(() => {
 <template>
   <el-row>
     <el-col :span="4">
-      <el-statistic title="监听币种" :value="20"/>
+      <el-statistic title="监听币种" :value="data.pairs.length" :value-style="value_style"
+                    @click="navigateTo(localPath('/dash/pair_job'))"/>
     </el-col>
     <el-col :span="4">
       <el-statistic title="打开/平仓数量" :value="open_num">
@@ -139,6 +148,8 @@ onMounted(() => {
     </el-form-item>
   </el-form>
   <el-descriptions border :column="2">
+    <el-descriptions-item label="市场" align="center">{{data.exchange}}.{{data.market}}</el-descriptions-item>
+    <el-descriptions-item label="时间周期" align="center">{{data.run_tfs.join(', ')}}</el-descriptions-item>
     <el-descriptions-item label="启动时间" align="center">{{getDateStr(data.bot_start_timestamp)}}</el-descriptions-item>
     <el-descriptions-item label="最近活跃时间" align="center">{{getDateStr(data.last_process)}}</el-descriptions-item>
   </el-descriptions>

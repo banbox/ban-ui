@@ -3,9 +3,10 @@ import {definePageMeta, getApi} from "#imports";
 import {useDashLocal} from "~/stores/dashLocal";
 import {useDashStore} from "~/stores/dash";
 import {useI18n} from "vue-i18n";
-import {TradeBot} from "~/composables/dash/types";
+import {BotInfo, TradeBot} from "~/composables/dash/types";
 import {Delete} from "@element-plus/icons-vue";
 import {useLocalePath} from "#i18n";
+import {useApi} from "~/composables/dash/api";
 
 const {t} = useI18n()
 
@@ -13,10 +14,17 @@ definePageMeta({
   layout: false,
 })
 
+interface BotCount{
+  open_num: number
+  max_num: number
+  total_cost: number
+}
+
 const local = useDashLocal()
 const store = useDashStore()
 const showAdd = ref(false)
 const localPath = useLocalePath()
+const counts = reactive<Record<string, BotCount>>({})
 
 function loginOk(info: TradeBot){
   const message = `${t('add_bot_ok')}：${info.name}`
@@ -40,6 +48,19 @@ async function delBot(index: number) {
     local.cur_id = 0
   }
 }
+
+async function loadData(bot: TradeBot){
+  const {getApi} = useApi(bot)
+  const rsp = await getApi('/count')
+  counts[bot.url] = (rsp as unknown) as BotCount
+}
+
+onMounted(() => {
+  local.all_bots.forEach(bot => {
+    loadData(bot)
+  })
+})
+
 </script>
 
 <template>
@@ -56,6 +77,10 @@ async function delBot(index: number) {
         :class="{active: index == local.cur_id}">
         <div class="title">{{item.name}}</div>
         <div class="right-acts">
+          <template v-if="counts[item.url]">
+            <div class="num">Open: {{counts[item.url].open_num}}</div>
+            <div class="cost">Cost: {{counts[item.url].total_cost.toFixed(4)}}</div>
+          </template>
           <div class="status" :class="[item.avaiable ? 'ok': 'fail']"
                :title="$t(item.avaiable ? 'online':'offline')"/>
           <el-switch v-model="item.auto_refresh" :title="$t('auto_refresh')"/>
@@ -72,6 +97,7 @@ async function delBot(index: number) {
 
 <style scoped lang="scss">
 .main-body{
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -92,8 +118,8 @@ async function delBot(index: number) {
 }
 .all-bots{
   margin: 30px 0;
-  min-width: 300px;
-  max-width: 500px;
+  min-width: 500px;
+  max-width: 700px;
   border-top: 1px solid var(--el-border-color);
   .item{
     cursor: pointer;
@@ -115,7 +141,7 @@ async function delBot(index: number) {
     }
 
     .right-acts{
-      width: 130px;
+      width: 330px;
       display: flex;
       flex-direction: row;
       align-items: center;

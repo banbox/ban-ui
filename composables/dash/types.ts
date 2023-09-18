@@ -53,6 +53,11 @@ export interface BotInfo{
 
   balance_total: number
   balance_items: BalanceItem[]
+
+  run_tfs: string[]
+  exchange: string
+  market: string
+  pairs: string[]
 }
 
 export interface PairPerf{

@@ -56,15 +56,15 @@ function goPage(path: string){
         <el-icon><ShoppingTrolley /></el-icon>
         <template #title>交易对管理</template>
       </el-menu-item>
-      <el-menu-item index="6">
+      <el-menu-item index="6" @click="goPage('/dash/config')">
         <el-icon><Setting /></el-icon>
         <template #title>配置</template>
       </el-menu-item>
-      <el-menu-item index="7">
-        <el-icon><TrendCharts /></el-icon>
-        <template #title>K线</template>
-      </el-menu-item>
-      <el-menu-item index="8">
+<!--      <el-menu-item index="7">-->
+<!--        <el-icon><TrendCharts /></el-icon>-->
+<!--        <template #title>K线</template>-->
+<!--      </el-menu-item>-->
+      <el-menu-item index="8" @click="goPage('/dash/logs')">
         <el-icon><Tickets /></el-icon>
         <template #title>日志</template>
       </el-menu-item>
@@ -78,9 +78,9 @@ function goPage(path: string){
         </div>
         <div class="head-sec right">
           <template v-if="local.all_bots.length > 0">
-            <el-switch v-model="local.bot.auto_refresh" inline-prompt :active-text="$t('auto_refresh')"
-                       :inactive-text="$t('disable_refresh')"/>
-            <el-button size="small" type="primary" :icon="Refresh" circle></el-button>
+<!--            <el-switch v-model="local.bot.auto_refresh" inline-prompt :active-text="$t('auto_refresh')"-->
+<!--                       :inactive-text="$t('disable_refresh')"/>-->
+<!--            <el-button size="small" type="primary" :icon="Refresh" circle></el-button>-->
             <el-select v-model="local.cur_id" style="width: 130px">
               <el-option v-for="(item, index) in local.all_bots" :key="index" :label="item.name" :value="index"/>
             </el-select>

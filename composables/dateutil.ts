@@ -33,11 +33,16 @@ const timezone_map: Record<string, string> = {
   'Pacific/Auckland': 'auckland',
 }
 
+export function getUTCStamp(): number{
+  let result = dayjs()
+  return result.valueOf()
+}
+
 /**
  * 将字符串的时间转为13位时间戳，要求输入的是UTC时区字符串
  * @param date_str 10位/13位时间戳、YYYYMMDD YYYYMMDDHHmm YYYYMMDDHHmmss
  */
-export function getTimestamp(date_str: string): number{
+export function toUTCStamp(date_str: string): number{
   if(!date_str)return 0
   date_str = date_str.trim();
   const isNumOnly = /^\d+$/.test(date_str);
@@ -86,7 +91,9 @@ export function getTimestamp(date_str: string): number{
   return result.valueOf()
 }
 
-export function getDateStr(date_ts: number, tz: string | undefined = undefined): string{
+export function getDateStr(date_ts: number, template: string = 'YYYY-MM-DD HH:mm:ss',
+                           tz: string | undefined = undefined): string{
+  if(!date_ts)return '--'
   if(!tz_applied){
     const store = useKlineLocal()
     applyTimezone(store.timezone)
@@ -104,7 +111,7 @@ export function getDateStr(date_ts: number, tz: string | undefined = undefined):
   else if(cur_tz){
     result = result.tz(cur_tz)
   }
-  return result.format('YYYY-MM-DD HH:mm:ss')
+  return result.format(template)
 }
 
 export function adjustFromTo(period: Period, toTimestamp: number, count: number) {

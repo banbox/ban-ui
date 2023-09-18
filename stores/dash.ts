@@ -1,0 +1,10 @@
+import {defineStore} from "pinia";
+import {ref} from "#imports";
+import {TradeBot} from "~/composables/dash/types"
+
+
+export const useDashStore = defineStore('dash', () => {
+  const menu_id = ref('1')
+  const showContact = ref(false)
+  return {menu_id, showContact}
+})

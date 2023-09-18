@@ -3,7 +3,7 @@ import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'url'
 import VueI18nVitePlugin from '@intlify/unplugin-vue-i18n/vite'
 
-const backendHost = process.env.inter_aipp_host || 'http://127.0.0.1:9000'
+const backendHost = process.env.inter_aipp_host || 'http://127.0.0.1:8000'
 const defaultLocale = process.env.NODE_ENV == 'production' ? 'en-US': 'zh-CN'
 
 
@@ -82,5 +82,8 @@ export default defineNuxtConfig({
     public: {
       gtagId: 'G-FS4QCSW076'  // 谷歌统计
     }
+  },
+  routeRules: {
+    '/dash/**': {ssr: false}
   }
 })

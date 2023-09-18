@@ -19,3 +19,7 @@ useSeoMeta({
   ogImage: 'https://www.digochain.com/logo_200.png'
 })
 </script>
+
+<style lang="scss">
+@import "assets/site";
+</style>

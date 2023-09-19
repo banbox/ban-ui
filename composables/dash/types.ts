@@ -26,13 +26,13 @@ export interface BotInfo{
   last_process: number,
   allow_trade_at: number,
   profit_closed_percent_mean: number
-  profit_closed_ratio_mean: number
+  profit_closed_mean: number
   profit_closed_percent_sum: number
-  profit_closed_ratio_sum: number
+  profit_closed_sum: number
   profit_all_percent_mean: number
-  profit_all_ratio_mean: number
+  profit_all_mean: number
   profit_all_percent_sum: number
-  profit_all_ratio_sum: number
+  profit_all_sum: number
   trade_count: number
   closed_trade_count: number
   first_trade_timestamp?: number
@@ -48,7 +48,7 @@ export interface BotInfo{
   expectancy_ratio: number
   max_drawdown: number
   max_drawdown_abs: number
-  trading_volume?: number
+  total_cost?: number
   bot_start_timestamp: number
 
   balance_total: number

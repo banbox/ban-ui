@@ -22,13 +22,13 @@ const data = reactive<BotInfo>({
   last_process: 0,
   allow_trade_at: 0,
   profit_closed_percent_mean: 0,
-  profit_closed_ratio_mean: 0,
+  profit_closed_mean: 0,
   profit_closed_percent_sum: 0,
-  profit_closed_ratio_sum: 0,
+  profit_closed_sum: 0,
   profit_all_percent_mean: 0,
-  profit_all_ratio_mean: 0,
+  profit_all_mean: 0,
   profit_all_percent_sum: 0,
-  profit_all_ratio_sum: 0,
+  profit_all_sum: 0,
   trade_count: 0,
   closed_trade_count: 0,
   first_trade_timestamp: 0,
@@ -44,7 +44,7 @@ const data = reactive<BotInfo>({
   expectancy_ratio: 0,
   max_drawdown: 0,
   max_drawdown_abs: 0,
-  trading_volume: 0,
+  total_cost: 0,
   bot_start_timestamp: 0,
 
   balance_total: 0,
@@ -156,25 +156,25 @@ onMounted(() => {
   <el-descriptions border title="" :column="4">
     <el-descriptions-item label="第一笔" align="center">{{getDateStr(data.first_trade_timestamp)}}</el-descriptions-item>
     <el-descriptions-item label="最新一笔" align="center">{{getDateStr(data.latest_trade_timestamp)}}</el-descriptions-item>
-    <el-descriptions-item label="平均持仓" align="center">{{data.avg_duration}}</el-descriptions-item>
-    <el-descriptions-item label="交易量" align="center">{{data.trading_volume}}</el-descriptions-item>
+    <el-descriptions-item label="平均持仓" align="center">{{fmtDuration(data.avg_duration)}}</el-descriptions-item>
+    <el-descriptions-item label="交易量" align="center">{{data.total_cost}}</el-descriptions-item>
 
     <el-descriptions-item label="最佳交易" align="center">{{data.best_pair}}</el-descriptions-item>
     <el-descriptions-item label="最佳利润" align="center">{{(data.best_pair_profit_pct * 100).toFixed(1)}}%</el-descriptions-item>
-    <el-descriptions-item label="最大回撤" align="center">{{data.max_drawdown}}</el-descriptions-item>
-    <el-descriptions-item label="最大回撤金额" align="center">{{data.max_drawdown_abs}}</el-descriptions-item>
+    <el-descriptions-item label="最大回撤" align="center">{{data.max_drawdown}}%</el-descriptions-item>
+    <el-descriptions-item label="最大回撤金额" align="center">{{data.max_drawdown_abs.toFixed(5)}}</el-descriptions-item>
   </el-descriptions>
   <el-descriptions border title="全部订单" :column="4">
     <el-descriptions-item label="平均收益率" align="center">{{data.profit_all_percent_mean}}%</el-descriptions-item>
-    <el-descriptions-item label="平均收益" align="center">{{data.profit_all_ratio_mean}}</el-descriptions-item>
+    <el-descriptions-item label="平均收益" align="center">{{data.profit_all_mean.toFixed(5)}}</el-descriptions-item>
     <el-descriptions-item label="总收益率" align="center">{{data.profit_all_percent_sum}}%</el-descriptions-item>
-    <el-descriptions-item label="总收益" align="center">{{data.profit_all_ratio_sum}}</el-descriptions-item>
+    <el-descriptions-item label="总收益" align="center">{{data.profit_all_sum.toFixed(5)}}</el-descriptions-item>
   </el-descriptions>
   <el-descriptions border title="已完成订单" :column="4">
     <el-descriptions-item label="平均收益率" align="center">{{data.profit_closed_percent_mean}}%</el-descriptions-item>
-    <el-descriptions-item label="平均收益" align="center">{{data.profit_closed_ratio_mean}}</el-descriptions-item>
+    <el-descriptions-item label="平均收益" align="center">{{data.profit_closed_mean.toFixed(5)}}</el-descriptions-item>
     <el-descriptions-item label="总收益率" align="center">{{data.profit_closed_percent_sum}}%</el-descriptions-item>
-    <el-descriptions-item label="总收益" align="center">{{data.profit_closed_ratio_sum}}</el-descriptions-item>
+    <el-descriptions-item label="总收益" align="center">{{data.profit_closed_sum.toFixed(5)}}</el-descriptions-item>
   </el-descriptions>
   <div class="balance">
     <h3>钱包余额</h3>

@@ -165,15 +165,15 @@ onMounted(() => {
     <el-descriptions-item label="最大回撤金额" align="center">{{data.max_drawdown_abs.toFixed(5)}}</el-descriptions-item>
   </el-descriptions>
   <el-descriptions border title="全部订单" :column="4">
-    <el-descriptions-item label="平均收益率" align="center">{{data.profit_all_percent_mean}}%</el-descriptions-item>
+    <el-descriptions-item label="平均收益率" align="center">{{data.profit_all_percent_mean.toFixed(1)}}%</el-descriptions-item>
     <el-descriptions-item label="平均收益" align="center">{{data.profit_all_mean.toFixed(5)}}</el-descriptions-item>
-    <el-descriptions-item label="总收益率" align="center">{{data.profit_all_percent_sum}}%</el-descriptions-item>
+    <el-descriptions-item label="总收益率" align="center">{{data.profit_all_percent_sum.toFixed(1)}}%</el-descriptions-item>
     <el-descriptions-item label="总收益" align="center">{{data.profit_all_sum.toFixed(5)}}</el-descriptions-item>
   </el-descriptions>
   <el-descriptions border title="已完成订单" :column="4">
-    <el-descriptions-item label="平均收益率" align="center">{{data.profit_closed_percent_mean}}%</el-descriptions-item>
+    <el-descriptions-item label="平均收益率" align="center">{{data.profit_closed_percent_mean.toFixed(1)}}%</el-descriptions-item>
     <el-descriptions-item label="平均收益" align="center">{{data.profit_closed_mean.toFixed(5)}}</el-descriptions-item>
-    <el-descriptions-item label="总收益率" align="center">{{data.profit_closed_percent_sum}}%</el-descriptions-item>
+    <el-descriptions-item label="总收益率" align="center">{{data.profit_closed_percent_sum.toFixed(1)}}%</el-descriptions-item>
     <el-descriptions-item label="总收益" align="center">{{data.profit_closed_sum.toFixed(5)}}</el-descriptions-item>
   </el-descriptions>
   <div class="balance">

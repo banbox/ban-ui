@@ -85,8 +85,11 @@ function showOrder(idx: number){
     </el-table-column>
     <el-table-column prop="exit_tag" label="出场标签" v-if="tab_name == 'his'"/>
     <el-table-column prop="leverage" label="杠杆"/>
-    <el-table-column prop="profit_rate" label="收益">
+    <el-table-column prop="profit_rate" label="收益率">
       <template #default="props">{{(props.row.profit_rate * 100).toFixed(1)}}%</template>
+    </el-table-column>
+    <el-table-column label="收益">
+      <template #default="props">{{(props.row.profit).toFixed(5)}}</template>
     </el-table-column>
     <el-table-column label="操作" class-name="actions" width="70" align="center">
       <template #default="props">

@@ -47,15 +47,16 @@ watch(tab_name, () => {
 })
 
 function showOrder(idx: number){
-  Object.assign(ban_od, od_list[idx])
+  console.log('show order:', idx)
+  ban_od.value = od_list[idx]
   showOdDetail.value = true
 }
 </script>
 
 <template>
   <client-only>
-    <el-dialog :title="ban_od?.id" v-model="showOdDetail">
-      <pre>{{ban_od}}</pre>
+    <el-dialog title="订单详情" v-model="showOdDetail">
+      <pre class="od-detail" v-if="ban_od">{{JSON.stringify(ban_od, null, 4)}}</pre>
     </el-dialog>
   </client-only>
   <el-menu mode="horizontal" :default-active="tab_name" @select="tab_name = $event">
@@ -97,5 +98,7 @@ function showOrder(idx: number){
 </template>
 
 <style scoped lang="scss">
-
+.od-detail{
+  white-space: pre-wrap;
+}
 </style>

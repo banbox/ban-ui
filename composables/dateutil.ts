@@ -1,8 +1,10 @@
 import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
 import timezone from "dayjs/plugin/timezone"
+import duration from "dayjs/plugin/duration"
 dayjs.extend(utc)
 dayjs.extend(timezone)
+dayjs.extend(duration)
 import {Period} from "~/components/kline/types";
 import kc from "klinecharts";
 import {formatDate} from "~/composables/kline/coms";
@@ -112,6 +114,11 @@ export function getDateStr(date_ts: number, template: string = 'YYYY-MM-DD HH:mm
     result = result.tz(cur_tz)
   }
   return result.format(template)
+}
+
+export function fmtDuration(cost_secs: number){
+  if(!cost_secs)return '00:00'
+  return dayjs.utc(cost_secs * 1000).format('HH:mm:ss')
 }
 
 export function adjustFromTo(period: Period, toTimestamp: number, count: number) {

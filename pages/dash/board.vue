@@ -35,7 +35,7 @@ const data = reactive<BotInfo>({
   latest_trade_timestamp: 0,
   avg_duration: '',
   best_pair: '',
-  best_pair_profit_ratio: 0,
+  best_pair_profit_pct: 0,
   winning_trades: 0,
   losing_trades: 0,
   profit_factor: 0,
@@ -109,7 +109,7 @@ onMounted(() => {
 
 <template>
   <el-row>
-    <el-col :span="4">
+    <el-col :span="3">
       <el-statistic title="监听币种" :value="data.pairs.length" :value-style="value_style"
                     @click="navigateTo(localPath('/dash/pair_job'))"/>
     </el-col>
@@ -118,10 +118,10 @@ onMounted(() => {
         <template #suffix>/ {{data.closed_trade_count}}</template>
       </el-statistic>
     </el-col>
-    <el-col :span="4">
+    <el-col :span="5">
       <el-statistic title="盈利/亏损/胜率" :value="data.losing_trades">
         <template #prefix>{{data.winning_trades}} / </template>
-        <template #suffix>/ {{data.winrate}}</template>
+        <template #suffix>/ {{(data.winrate * 100).toFixed(1)}}%</template>
       </el-statistic>
     </el-col>
     <el-col :span="4">
@@ -160,7 +160,7 @@ onMounted(() => {
     <el-descriptions-item label="交易量" align="center">{{data.trading_volume}}</el-descriptions-item>
 
     <el-descriptions-item label="最佳交易" align="center">{{data.best_pair}}</el-descriptions-item>
-    <el-descriptions-item label="最佳利润" align="center">{{data.best_pair_profit_ratio}}</el-descriptions-item>
+    <el-descriptions-item label="最佳利润" align="center">{{(data.best_pair_profit_pct * 100).toFixed(1)}}%</el-descriptions-item>
     <el-descriptions-item label="最大回撤" align="center">{{data.max_drawdown}}</el-descriptions-item>
     <el-descriptions-item label="最大回撤金额" align="center">{{data.max_drawdown_abs}}</el-descriptions-item>
   </el-descriptions>

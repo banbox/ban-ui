@@ -39,7 +39,7 @@ export interface BotInfo{
   latest_trade_timestamp?: number
   avg_duration: string
   best_pair?: string
-  best_pair_profit_ratio: number
+  best_pair_profit_pct: number
   winning_trades: number
   losing_trades: number
   profit_factor: number

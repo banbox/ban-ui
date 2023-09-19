@@ -62,8 +62,12 @@ onMounted(() => {
       <el-table :data="pairs">
         <el-table-column prop="pair" label="币对" />
         <el-table-column prop="close_num" label="平仓单数" />
-        <el-table-column prop="profit_sum" label="总利润" />
-        <el-table-column prop="profit_pct" label="收益" />
+        <el-table-column prop="profit_sum" label="总利润" >
+          <template #default="scope">{{scope.row.profit_sum.toFixed(5)}}</template>
+        </el-table-column>
+        <el-table-column prop="profit_pct" label="收益" >
+          <template #default="scope">{{(scope.row.profit_pct * 100).toFixed(1)}}%</template>
+        </el-table-column>
       </el-table>
     </el-tab-pane>
     <el-tab-pane name="strategy" label="策略">

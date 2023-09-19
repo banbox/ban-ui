@@ -4,6 +4,7 @@ import {definePageMeta} from "#imports";
 import {useCurApi} from "~/composables/dash/api";
 import {useDashStore} from "~/stores/dash";
 import {PeriodStat, TagStat} from "~/composables/dash/types";
+import {fmtDuration} from "~/composables/dateutil";
 
 definePageMeta({
   layout: 'dash',
@@ -16,9 +17,9 @@ const tab_name = ref('days')  // weeks, months
 const stat_list = reactive<PeriodStat[]>([])
 const tag_stats = reactive<TagStat[]>([])
 const durations = reactive({
-  wins: '',
-  draws: '',
-  losses: ''
+  wins: 0,
+  draws: 0,
+  losses: 0
 })
 const tab_labels = {
   days: '按天',
@@ -63,13 +64,17 @@ watch(tab_name, () => {
     </el-table-column>
     <el-table-column prop="start_balance" label="初始余额" />
     <el-table-column prop="order_num" label="订单数" />
-    <el-table-column prop="profit_sum" label="总利润" />
-    <el-table-column prop="profit_pct" label="利润率" />
+    <el-table-column prop="profit_sum" label="总利润" >
+      <template #default="scope">{{scope.row.profit_sum.toFixed(5)}}</template>
+    </el-table-column>
+    <el-table-column prop="profit_pct" label="利润率" >
+      <template #default="scope">{{(scope.row.profit_pct * 100).toFixed(1)}}%</template>
+    </el-table-column>
   </el-table>
   <el-descriptions title="平均开单时长" border>
-    <el-descriptions-item label="盈利时" align="center">{{durations.wins}}</el-descriptions-item>
-    <el-descriptions-item label="盈利时" align="center">{{durations.draws}}</el-descriptions-item>
-    <el-descriptions-item label="盈利时" align="center">{{durations.losses}}</el-descriptions-item>
+    <el-descriptions-item label="盈利时" align="center">{{fmtDuration(durations.wins)}}</el-descriptions-item>
+    <el-descriptions-item label="持平时" align="center">{{fmtDuration(durations.draws)}}</el-descriptions-item>
+    <el-descriptions-item label="亏损时" align="center">{{fmtDuration(durations.losses)}}</el-descriptions-item>
   </el-descriptions>
   <el-table :data="tag_stats">
     <el-table-column prop="tag" label="平仓原因"/>

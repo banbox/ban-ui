@@ -43,8 +43,9 @@ overlays.forEach(o => { kc.registerOverlay(o) })
 figures.forEach(o => { kc.registerFigure(o) })
 
 interface ChartProp{
+  datafeed: MyDatafeed,
   hasRight?: boolean,
-  customLoad?: boolean
+  customLoad?: boolean,
 }
 
 const props = withDefaults(defineProps<ChartProp>(), {
@@ -70,7 +71,6 @@ type NoParamFunc = () => void
 let cloud_ind_cbs: NoParamFunc[] = [];
 
 const watermark = ref('<img width="432" src="/watermark.png"/>')
-const datafeed = new MyDatafeed()
 
 const periods = reactive<Period[]>(AllPeriods)
 
@@ -125,7 +125,7 @@ function createIndicator (widget: Nullable<Chart>, name: string, params?: any[],
 async function loadKlineData(from: number, to: number, isNewData?: boolean){
   loading = true
   const strategy = route.query.strategy?.toString()
-  const kdata = await datafeed.getHistoryKLineData({
+  const kdata = await props.datafeed.getHistoryKLineData({
     symbol: klocal.symbol, period: klocal.period, from, to, strategy})
   if(isNewData){
     kdata.data.forEach(bar => {
@@ -262,12 +262,12 @@ if(process.client){
 
 async function loadKlineRange(symbol: SymbolInfo, period: Period, start_ms: number, stop_ms: number,
                               loadMore: boolean = true) {
-  if(!chart.value)return
+  if (!chart.value) return
   loading = true
   loadingChart.value = true
   const chartObj: Chart = chart.value!;
   const strategy = route.query.strategy?.toString()
-  const kdata = await datafeed.getHistoryKLineData({
+  const kdata = await props.datafeed.getHistoryKLineData({
     symbol, period, from: start_ms, to: stop_ms, strategy
   })
   const klines = kdata.data
@@ -288,28 +288,31 @@ async function loadKlineRange(symbol: SymbolInfo, period: Period, start_ms: numb
   })
   loading = false
   loadingChart.value = false
-  tf_msecs = tf_to_secs(period.timeframe) * 1000
-  const curTime = new Date().getTime()
-  if(klines.length && klines[klines.length - 1].timestamp + tf_msecs > curTime) {
-    // 加载的是最新的bar，则自动开启websocket监听
-    datafeed.subscribe(symbol, period, result => {
-      const kline = chartObj.getDataList()
-      const last = kline[kline.length - 1]
-      const lastBar: BarArr | null = last && last.timestamp ? [
-        last.timestamp, last.open, last.high, last.low, last.close, last.volume ?? 0
-      ] : null
-      const ohlcvArr = build_ohlcvs(result.bars, result.secs * 1000, tf_msecs, lastBar)
-      addChartBars(chartObj, ohlcvArr.map(row => {
-        return {
-          timestamp: row[0],
-          open: row[1],
-          high: row[2],
-          low: row[3],
-          close: row[4],
-          volume: row[5]
-        }
-      }))
-    })
+  if (klines.length) {
+    tf_msecs = tf_to_secs(period.timeframe) * 1000
+    const curTime = new Date().getTime()
+    const stop_ms = klines[klines.length - 1].timestamp + tf_msecs
+    if (stop_ms + tf_msecs > curTime) {
+      // 加载的是最新的bar，则自动开启websocket监听
+      props.datafeed.subscribe(symbol, result => {
+        const kline = chartObj.getDataList()
+        const last = kline[kline.length - 1]
+        const lastBar: BarArr | null = last && last.timestamp ? [
+          last.timestamp, last.open, last.high, last.low, last.close, last.volume ?? 0
+        ] : null
+        const ohlcvArr = build_ohlcvs(result.bars, result.secs * 1000, tf_msecs, lastBar)
+        addChartBars(chartObj, ohlcvArr.map(row => {
+          return {
+            timestamp: row[0],
+            open: row[1],
+            high: row[2],
+            low: row[3],
+            close: row[4],
+            volume: row[5]
+          }
+        }))
+      })
+    }
   }
 }
 
@@ -371,7 +374,7 @@ watch(klocal.symbol, (new_symbol, prev_symbol) => {
   updateSymbolPriceUnit(new_symbol)
   if (loading || props.customLoad) return
   // 手动加载模式下，不监听币种和周期变化自动加载。
-  datafeed.unsubscribe(prev_symbol!, klocal.period)
+  props.datafeed.unsubscribe(prev_symbol!)
   loadSymbolPeriod(true, false)
 })
 
@@ -379,16 +382,16 @@ watch(klocal.symbol, (new_symbol, prev_symbol) => {
 watch(() => klocal.theme, (new_val) => {
   // 加载新指标时，修改默认颜色
   if(new_val == 'light'){
-    datafeed.longColor = 'green'
-    datafeed.shortColor = 'red'
+    props.datafeed.longColor = 'green'
+    props.datafeed.shortColor = 'red'
   }
   else{
-    datafeed.longColor = 'green'
-    datafeed.shortColor = 'rgb(255,135,8)'
+    props.datafeed.longColor = 'green'
+    props.datafeed.shortColor = 'rgb(255,135,8)'
   }
   // 修改已绘制的指标颜色
   sigOvers.forEach(olay => {
-    olay.extendData.bgColor = olay.extendData.postion == 'top' ? datafeed.shortColor: datafeed.longColor;
+    olay.extendData.bgColor = olay.extendData.postion == 'top' ? props.datafeed.shortColor: props.datafeed.longColor;
     chart.value?.overrideOverlay(olay)
   })
   chart.value?.setStyles(getThemeStyles(new_val))

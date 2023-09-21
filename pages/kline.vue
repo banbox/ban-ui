@@ -1,7 +1,7 @@
 <template>
-  <KlineChart :has-right="true">
+  <KlineChart :datafeed="datafeed" :has-right="true">
     <div class="kline-slide" v-show="klocal.showRight">
-      <TopChange/>
+      <TopChange :feed="datafeed"/>
       <OpinionFlow/>
     </div>
   </KlineChart>
@@ -11,10 +11,12 @@
 import {useKlineLocal} from "~/stores/klineLocal";
 import {makePeriod} from "~/composables/kline/coms";
 import {useKlineStore} from "~/stores/kline";
+import {MyDatafeed} from "~/composables/kline/datafeeds";
 const {exg, symbol, period, ind} = useRoute().query
 
 const klocal = useKlineLocal()
 const store = useKlineStore()
+const datafeed = new MyDatafeed()
 
 
 function loadQueryInds(){

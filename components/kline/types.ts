@@ -31,7 +31,7 @@ export type KData = {
   lays?: any[]
 }
 
-export type DatafeedSubscribeCallback = (data: any) => void
+export type DatafeedWatchCallback = (data: any) => void
 
 export type GetKlineArgs = {
   symbol: SymbolInfo,
@@ -44,8 +44,8 @@ export type GetKlineArgs = {
 export interface Datafeed {
   getSymbols (): Promise<SymbolInfo[]>
   getHistoryKLineData (args: GetKlineArgs): Promise<KData>
-  subscribe (symbol: SymbolInfo, period: Period, callback: DatafeedSubscribeCallback): void
-  unsubscribe (symbol: SymbolInfo, period: Period): void
+  subscribe (symbol: SymbolInfo, callback: DatafeedWatchCallback): void
+  unsubscribe (symbol: SymbolInfo): void
 }
 
 export interface ChartProOptions {

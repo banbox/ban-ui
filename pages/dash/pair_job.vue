@@ -38,12 +38,12 @@ async function loadData(){
   }
 }
 
-async function showStgyCode(name: string){
-  const rsp = await getApi('/strategy/' + name)
-  stgy_content.value = rsp.data ?? ''
-  active_stgy.value = name
-  show_code.value = true
-}
+// async function showStgyCode(name: string){
+//   const rsp = await getApi('/strategy/' + name)
+//   stgy_content.value = rsp.data ?? ''
+//   active_stgy.value = name
+//   show_code.value = true
+// }
 
 onMounted(() => {
   loadData()
@@ -74,11 +74,11 @@ onMounted(() => {
       <el-table :data="stgy_list">
         <el-table-column prop="name" label="策略" />
         <el-table-column prop="version" label="版本" />
-        <el-table-column label="操作" >
-          <template #default="props">
-            <el-link @click="showStgyCode(props.row.name)">查看</el-link>
-          </template>
-        </el-table-column>
+<!--        <el-table-column label="操作" >-->
+<!--          <template #default="props">-->
+<!--            <el-link @click="showStgyCode(props.row.name)">查看</el-link>-->
+<!--          </template>-->
+<!--        </el-table-column>-->
       </el-table>
     </el-tab-pane>
     <el-tab-pane name="pair_stgy" label="运行任务">

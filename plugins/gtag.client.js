@@ -3,6 +3,7 @@
  * https://analytics.google.com/analytics/web/provision/
  */
 export default defineNuxtPlugin((nuxtApp) => {
+  if(process.env.NODE_ENV !== 'production')return
   const { gtagId } = useRuntimeConfig().public;
 
   function gtag() {

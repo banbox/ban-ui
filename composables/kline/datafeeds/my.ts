@@ -1,14 +1,15 @@
-import {Datafeed, SymbolInfo, Period, DatafeedSubscribeCallback, KData, GetKlineArgs} from "~/components/kline/types";
+import {Datafeed, SymbolInfo, Period, DatafeedWatchCallback, KData, GetKlineArgs} from "~/components/kline/types";
 import {getApi} from "~/utils/netio";
 import {useAppConfig} from "#app";
 import {BarArr} from "~/composables/kline/coms";
 
-export default class MyDatafeed implements Datafeed{
+export default class MyDatafeed implements Datafeed {
 
   public shortColor: string = 'red'
   public longColor: string = 'green'
   private _prevSymbol?: string
   private _ws?: WebSocket
+  private listens: Record<string, any> = {}
 
   async getHistoryKLineData({symbol, period, from, to, strategy}: GetKlineArgs): Promise<KData> {
     const query = {
@@ -28,19 +29,20 @@ export default class MyDatafeed implements Datafeed{
     }))
     let overlays = (rsp.signals || []).map((s: any) => {
       let extendData: any, price: number
-      if(s.action == 'sell'){
+      if (s.action == 'sell') {
         extendData = {postion: 'top', bgColor: this.shortColor}
         price = s.price ?? s.high
-      }
-      else{
+      } else {
         extendData = {postion: 'bottom', bgColor: this.longColor}
         price = s.price ?? s.low
       }
       extendData.text = s.action + ':' + price
-      return {name: 'barSignal', groupId: 'klineSigs', extendData,
-        points: [{timestamp: s.bar_ms ?? s.time, value: price}]}
+      return {
+        name: 'barSignal', groupId: 'klineSigs', extendData,
+        points: [{timestamp: s.bar_ms ?? s.time, value: price}]
+      }
     })
-    if(rsp.overlays){
+    if (rsp.overlays) {
       overlays = overlays.concat(rsp.overlays)
     }
     return await {data: kline_data, lays: overlays}
@@ -60,11 +62,19 @@ export default class MyDatafeed implements Datafeed{
     }))
   }
 
-  subscribe(symbol: SymbolInfo, period: Period, callback: DatafeedSubscribeCallback): void {
-    if(!process.client)return;
-    if(this._prevSymbol === symbol.ticker)return
+  watch(key: string, callback: DatafeedWatchCallback) {
+    if (!this._ws) return
+    this._ws?.send(JSON.stringify({
+      action: 'watch', key: key
+    }))
+    this.listens[key] = callback
+  }
+
+  subscribe(symbol: SymbolInfo, callback: DatafeedWatchCallback): void {
+    if (!process.client) return;
+    if (this._prevSymbol === symbol.ticker) return
     let ws_url = useAppConfig().ws_url as string
-    if(process.env.NODE_ENV == 'production'){
+    if (process.env.NODE_ENV == 'production') {
       ws_url = `wss://${location.host}/api`
     }
     this._prevSymbol = symbol.ticker
@@ -81,22 +91,26 @@ export default class MyDatafeed implements Datafeed{
     this._ws.onmessage = event => {
       const result = JSON.parse(event.data)
       const action = result.a as string
-      if(action == 'subscribe' && result.bars && result.bars.length){
+      if (action == 'subscribe' && result.bars && result.bars.length) {
         const first = result.bars[0] as BarArr
-        if(last_bar && first[0] == last_bar[0]){
+        if (last_bar && first[0] == last_bar[0]) {
           // 如果和上一个推送的bar时间戳相同，则认为是其更新，减去上一个的volume，避免调用方错误累加
           first[5] -= last_bar[5]
         }
         last_bar = result.bars[result.bars.length - 1]
         callback(result)
-      }
-      else{
-        console.error('unknown msg:', event)
+      } else {
+        const cb = this.listens[action];
+        if (cb) {
+          cb(result)
+        } else {
+          console.error('unknown msg:', event)
+        }
       }
     }
   }
 
-  unsubscribe(symbol: SymbolInfo, period: Period): void {
+  unsubscribe(symbol: SymbolInfo): void {
     if(!this._ws || this._prevSymbol === symbol.ticker)return
     this._ws?.send(JSON.stringify({
       action: 'unsubscribe',

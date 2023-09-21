@@ -51,6 +51,7 @@ import {onMounted, reactive, ref} from "vue";
 import {getApi} from "~/utils/netio";
 import {formatBigNumber, formatPrecision} from "~/composables/kline/coms";
 import {useKlineLocal} from "~/stores/klineLocal";
+import {MyDatafeed} from "~/composables/kline/datafeeds";
 const {t} = useNuxtApp()
 const symbol_down = ref(true)
 const price_down = ref(true)
@@ -59,17 +60,18 @@ const vol_down = ref(true)
 const sort_key = ref('chg')
 const main_col = ref('chg')
 const data_list = reactive<any[]>([])
-let loop_timer: ReturnType<typeof setTimeout>
 const store = useKlineLocal()
+
+const props = defineProps<{
+  feed: MyDatafeed
+}>()
+
 
 onMounted(async () => {
   await updateWrap()
 })
 
-async function updateData(){
-  if(!store.showRight)return
-  const rsp = await getApi('/kline/top_chg')
-  const new_list = (rsp.data ?? []) as any[]
+function applyDataList(new_list: any[]){
   const map_list = new_list.map(row => {
     const [base_s, quote_s] = row[1].split('/');
     const vol_text = formatBigNumber(formatPrecision(row[5], 2))
@@ -89,9 +91,20 @@ async function updateData(){
   doArrSort()
 }
 
-async function updateWrap(){
+async function updateData(){
+  if(!store.showRight)return
+  const rsp = await getApi('/kline/top_chg')
+  const new_list = (rsp.data ?? []) as any[]
+  applyDataList(new_list)
+}
+
+async function updateWrap() {
   await updateData()
-  loop_timer = setTimeout(updateWrap, 60000)
+  setTimeout(() => {
+    props.feed.watch('topchg_binance_future', res => {
+      applyDataList(res.data)
+    })
+  }, 3000)
 }
 
 function doArrSort(){

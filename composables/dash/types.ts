@@ -152,3 +152,15 @@ export interface BanOrder extends Record<string, any>{
   exit_fee_type?: string
   exit_update_at?: number
 }
+
+export interface OpenOrder{
+  pair: string
+  side?: string
+  order_type?: string
+  price?: number
+  stoploss_price?: number
+  enter_cost?: number
+  enter_tag?: string
+  leverage?: number
+  strategy?: string
+}

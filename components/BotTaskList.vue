@@ -6,6 +6,7 @@ import {ActionType, Chart, OverlayCreate} from "klinecharts";
 import {fmtDuration, tf_to_secs} from "~/composables/dateutil";
 import {useKlineLocal} from "~/stores/klineLocal";
 import {useKlineStore} from "~/stores/kline";
+import {Delete} from "@element-plus/icons-vue"
 
 const task_list = reactive<BotTask[]>([])
 const allow_modes = reactive<string[]>(['live', 'non_live'])
@@ -13,7 +14,11 @@ const cur_task = ref(-1)
 const trade_list = reactive<BanOrder[]>([])
 const trade_gp = 'ban_trades';
 const loadingTask = ref(false);
+const showItemMenu = ref(false);
 let loadingOrders = false;
+const menuPos = reactive({
+  top: '0px', left: '0px'
+})
 const klocal = useKlineLocal()
 const main = useKlineStore()
 const show_num = 1000
@@ -59,10 +64,7 @@ function loadVisiableTrades(){
   const start_ms = dataList[0].timestamp;
   const stop_ms = dataList[dataList.length - 1].timestamp;
   const show_trades = trade_list.filter(td => start_ms <= td.enter_at && td.exit_at <= stop_ms);
-  if(!show_trades.length){
-    console.log('no trades in range:', trade_list.length, start_ms, stop_ms)
-    return;
-  }
+  if(!show_trades.length)return;
   const cur_ols = show_trades.map(td => {
     let color = '#1677FF';
     let exit_color = '#01C5C4';
@@ -105,7 +107,7 @@ ${td.strategy}
  * 如果当前币种有订单，则显示到最新订单。否则显示到任务结束时间。
  */
 function loadDataRange(){
-  const task = task_list[cur_task.value];
+  const task = cur_list.value[cur_task.value];
   let timeframe = task.tfs[0]
   const cur_pair = klocal.symbol.ticker
   const last = trade_list.findLast(od => od.symbol == cur_pair)
@@ -124,10 +126,14 @@ function loadDataRange(){
 }
 
 async function clickTask(task_idx: number){
+  if(showItemMenu.value){
+    showItemMenu.value = false;
+    return
+  }
   if(loadingTask.value)return
   loadingTask.value = true;
   cur_task.value = task_idx
-  const task = task_list[task_idx];
+  const task = cur_list.value[task_idx];
   // 删除旧的订单覆盖物
   main.chart?.removeOverlay({groupId: trade_gp})
   // 切换到第一个币种
@@ -144,6 +150,36 @@ async function clickTask(task_idx: number){
   trade_list.splice(0, trade_list.length, ...valid_ods)
   // K线显示到此币种订单的最新时间
   loadDataRange()
+}
+
+function itemRightClick(e: PointerEvent, index: number){
+  cur_task.value = index
+  menuPos.left = `${e.clientX}px`
+  menuPos.top = `${e.clientY}px`
+  showItemMenu.value = true
+}
+
+async function delTask() {
+  if (cur_task.value < 0) {
+    ElMessage.error({message: '请右击任务删除'})
+    return
+  }
+  try {
+    await ElMessageBox.confirm('确定要删除此任务全部数据吗？不可撤销！', '警告')
+  } catch (e) {
+    return
+  }
+  const task = cur_list.value[cur_task.value]
+  const rsp = await postApi('/dev/del_task', {task_id: task.task_id})
+  if (rsp.code == 200) {
+    cur_task.value = -1
+    const task_num = rsp.total > 0 ? 1:0;
+    ElMessage.success({message: `已删除${task_num}个任务共${rsp.total}条记录`})
+    await loadData()
+  } else {
+    console.error('del task fail:', rsp)
+    ElMessage.error({message: rsp.msg ?? '删除失败'})
+  }
 }
 
 watch(() => main.klineLoaded, () => {
@@ -167,7 +203,8 @@ watch(() => main.klineLoaded, () => {
     </div>
     <div class="task-list">
       <div class="item" v-for="(item, index) in cur_list" :key="index"
-          :class="[item.live ? 'live':'']" @click="clickTask(index)">
+          :class="[item.live ? 'live':'']" @click="clickTask(index)"
+           @contextmenu.prevent="itemRightClick($event, index)">
         <div class="top">
           <span class="stg" v-if="item.strategy.length == 0">无策略</span>
           <span class="stg" v-else-if="item.strategy.length == 1">{{item.strategy[0]}}</span>
@@ -181,6 +218,12 @@ watch(() => main.klineLoaded, () => {
           <span class="date">{{getDateStr(item.start_ms, 'YYYYMMDD')}}-{{getDateStr(item.stop_ms, 'YYYYMMDD')}}</span>
           <span class="num">{{item.order_num}}笔</span>
           <span class="profit">{{(item.profit_rate * 100).toFixed(1)}}%</span>
+        </div>
+      </div>
+      <div class="item-menu" tabindex="0" v-if="showItemMenu" :style="menuPos" @blur="showItemMenu = false">
+        <div class="action" @click="delTask">
+          <el-icon><Delete/></el-icon>
+          <span>删除</span>
         </div>
       </div>
     </div>
@@ -223,6 +266,25 @@ watch(() => main.klineLoaded, () => {
     }
     &.live{
       background-color: var(--el-color-success-light-9);
+    }
+  }
+  .item-menu{
+    position: absolute;
+    z-index: 100;
+    box-shadow: 0px 4px 24px 0px rgb(67 84 106 / 18%);
+    .action{
+      cursor: pointer;
+      background-color: #ffffff;
+      width: 130px;
+      height: 34px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      padding: 0 10px;
+      border: 1px solid var(--el-border-color-light);
+      .el-icon{
+        margin-right: 10px;
+      }
     }
   }
 }

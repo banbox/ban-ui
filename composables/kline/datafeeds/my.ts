@@ -5,8 +5,6 @@ import {BarArr} from "~/composables/kline/coms";
 
 export default class MyDatafeed implements Datafeed {
 
-  public shortColor: string = 'red'
-  public longColor: string = 'green'
   private _prevSymbol?: string
   private _ws?: WebSocket
   private listens: Record<string, any> = {}
@@ -27,25 +25,7 @@ export default class MyDatafeed implements Datafeed {
       close: data[4],
       volume: data[5]
     }))
-    let overlays = (rsp.signals || []).map((s: any) => {
-      let extendData: any, price: number
-      if (s.action == 'sell') {
-        extendData = {postion: 'top', bgColor: this.shortColor}
-        price = s.price ?? s.high
-      } else {
-        extendData = {postion: 'bottom', bgColor: this.longColor}
-        price = s.price ?? s.low
-      }
-      extendData.text = s.action + ':' + price
-      return {
-        name: 'barSignal', groupId: 'klineSigs', extendData,
-        points: [{timestamp: s.bar_ms ?? s.time, value: price}]
-      }
-    })
-    if (rsp.overlays) {
-      overlays = overlays.concat(rsp.overlays)
-    }
-    return await {data: kline_data, lays: overlays}
+    return await {data: kline_data, lays: rsp.overlays ?? []}
   }
 
   async getSymbols(): Promise<SymbolInfo[]> {

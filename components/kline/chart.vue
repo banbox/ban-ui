@@ -59,7 +59,6 @@ const {authDoing, authStatus} = useAuthState()
 const chartRef = ref<HTMLElement>()
 const drawBarRef = ref<any>(null)
 const batch_num = ref(500)
-const sigOvers = reactive<OverlayCreate[]>([])
 const {$on} = useNuxtApp()
 let priceUnitDom: HTMLElement
 let loading = false
@@ -135,10 +134,7 @@ async function loadKlineData(from: number, to: number, isNewData?: boolean){
     main.chart?.applyMoreData(kdata.data, more)
   }
   kdata.lays?.forEach(o => {
-    const oid = drawBarRef.value?.addOverlay(o)
-    if(o.groupId == 'klineSigs'){
-      sigOvers.push({id: oid, name: o.name, extendData: o.extendData})
-    }
+    drawBarRef.value?.addOverlay(o)
   })
   loading = false
 }
@@ -273,16 +269,10 @@ async function loadKlineRange(symbol: SymbolInfo, period: Period, start_ms: numb
     const pricePrec = GetNumberDotOffset(Math.min(klines[0].low, klines[klines.length - 1].low)) + 3
     chartObj.setPriceVolumePrecision(pricePrec, 0)
   }
-  sigOvers.splice(0, sigOvers.length)
-  const delArgs: Partial<Pick<kc.Overlay, "id" | "groupId" | "name">> = {groupId: 'klineSigs'}
-  chartObj.removeOverlay(delArgs)
   const hasMore = loadMore && klines.length > 0;
   chartObj.applyNewData(klines, hasMore)
   kdata.lays?.forEach(o => {
-    const oid = drawBarRef.value?.addOverlay(o)
-    if (o.groupId == 'klineSigs') {
-      sigOvers.push({id: oid, name: o.name, extendData: o.extendData})
-    }
+    drawBarRef.value?.addOverlay(o)
   })
   loading = false
   main.loadingChart = false
@@ -382,18 +372,13 @@ watch(klocal.symbol, (new_symbol, prev_symbol) => {
 watch(() => klocal.theme, (new_val) => {
   // 加载新指标时，修改默认颜色
   if(new_val == 'light'){
-    datafeed.longColor = 'green'
-    datafeed.shortColor = 'red'
+    main.color_long = 'green'
+    main.color_short = 'red'
   }
   else{
-    datafeed.longColor = 'green'
-    datafeed.shortColor = 'rgb(255,135,8)'
+    main.color_long = 'green'
+    main.color_short = 'rgb(255,135,8)'
   }
-  // 修改已绘制的指标颜色
-  sigOvers.forEach(olay => {
-    olay.extendData.bgColor = olay.extendData.postion == 'top' ? datafeed.shortColor: datafeed.longColor;
-    main.chart?.overrideOverlay(olay)
-  })
   main.chart?.setStyles(getThemeStyles(new_val))
 })
 

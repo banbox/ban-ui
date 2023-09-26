@@ -25,6 +25,9 @@ export const useKlineStore = defineStore('kline', () => {
   // 限制只能查看这些symbols
   const cur_symbols = reactive<SymbolInfo[]>([])
 
+  const color_short = ref('red')
+  const color_long = ref('green')
+
   const local_mains = ['MA', 'EMA', 'SMA', 'BOLL', 'SAR', 'BBI']
   const local_subs = ['VOL', 'MACD', 'KDJ', 'RSI', 'BIAS', 'BRAR',
     'CCI', 'DMI', 'CR', 'PSY', 'DMA', 'TRIX', 'OBV', 'VR', 'WR', 'MTM', 'EMV',
@@ -40,5 +43,7 @@ export const useKlineStore = defineStore('kline', () => {
   }
 
   return {chart, loadingChart, showLogin, showDrawBar, modalIndCfg, editPaneId, editIndName, authTFList,
-    fireOhlcv, start_ms, stop_ms, fireKRange, klineLoaded, all_inds, cur_symbols}
+    fireOhlcv, start_ms, stop_ms, fireKRange, klineLoaded, all_inds, cur_symbols,
+    color_short, color_long
+  }
 })

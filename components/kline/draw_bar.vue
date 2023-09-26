@@ -260,7 +260,7 @@ function clickRemove(){
 
 
 function editOverlay(overlay: any){
-  if(authStatus.value <= 0 || overlay.groupId == 'klineSigs')return
+  if(authStatus.value <= 0 || overlay.groupId !== GROUP_ID)return
   const keys = ['extendData', 'groupId', 'id', 'lock', 'mode', 'name', 'paneId', 'points', 'styles',
     'totalStep', 'visible', 'zLevel']
   const data = Object.fromEntries(keys.map(k => [k, overlay[k]]))

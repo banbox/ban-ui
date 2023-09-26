@@ -1,0 +1,229 @@
+<script setup lang="ts">
+import {BotTask} from "~/composables/types";
+import {TradeInfo, useKlineChart} from "~/composables/kline/coms";
+import {BanOrder} from "~/composables/dash/types";
+import {ActionType, Chart, OverlayCreate} from "klinecharts";
+import {fmtDuration, tf_to_secs} from "~/composables/dateutil";
+import {useKlineLocal} from "~/stores/klineLocal";
+import {useKlineStore} from "~/stores/kline";
+
+const task_list = reactive<BotTask[]>([])
+const allow_modes = reactive<string[]>(['live', 'non_live'])
+const cur_task = ref(-1)
+const trade_list = reactive<BanOrder[]>([])
+const trade_gp = 'ban_trades';
+const loadingTask = ref(false);
+let loadingOrders = false;
+const klocal = useKlineLocal()
+const main = useKlineStore()
+const show_num = 1000
+
+async function loadData(){
+  const rsp = await getApi('/dev/task_list')
+  task_list.splice(0, task_list.length, ...(rsp.data ?? []))
+}
+
+const cur_list = computed(() => {
+  if(!allow_modes.length){
+    return [] as BotTask[]
+  }
+  if(allow_modes.length == 2){
+    return task_list
+  }
+  const live_req = allow_modes.includes('live')
+  return task_list.filter(t => t.live == live_req)
+})
+
+onMounted(() => {
+  loadData()
+})
+
+function clickMode(mode: string){
+  if(allow_modes.includes(mode)){
+    allow_modes.splice(allow_modes.indexOf(mode), 1)
+  }
+  else {
+    allow_modes.push(mode)
+  }
+}
+
+/**
+ * 为当前可见区域显示订单
+ * 订阅chart的onVisibleRangeChange事件，调用此方法
+ */
+function loadVisiableTrades(){
+  if(!main.chart)return
+  const chartObj = main.chart as Chart;
+  const dataList = chartObj.getDataList();
+  if(!dataList.length)return;
+  const start_ms = dataList[0].timestamp;
+  const stop_ms = dataList[dataList.length - 1].timestamp;
+  const show_trades = trade_list.filter(td => start_ms <= td.enter_at && td.exit_at <= stop_ms);
+  if(!show_trades.length){
+    console.log('no trades in range:', trade_list.length, start_ms, stop_ms)
+    return;
+  }
+  const cur_ols = show_trades.map(td => {
+    let color = '#1677FF';
+    let exit_color = '#01C5C4';
+    if(td.short){
+      color = '#FF9600';
+      exit_color = '#935EBD';
+    }
+    const in_action = `开${td.short ? "空" : "多"}`
+    const out_action = `平${td.short ? "空" : "多"}`
+    const in_text = `${in_action} ${td.enter_tag} ${td.leverage}倍
+${td.strategy}
+花费：${td.enter_cost.toFixed(2)}`
+    const out_text = `${out_action} ${td.exit_tag} ${td.leverage}倍
+${td.strategy}
+利润：${(td.profit_rate * 100).toFixed(1)}% ${td.profit.toFixed(5)}
+持有：${fmtDuration(td.duration)}`
+    return {
+      name: 'trade',
+      groupId: trade_gp,
+      points: [
+        {timestamp: td.enter_at, value: td.enter_price ?? td.init_price},
+        {timestamp: td.exit_at, value: td.exit_price}
+      ],
+      extendData: {
+        line_color: color,
+        in_color: color,
+        in_text: in_text,
+        out_color: exit_color,
+        out_text: out_text
+      } as TradeInfo
+    } as OverlayCreate
+  })
+  cur_ols.forEach(ol => {
+    chartObj.createOverlay(ol)
+  })
+}
+
+/**
+ * 设置K线图的时间范围并显示。
+ * 如果当前币种有订单，则显示到最新订单。否则显示到任务结束时间。
+ */
+function loadDataRange(){
+  const task = task_list[cur_task.value];
+  let timeframe = task.tfs[0]
+  const cur_pair = klocal.symbol.ticker
+  const last = trade_list.findLast(od => od.symbol == cur_pair)
+  if(last){
+    timeframe = last.timeframe
+    main.stop_ms = last.exit_at
+  }
+  else{
+    main.stop_ms = task.stop_ms
+  }
+  klocal.setTimeframe(timeframe)
+  const tf_msecs = tf_to_secs(timeframe) * 1000;
+  main.stop_ms += tf_msecs * 10
+  main.start_ms = main.stop_ms - tf_msecs * show_num
+  main.fireOhlcv += 1
+}
+
+async function clickTask(task_idx: number){
+  if(loadingTask.value)return
+  loadingTask.value = true;
+  cur_task.value = task_idx
+  const task = task_list[task_idx];
+  // 删除旧的订单覆盖物
+  main.chart?.removeOverlay({groupId: trade_gp})
+  // 切换到第一个币种
+  const cur_pair = task.pairs[0]
+  klocal.setSymbolTicker(cur_pair)
+  trade_list.splice(0, trade_list.length)
+  // 先加载数据，避免获取订单时间太长
+  loadDataRange()
+  // 加载任务的所有订单
+  const rsp = await getApi('/dev/orders', {task_id: task.task_id})
+  const res_ods = (rsp.data || []) as BanOrder[]
+  const valid_ods = res_ods.filter(td => td.enter_at && (td.enter_price || td.init_price) && td.enter_filled
+      && td.exit_at && td.exit_price)
+  trade_list.splice(0, trade_list.length, ...valid_ods)
+  // K线显示到此币种订单的最新时间
+  loadDataRange()
+}
+
+watch(() => main.klineLoaded, () => {
+  loadingTask.value = false
+  if(loadingOrders)return
+  loadingOrders = true
+  loadVisiableTrades()
+  loadingOrders = false
+}, {immediate: true})
+
+
+</script>
+
+<template>
+  <div class="list-wrap">
+    <div class="head-tags">
+      <el-tag @click="clickMode('non_live')"
+        :effect="allow_modes.includes('non_live') ? 'dark':'light'">回测</el-tag>
+      <el-tag @click="clickMode('live')"
+        :effect="allow_modes.includes('live') ? 'dark':'light'">实时</el-tag>
+    </div>
+    <div class="task-list">
+      <div class="item" v-for="(item, index) in cur_list" :key="index"
+          :class="[item.live ? 'live':'']" @click="clickTask(index)">
+        <div class="top">
+          <span class="stg" v-if="item.strategy.length == 0">无策略</span>
+          <span class="stg" v-else-if="item.strategy.length == 1">{{item.strategy[0]}}</span>
+          <span class="stg" v-else>{{item.strategy[0] + '等' + item.strategy.length + '个'}}</span>
+          <span>{{item.tfs.join(',')}}</span>
+          <span class="pair" v-if="item.pairs.length == 0">无策略</span>
+          <span class="pair" v-else-if="item.pairs.length == 1">{{item.pairs[0]}}</span>
+          <span class="pair" v-else>{{item.pairs[0] + '等' + item.pairs.length + '个'}}</span>
+        </div>
+        <div class="info">
+          <span class="date">{{getDateStr(item.start_ms, 'YYYYMMDD')}}-{{getDateStr(item.stop_ms, 'YYYYMMDD')}}</span>
+          <span class="num">{{item.order_num}}笔</span>
+          <span class="profit">{{(item.profit_rate * 100).toFixed(1)}}%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped lang="scss">
+.list-wrap{
+  height: 100%;
+}
+.head-tags{
+  padding: 3px 7px;
+  .el-tag{
+    margin-right: 7px;
+    cursor: pointer;
+  }
+}
+.task-list{
+  border-left: 1px solid var(--el-color-info-light-7);
+  border-top: 1px solid var(--el-color-info-light-7);
+  overflow-y: auto;
+  height: 100%;
+  .item{
+    cursor: pointer;
+    padding: 5px 10px;
+    border-bottom: 1px solid var(--el-color-info-light-7);
+    .top{
+      font-size: 14px;
+      line-height: 2;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+    }
+    .info{
+      font-size: 13px;
+      color: var(--el-color-info);
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+    }
+    &.live{
+      background-color: var(--el-color-success-light-9);
+    }
+  }
+}
+</style>

@@ -32,13 +32,12 @@ import {useSymbols} from "~/composables/kline/coms"
 import {useKlineLocal} from "~/stores/klineLocal";
 
 const props = defineProps<{
-  datafeed: Datafeed
   modelValue: boolean
 }>()
 
 const keyword = ref('')
-const {symbols, error, loading} = useSymbols(props.datafeed)
 const store = useKlineLocal()
+const {symbols, error, loading} = useSymbols()
 
 const matchSymbols = computed(() => {
   if(!keyword.value)return symbols.value

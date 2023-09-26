@@ -70,6 +70,7 @@ import {postApi} from "~/utils/netio";
 import {useAuthState} from "~/composables/auth";
 import {Period, SymbolInfo} from "~/components/kline/types";
 import {useKlineLocal} from "~/stores/klineLocal";
+import {useKlineStore} from "~/stores/kline";
 
 const popoverKey = ref('')
 const modeIcon = ref('weakMagnet')
@@ -82,10 +83,7 @@ const delOverlayIds: string[] = []
 const layIdMap: Record<string, any> = {}
 const {authStatus} = useAuthState()
 const store = useKlineLocal()
-
-const props = defineProps<{
-  chart: Chart,
-}>()
+const main = useKlineStore()
 
 const GROUP_ID = 'drawing_tools'
 
@@ -188,7 +186,7 @@ function addOverlay(data: any){
       return true
     }
   }
-  const layId = props.chart.createOverlay({...defData, ...data})
+  const layId = main.chart?.createOverlay({...defData, ...data})
   if(layId){
     if(Array.isArray(layId)){
       hisLays.push(...(layId as string[]))
@@ -224,24 +222,24 @@ function clickMode(){
     cur_mode = 'normal'
   }
   mode.value = cur_mode;
-  props.chart.overrideOverlay({ mode: cur_mode as OverlayMode })
+  main.chart?.overrideOverlay({ mode: cur_mode as OverlayMode })
 }
 
 function clickSubMode(value: string){
   modeIcon.value = value;
   mode.value = value;
   popoverKey.value = '';
-  props.chart.overrideOverlay({ mode: value as OverlayMode })
+  main.chart?.overrideOverlay({ mode: value as OverlayMode })
 }
 
 function toggleLock(){
   lock.value = !lock.value;
-  props.chart.overrideOverlay({ lock: lock.value });
+  main.chart?.overrideOverlay({ lock: lock.value });
 }
 
 function toggleVisiable(){
   visiable.value = !visiable.value
-  props.chart.overrideOverlay({ visible: visiable.value })
+  main.chart?.overrideOverlay({ visible: visiable.value })
 }
 
 function clickRemove(){
@@ -253,7 +251,7 @@ function clickRemove(){
     args['id'] = hisLays.pop()
   }
   delOverlayIds.splice(0, delOverlayIds.length)
-  props.chart.removeOverlay(args)
+  main.chart?.removeOverlay(args)
   setTimeout(() => {
     if(!delOverlayIds.length)return
     delOverlays(delOverlayIds)

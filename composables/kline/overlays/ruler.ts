@@ -49,6 +49,7 @@ function getIntervalText(interval: number){
 const ruler: OverlayTemplate = {
   name: 'ruler',
   totalStep: 3,
+  lock: true,
   needDefaultPointFigure: true,
   needDefaultXAxisFigure: true,
   needDefaultYAxisFigure: true,

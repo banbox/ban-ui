@@ -1,10 +1,10 @@
 <template>
-  <KlineSymbolModal v-model="showSymbolModal" :datafeed="datafeed"/>
+  <KlineSymbolModal v-model="showSymbolModal"/>
   <KlinePeriodModal v-model="showPeriodModal" @change="clickPeriod"/>
   <KlineIndSearchModal v-model="showIndSearchModal"/>
-  <KlineSettingModal v-model="showSettingModal" :chart="chart"/>
+  <KlineSettingModal v-model="showSettingModal"/>
   <KlineScreenshotModal v-model="showScreenShotModal" :url="screenShotUrl" @close="screenShotUrl = ''"/>
-  <KlineIndCfgModal v-model="store.modalIndCfg" :chart="chart" />
+  <KlineIndCfgModal v-model="store.modalIndCfg" />
   <KlineTimezoneModal v-model="showTimezoneModal"/>
   <KlineI18nModal v-model="showI18nModal"/>
   <LoginBox v-model="store.showLogin"/>
@@ -116,12 +116,11 @@ import {useAuthState} from "~/composables/auth";
 import {useKlineStore} from "~/stores/kline";
 import {Chart} from "klinecharts";
 import {MyDatafeed} from "~/composables/kline/datafeeds";
+import {useKlineChart} from "~/composables/kline/coms";
 
 const period_bar = ref()
 
 const props = defineProps<{
-  chart: Chart,  // 绘图对象
-  datafeed: MyDatafeed,
   customLoad: boolean
   hasRight: boolean
 }>()
@@ -188,7 +187,7 @@ function clickPeriod(item: Period){
 
 function clickScreenShot(){
   let bgColor = klocal.theme === 'dark' ? '#151517' : '#ffffff'
-  screenShotUrl.value = props.chart.getConvertPictureUrl(true, 'jpeg', bgColor) ?? ''
+  screenShotUrl.value = store.chart?.getConvertPictureUrl(true, 'jpeg', bgColor) ?? ''
   showScreenShotModal.value = true
 }
 

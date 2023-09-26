@@ -20,7 +20,7 @@ import {
   getDefStyles,
   getThemeStyles,
   GetNumberDotOffset,
-  build_ohlcvs, BarArr, AddDelInd
+  build_ohlcvs, BarArr, AddDelInd, useKlineChart, useKlineObjs
 } from "~/composables/kline/coms";
 import {adjustFromTo, tf_to_secs, toUTCStamp, getDateStr, makeFormatDate} from "~/composables/dateutil"
 import overlays from '~/composables/kline/overlays'
@@ -34,7 +34,7 @@ import {useKlineStore} from "~/stores/kline";
 import {getDefaults} from "~/config";
 import {ApiResult} from "~/utils/netio";
 import makeCloudInds from "~/composables/kline/indicators/cloudInds";
-import {addChartBars, appendOhlcv} from "~/composables/kline/kc_exts";
+import {addChartBars} from "~/composables/kline/kc_exts";
 const {t} = useI18n()
 const route = useRoute()
 const defaults = getDefaults()
@@ -43,7 +43,6 @@ overlays.forEach(o => { kc.registerOverlay(o) })
 figures.forEach(o => { kc.registerFigure(o) })
 
 interface ChartProp{
-  datafeed: MyDatafeed,
   hasRight?: boolean,
   customLoad?: boolean,
 }
@@ -55,11 +54,10 @@ const props = withDefaults(defineProps<ChartProp>(), {
 
 const klocal = useKlineLocal()
 const main = useKlineStore()
+const {datafeed} = useKlineObjs()
 const {authDoing, authStatus} = useAuthState()
 const chartRef = ref<HTMLElement>()
-const chart = ref<Nullable<Chart>>(null)
 const drawBarRef = ref<any>(null)
-const loadingChart = ref(false)
 const batch_num = ref(500)
 const sigOvers = reactive<OverlayCreate[]>([])
 const {$on} = useNuxtApp()
@@ -89,14 +87,14 @@ function ensureCloudInd(cb: NoParamFunc){
 
 
 function setIndicator({is_main, ind_name, is_add}: AddDelInd){
-  if(!chart.value)return
+  if(!main.chart)return
   const paneId = is_main ? 'candle_pane' : 'pane_' + ind_name
   if(is_add){
-    const ind = createIndicator(chart.value, ind_name, undefined, true, {id: paneId})
+    const ind = createIndicator(main.chart, ind_name, undefined, true, {id: paneId})
     ind && klocal.save_inds.push(ind)
   }
   else{
-    chart.value?.removeIndicator(paneId, ind_name)
+    main.chart?.removeIndicator(paneId, ind_name)
     klocal.removeInd(paneId, ind_name)
   }
 }
@@ -125,16 +123,16 @@ function createIndicator (widget: Nullable<Chart>, name: string, params?: any[],
 async function loadKlineData(from: number, to: number, isNewData?: boolean){
   loading = true
   const strategy = route.query.strategy?.toString()
-  const kdata = await props.datafeed.getHistoryKLineData({
+  const kdata = await datafeed.getHistoryKLineData({
     symbol: klocal.symbol, period: klocal.period, from, to, strategy})
   if(isNewData){
     kdata.data.forEach(bar => {
-      chart.value?.updateData(bar)
+      main.chart?.updateData(bar)
     })
   }
   else{
     const more = kdata.data.length > 0
-    chart.value?.applyMoreData(kdata.data, more)
+    main.chart?.applyMoreData(kdata.data, more)
   }
   kdata.lays?.forEach(o => {
     const oid = drawBarRef.value?.addOverlay(o)
@@ -147,18 +145,18 @@ async function loadKlineData(from: number, to: number, isNewData?: boolean){
 
 
 const documentResize = () => {
-  chart.value?.resize()
+  main.chart?.resize()
 }
 
 onMounted(() => {
   window.addEventListener('resize', documentResize)
-  chart.value = kc.init(chartRef.value!, {
+  main.chart = kc.init(chartRef.value!, {
     customApi: {
       formatDate: makeFormatDate(klocal.period.timespan)
     }
   })
-  if(chart.value){
-    initChart(chart.value)
+  if(main.chart){
+    initChart(main.chart)
   }
 })
 
@@ -180,7 +178,7 @@ function initChart(chartObj: Chart){
   priceUnitDom.className = 'klinecharts-pro-price-unit'
   priceUnitContainer?.appendChild(priceUnitDom)
 
-  chart.value?.setTimezone(klocal.timezone)
+  main.chart?.setTimezone(klocal.timezone)
 
   ensureCloudInd(() => {
     klocal.save_inds.forEach(ind => {
@@ -262,12 +260,12 @@ if(process.client){
 
 async function loadKlineRange(symbol: SymbolInfo, period: Period, start_ms: number, stop_ms: number,
                               loadMore: boolean = true) {
-  if (!chart.value) return
+  if (!main.chart) return
   loading = true
-  loadingChart.value = true
-  const chartObj: Chart = chart.value!;
+  main.loadingChart = true
+  const chartObj: Chart = main.chart!;
   const strategy = route.query.strategy?.toString()
-  const kdata = await props.datafeed.getHistoryKLineData({
+  const kdata = await datafeed.getHistoryKLineData({
     symbol, period, from: start_ms, to: stop_ms, strategy
   })
   const klines = kdata.data
@@ -287,14 +285,16 @@ async function loadKlineRange(symbol: SymbolInfo, period: Period, start_ms: numb
     }
   })
   loading = false
-  loadingChart.value = false
+  main.loadingChart = false
+  // 触发K线加载完毕事件
+  main.klineLoaded += 1
   if (klines.length) {
     tf_msecs = tf_to_secs(period.timeframe) * 1000
     const curTime = new Date().getTime()
     const stop_ms = klines[klines.length - 1].timestamp + tf_msecs
     if (stop_ms + tf_msecs > curTime) {
       // 加载的是最新的bar，则自动开启websocket监听
-      props.datafeed.subscribe(symbol, result => {
+      datafeed.subscribe(symbol, result => {
         const kline = chartObj.getDataList()
         const last = kline[kline.length - 1]
         const lastBar: BarArr | null = last && last.timestamp ? [
@@ -351,7 +351,7 @@ function loadSymbolPeriod(symbol_chg: boolean, period_chg: boolean){
 
 // 监听周期变化
 watch(klocal.period, (new_period, prev_period) => {
-  chart.value?.setCustomApi({
+  main.chart?.setCustomApi({
     formatDate: makeFormatDate(klocal.period.timespan)
   })
   if (loading || props.customLoad) return
@@ -374,7 +374,7 @@ watch(klocal.symbol, (new_symbol, prev_symbol) => {
   updateSymbolPriceUnit(new_symbol)
   if (loading || props.customLoad) return
   // 手动加载模式下，不监听币种和周期变化自动加载。
-  props.datafeed.unsubscribe(prev_symbol!)
+  datafeed.unsubscribe(prev_symbol!)
   loadSymbolPeriod(true, false)
 })
 
@@ -382,24 +382,24 @@ watch(klocal.symbol, (new_symbol, prev_symbol) => {
 watch(() => klocal.theme, (new_val) => {
   // 加载新指标时，修改默认颜色
   if(new_val == 'light'){
-    props.datafeed.longColor = 'green'
-    props.datafeed.shortColor = 'red'
+    datafeed.longColor = 'green'
+    datafeed.shortColor = 'red'
   }
   else{
-    props.datafeed.longColor = 'green'
-    props.datafeed.shortColor = 'rgb(255,135,8)'
+    datafeed.longColor = 'green'
+    datafeed.shortColor = 'rgb(255,135,8)'
   }
   // 修改已绘制的指标颜色
   sigOvers.forEach(olay => {
-    olay.extendData.bgColor = olay.extendData.postion == 'top' ? props.datafeed.shortColor: props.datafeed.longColor;
-    chart.value?.overrideOverlay(olay)
+    olay.extendData.bgColor = olay.extendData.postion == 'top' ? datafeed.shortColor: datafeed.longColor;
+    main.chart?.overrideOverlay(olay)
   })
-  chart.value?.setStyles(getThemeStyles(new_val))
+  main.chart?.setStyles(getThemeStyles(new_val))
 })
 
 // 监听时区变化
 watch(() => klocal.timezone, (new_val) => {
-  chart.value?.setTimezone(new_val)
+  main.chart?.setTimezone(new_val)
 })
 
 // 监听右侧边栏显示
@@ -426,11 +426,11 @@ watch(() => main.fireOhlcv, async () => {
   <div class="kline-body klinecharts-pro" :data-theme="klocal.theme">
     <i class="icon-close klinecharts-pro-load-icon"/>
     <div class="kline-main" :data-right="klocal.showRight">
-      <KlineMenuBar :chart="chart" :datafeed="datafeed" :has-right="hasRight" :custom-load="customLoad"
+      <KlineMenuBar :has-right="hasRight" :custom-load="customLoad"
         @loadData="customLoadKline"/>
       <div class="klinecharts-pro-content">
-        <KlineLoading v-if="loadingChart"/>
-        <KlineDrawBar ref="drawBarRef" :chart="chart" v-if="main.showDrawBar"/>
+        <KlineLoading v-if="main.loadingChart"/>
+        <KlineDrawBar ref="drawBarRef" v-if="main.showDrawBar"/>
         <div ref="chartRef" class='klinecharts-pro-widget' :data-has-left="main.showDrawBar"
            @keydown.delete="drawBarRef.clickRemove()"/>
       </div>
@@ -459,14 +459,14 @@ body{
     flex-grow: 1;
     width: 100%;
     &[data-right=true]{
-      width: calc(100% - 300px);
+      width: calc(100% - var(--c-aside-width));
     }
   }
 }
 .kline-slide{
   height: 100%;
   overflow: hidden;
-  width: 300px;
+  width: var(--c-aside-width);
   display: flex;
   flex-direction: column;
 }

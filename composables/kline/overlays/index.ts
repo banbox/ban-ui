@@ -18,6 +18,7 @@ import abcd from './abcd'
 import xabcd from './xabcd'
 import barSignal from "./barSignal";
 import ruler from "./ruler";
+import trade from "./trade";
 
 const overlays = [
   arrow,
@@ -25,7 +26,7 @@ const overlays = [
   fibonacciCircle, fibonacciSegment, fibonacciSpiral,
   fibonacciSpeedResistanceFan, fibonacciExtension, gannBox,
   threeWaves, fiveWaves, eightWaves, anyWaves, abcd, xabcd,
-  barSignal, ruler
+  barSignal, ruler, trade
 ]
 
 export default overlays

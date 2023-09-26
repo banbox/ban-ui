@@ -22,7 +22,6 @@ import {defineEmits, reactive, computed, watch} from "vue";
 import {useKlineStore} from "~/stores/kline";
 
 const props = defineProps<{
-  chart?: Chart,  // 绘图对象
   modelValue: boolean
 }>()
 
@@ -45,10 +44,10 @@ const params = reactive<any[]>([])
 const fields = reactive<any[]>([])
 
 watch(() => [store.editPaneId, store.editIndName], ([new_pid, new_ind]) => {
-  if(!props.chart)return
+  if(!store.chart)return
   fields.splice(0, fields.length)
   fields.push(...(IndFieldsMap[new_ind] ?? []))
-  const indicator = props.chart.getIndicatorByPaneId(new_pid, new_ind) as Indicator
+  const indicator = store.chart.getIndicatorByPaneId(new_pid, new_ind) as Indicator
   params.splice(0, params.length)
   if(indicator?.calcParams){
     params.push(...(indicator?.calcParams ?? []))
@@ -71,7 +70,7 @@ function clickModel(from: string){
       result.push(Number(param))
     }
   })
-  props.chart?.overrideIndicator({name: store.editIndName, calcParams: result}, store.editPaneId)
+  store.chart?.overrideIndicator({name: store.editIndName, calcParams: result}, store.editPaneId)
 }
 
 </script>

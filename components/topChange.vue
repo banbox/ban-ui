@@ -49,7 +49,7 @@ import {SortDown, SortUp, Switch} from "@element-plus/icons-vue";
 import {useNuxtApp} from "#app";
 import {onMounted, reactive, ref} from "vue";
 import {getApi} from "~/utils/netio";
-import {formatBigNumber, formatPrecision} from "~/composables/kline/coms";
+import {formatBigNumber, formatPrecision, useKlineObjs} from "~/composables/kline/coms";
 import {useKlineLocal} from "~/stores/klineLocal";
 import {MyDatafeed} from "~/composables/kline/datafeeds";
 const {t} = useNuxtApp()
@@ -61,10 +61,7 @@ const sort_key = ref('chg')
 const main_col = ref('chg')
 const data_list = reactive<any[]>([])
 const store = useKlineLocal()
-
-const props = defineProps<{
-  feed: MyDatafeed
-}>()
+const {datafeed} = useKlineObjs()
 
 
 onMounted(async () => {
@@ -101,7 +98,7 @@ async function updateData(){
 async function updateWrap() {
   await updateData()
   setTimeout(() => {
-    props.feed.watch('topchg_binance_future', res => {
+    datafeed.watch('topchg_binance_future', res => {
       applyDataList(res.data)
     })
   }, 3000)

@@ -1,6 +1,9 @@
 import {Datafeed, Period, SymbolInfo} from "~/components/kline/types";
-import {CandleTooltipCustomCallbackData, CandleStyle} from "klinecharts";
+import {CandleTooltipCustomCallbackData, CandleStyle, Nullable, Chart} from "klinecharts";
 import kc from "klinecharts";
+import {MyDatafeed} from "~/composables/kline/datafeeds";
+import {useKlineStore} from "~/stores/kline";
+import {ref} from "#imports";
 export const formatPrecision = kc.utils.formatPrecision
 export const formatThousands = kc.utils.formatThousands
 export const formatDate = kc.utils.formatDate
@@ -29,6 +32,21 @@ export type BanInd = {
   title: string,
   cloud: boolean,
   is_main: boolean
+}
+
+/**
+ * 用于K线图表上显示的交易信息
+ * time/price通过Point传入
+ */
+export interface TradeInfo {
+  line_color: string,
+  in_color: string,
+  in_text: string,
+  out_color: string,
+  out_text: string,
+  active?: boolean,
+  selected?: boolean,
+  distance?: number
 }
 
 export function GetNumberDotOffset(value: number){
@@ -247,25 +265,42 @@ export function build_ohlcvs(details: BarArr[], in_msecs: number, tf_msecs: numb
   return result
 }
 
-export function useSymbols(feeder: Datafeed){
-  const symbols = ref<SymbolInfo[]>([])
+/**
+ * 自定义K线相关的共享对象。
+ * 这些对象放在pinia的store中会报错，故使用use在多个组件间共享。
+ */
+export function useKlineObjs(){
+  const datafeed = reactive(new MyDatafeed())
+
+  return {datafeed}
+}
+
+export function useSymbols() {
+  const all_symbols = reactive<SymbolInfo[]>([])
   const error = ref(null)
   const loading = ref(false)
+  const main = useKlineStore()
+  const {datafeed} = useKlineObjs()
 
-  function doFetch(){
+  function doFetch() {
     loading.value = true
-    symbols.value = []
     error.value = null
-    feeder.getSymbols().then(res => {
-      symbols.value = res
+    datafeed.getSymbols().then(res => {
+      all_symbols.splice(0, all_symbols.length, ...res)
       loading.value = false
     })
-    .catch(err => {
-      error.value = err
-      loading.value = false
-    })
+      .catch(err => {
+        error.value = err
+        loading.value = false
+      })
   }
 
   doFetch()
+
+  const symbols = computed(() => {
+    if (main.cur_symbols.length) return main.cur_symbols
+    return all_symbols
+  })
+
   return {symbols, error, loading}
 }

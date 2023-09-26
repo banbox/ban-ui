@@ -1,19 +1,9 @@
-import {
-  IndicatorTemplate,
-  KLineData,
-  OverlayStyle,
+import kc,{
+  IndicatorTemplate,IndicatorDrawParams
 } from "klinecharts";
-import kc from "klinecharts";
 import {postApi} from "#imports";
-import {getInOutFigures} from "~/composables/kline/ktools";
-interface VisibleData {
-  dataIndex: number
-  x: number
-  data: KLineData,
-  ind: any
-}
-const LineType = kc.LineType;
-const PolygonType = kc.PolygonType;
+import {drawInOutFigure, InoutData} from "~/composables/kline/indicators/common";
+
 
 /**
  * 按传入的参数生成云端指标。
@@ -22,8 +12,8 @@ const PolygonType = kc.PolygonType;
  * @param params
  */
 export const makeCloudInds = (params: Record<string, any>[]): IndicatorTemplate[] => {
-  const my_figure_types = ['inout']  // 支持的figure类型
   return params.map((args): IndicatorTemplate => {
+    const my_figure_types = ['inout']  // 支持的figure类型
     const figures = args['figures'] ?? []
     if (args['figure_tpl'] && args['calcParams']) {
       for (let period of args['calcParams']) {
@@ -61,124 +51,40 @@ export const makeCloudInds = (params: Record<string, any>[]): IndicatorTemplate[
        * @param xAxis
        * @param yAxis
        */
-      draw({ctx, kLineDataList, indicator, visibleRange,
-             bounding, barSpace, defaultStyles, xAxis, yAxis}) {
+      draw: ({ctx, kLineDataList, indicator, visibleRange, defaultStyles, xAxis, yAxis}: IndicatorDrawParams) => {
         const figures = indicator.figures
         const my_figures = figures.filter(fg => fg.type && my_figure_types.includes(fg.type))
         // 不包含自定义figure，退出执行默认绘制
-        if(!my_figures.length)return false
+        if (!my_figures.length) return false
+        // 指标计算结果
         const result = indicator.result;
-        const viewKlines: VisibleData[] = []
-        for (let i = visibleRange.from; i < visibleRange.to; i++) {
-          const kLineData = kLineDataList[i]
-          const x = xAxis.convertToPixel(i)
-          viewKlines.push({dataIndex: i, x, data: kLineData, ind: result[i]})
-        }
+        // 显示范围内的K线
+        const inouts: InoutData[] = []
         const upColor = kc.utils.formatValue(indicator.styles, 'bars[0].upColor', (defaultStyles.bars)[0].upColor) as string
         const downColor = kc.utils.formatValue(indicator.styles, 'bars[0].downColor', (defaultStyles.bars)[0].downColor) as string
-        const layStyles = getDefaultOverlayStyle()
-        my_figures.forEach(figure => {
-          if(figure.type == 'inout'){
-            const baseVal = figure.baseValue ?? 0
-            const position = baseVal >= 0 ? 'bottom': 'top';
-            const color = baseVal >= 0 ? upColor : downColor
-            viewKlines.filter(it => it.ind && it.ind[figure.key]).forEach(it => {
-              const price = it.ind[figure.key]
-              const valueY = yAxis.convertToPixel(price)
-              const text = `${figure.key}:${price}`;
-              getInOutFigures({x: it.x, y: valueY}, position, text, color).forEach(fg => {
-                const { type, styles, attrs } = fg
-                const Figure = kc.getFigureClass(type)
-                if(Figure == null)return
-                const ss = {...layStyles[type], ...styles}
-                new Figure({name: type, attrs, styles: ss}).draw(ctx)
-              })
-            })
-          }
-          else{
-            console.error('unsupport custom figure:', figure.type)
-          }
-        })
+        for (let i = visibleRange.from; i < visibleRange.to; i++) {
+          const ind = result[i];
+          if (!ind || !Object.keys(ind).length) continue
+          const kLineData = kLineDataList[i]
+          const x = xAxis.convertToPixel(i)
+          const item: InoutData = {dataIndex: i, x, data: kLineData, tags: []}
+          my_figures.forEach(fig => {
+            if (fig.type == 'inout') {
+              const baseVal = fig.baseValue ?? 0
+              const color = baseVal >= 0 ? upColor : downColor
+              const price = ind[fig.key]
+              const text = `${fig.key}:${price}`;
+              item.tags.push({price, direction: -baseVal, color, text})
+            }
+          })
+          if (!item.tags.length) continue
+          inouts.push(item)
+        }
+        drawInOutFigure(inouts, ctx, yAxis)
         return my_figures.length === figures.length
       }
     }
   })
-}
-
-function getDefaultOverlayStyle (): OverlayStyle {
-  return {
-    point: {
-      color: '#1677FF',
-      borderColor: 'rgba(22, 119, 255, 0.35)',
-      borderSize: 1,
-      radius: 5,
-      activeColor: '#1677FF',
-      activeBorderColor: 'rgba(22, 119, 255, 0.35)',
-      activeBorderSize: 3,
-      activeRadius: 5
-    },
-    line: {
-      style: LineType.Solid,
-      smooth: false,
-      color: '#1677FF',
-      size: 1,
-      dashedValue: [2, 2]
-    },
-    rect: {
-      style: PolygonType.Fill,
-      color: 'rgba(22, 119, 255, 0.25)',
-      borderColor: '#1677FF',
-      borderSize: 1,
-      borderRadius: 0,
-      borderStyle: LineType.Solid,
-      borderDashedValue: [2, 2]
-    },
-    polygon: {
-      style: PolygonType.Fill,
-      color: '#1677FF',
-      borderColor: '#1677FF',
-      borderSize: 1,
-      borderStyle: LineType.Solid,
-      borderDashedValue: [2, 2]
-    },
-    circle: {
-      style: PolygonType.Fill,
-      color: 'rgba(22, 119, 255, 0.25)',
-      borderColor: '#1677FF',
-      borderSize: 1,
-      borderStyle: LineType.Solid,
-      borderDashedValue: [2, 2]
-    },
-    arc: {
-      style: LineType.Solid,
-      color: '#1677FF',
-      size: 1,
-      dashedValue: [2, 2]
-    },
-    text: {
-      color: '#1677FF',
-      size: 12,
-      family: 'Helvetica Neue',
-      weight: 'normal'
-    },
-    rectText: {
-      style: PolygonType.Fill,
-      color: '#FFFFFF',
-      size: 12,
-      family: 'Helvetica Neue',
-      weight: 'normal',
-      borderStyle: LineType.Solid,
-      borderDashedValue: [2, 2],
-      borderSize: 1,
-      borderRadius: 2,
-      borderColor: '#1677FF',
-      paddingLeft: 4,
-      paddingRight: 4,
-      paddingTop: 4,
-      paddingBottom: 4,
-      backgroundColor: '#1677FF'
-    }
-  }
 }
 
 export default makeCloudInds

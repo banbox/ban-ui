@@ -25,10 +25,11 @@ import kc from "klinecharts"
 import _ from "lodash"
 import {useI18n} from "vue-i18n";
 import {useKlineLocal} from "~/stores/klineLocal";
+import {useKlineStore} from "~/stores/kline";
 const {t} = useI18n()
 const store = useKlineLocal()
+const main = useKlineStore()
 const props = defineProps<{
-  chart: Chart,
   modelValue: boolean
 }>()
 
@@ -49,12 +50,12 @@ const options = reactive(getOptions())
 
 function update(key: string, value: any){
   store.setStyleItem(key, value)
-  props.chart.setStyles(store.chartStyle as Styles)
+  main.chart?.setStyles(store.chartStyle as Styles)
 }
 
 function resetStyle(){
   store.resetStyle()
-  props.chart.setStyles(store.chartStyle as Styles)
+  main.chart?.setStyles(store.chartStyle as Styles)
 }
 
 </script>

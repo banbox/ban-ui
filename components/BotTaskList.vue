@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {BotTask} from "~/composables/types";
 import {TradeInfo, useKlineChart} from "~/composables/kline/coms";
-import {BanOrder} from "~/composables/dash/types";
+import {BanOrder} from "~/composables/types";
 import {ActionType, Chart, OverlayCreate} from "klinecharts";
 import {fmtDuration, tf_to_secs} from "~/composables/dateutil";
 import {useKlineLocal} from "~/stores/klineLocal";

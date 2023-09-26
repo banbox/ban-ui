@@ -3,6 +3,7 @@ import {ref} from "#imports";
 import {BanInd} from "~/composables/kline/coms";
 import {Chart, Nullable} from "klinecharts";
 import {SymbolInfo} from "~/components/kline/types";
+import {getDefaults} from "~/config";
 
 
 export const useKlineStore = defineStore('kline', () => {
@@ -42,8 +43,21 @@ export const useKlineStore = defineStore('kline', () => {
     all_inds.push({name, title: name.toLowerCase(), cloud: false, is_main: false})
   }
 
+  function setCurSymbols(pairs: string[]){
+    const defs = getDefaults()
+    cur_symbols.splice(0, cur_symbols.length)
+    pairs.forEach(pair => {
+      cur_symbols.push({
+        ...defs.symbol,
+        ticker: pair,
+        name: pair,
+        shortName: pair
+      })
+    })
+  }
+
   return {chart, loadingChart, showLogin, showDrawBar, modalIndCfg, editPaneId, editIndName, authTFList,
-    fireOhlcv, start_ms, stop_ms, fireKRange, klineLoaded, all_inds, cur_symbols,
+    fireOhlcv, start_ms, stop_ms, fireKRange, klineLoaded, all_inds, cur_symbols, setCurSymbols,
     color_short, color_long
   }
 })

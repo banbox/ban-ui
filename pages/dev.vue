@@ -3,14 +3,21 @@ import {useKlineLocal} from "~/stores/klineLocal";
 import {MyDatafeed} from "~/composables/kline/datafeeds";
 import {PairItem} from "~/composables/types";
 import BotTaskList from "~/components/BotTaskList.vue";
+import {useKlineStore} from "~/stores/kline";
 
 const klocal = useKlineLocal()
+const main = useKlineStore()
 
 const slide_tab = ref('max_chg')
 const slide_tabs = reactive<PairItem[]>([
   {label: '市场变动', value: 'max_chg'},
   {label: '任务列表', value: 'task_list'},
 ])
+
+function setSlideTab(tab_name: string){
+  slide_tab.value = tab_name
+  main.cur_symbols.splice(0, main.cur_symbols.length)
+}
 
 </script>
 
@@ -24,7 +31,7 @@ const slide_tabs = reactive<PairItem[]>([
       <div class="tab-menu">
         <div class="menu-item" v-for="(item, index) in slide_tabs" :key="index"
           :class="{active: slide_tab == item.value}"
-             @click="slide_tab = item.value">{{item.label}}</div>
+             @click="setSlideTab(item.value)">{{item.label}}</div>
         <div class="grow"></div>
       </div>
     </div>

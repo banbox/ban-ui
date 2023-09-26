@@ -133,6 +133,7 @@ async function loadKlineData(from: number, to: number, isNewData?: boolean){
     const more = kdata.data.length > 0
     main.chart?.applyMoreData(kdata.data, more)
   }
+  main.klineLoaded += 1
   kdata.lays?.forEach(o => {
     drawBarRef.value?.addOverlay(o)
   })
@@ -397,7 +398,7 @@ watch(() => klocal.showRight, () => {
 // 监听数据加载动作
 watch(() => main.fireOhlcv, async () => {
   if(main.start_ms && main.stop_ms){
-    await loadKlineRange(klocal.symbol, klocal.period, main.start_ms, main.stop_ms, false)
+    await loadKlineRange(klocal.symbol, klocal.period, main.start_ms, main.stop_ms)
     main.start_ms = 0
     main.stop_ms = 0
   }

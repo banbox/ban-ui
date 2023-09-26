@@ -65,6 +65,7 @@ function loadVisiableTrades(){
   const stop_ms = dataList[dataList.length - 1].timestamp;
   const show_trades = trade_list.filter(td => start_ms <= td.enter_at && td.exit_at <= stop_ms);
   if(!show_trades.length)return;
+  chartObj.removeOverlay({groupId: trade_gp})
   const cur_ols = show_trades.map(td => {
     let color = '#1677FF';
     let exit_color = '#01C5C4';
@@ -137,6 +138,7 @@ async function clickTask(task_idx: number){
   // 删除旧的订单覆盖物
   main.chart?.removeOverlay({groupId: trade_gp})
   // 切换到第一个币种
+  main.setCurSymbols(task.pairs)
   const cur_pair = task.pairs[0]
   klocal.setSymbolTicker(cur_pair)
   trade_list.splice(0, trade_list.length)
@@ -203,7 +205,7 @@ watch(() => main.klineLoaded, () => {
     </div>
     <div class="task-list">
       <div class="item" v-for="(item, index) in cur_list" :key="index"
-          :class="[item.live ? 'live':'']" @click="clickTask(index)"
+          :class="[item.live ? 'live':'', {active: index == cur_task}]" @click="clickTask(index)"
            @contextmenu.prevent="itemRightClick($event, index)">
         <div class="top">
           <span class="stg" v-if="item.strategy.length == 0">无策略</span>
@@ -266,6 +268,9 @@ watch(() => main.klineLoaded, () => {
     }
     &.live{
       background-color: var(--el-color-success-light-9);
+    }
+    &.active{
+      color: var(--el-color-primary);
     }
   }
   .item-menu{

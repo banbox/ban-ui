@@ -6,7 +6,7 @@ import {ActionType, Chart, OverlayCreate} from "klinecharts";
 import {fmtDuration, tf_to_secs} from "~/composables/dateutil";
 import {useKlineLocal} from "~/stores/klineLocal";
 import {useKlineStore} from "~/stores/kline";
-import {Delete} from "@element-plus/icons-vue"
+import {Delete, Refresh} from "@element-plus/icons-vue"
 
 const task_list = reactive<BotTask[]>([])
 const allow_modes = reactive<string[]>(['live', 'non_live'])
@@ -108,7 +108,9 @@ ${td.strategy}
  * 如果当前币种有订单，则显示到最新订单。否则显示到任务结束时间。
  */
 function loadDataRange(){
+  if(cur_task.value < 0)return
   const task = cur_list.value[cur_task.value];
+  if(!task)return;
   let timeframe = task.tfs[0]
   const cur_pair = klocal.symbol.ticker
   const last = trade_list.findLast(od => od.symbol == cur_pair)
@@ -193,15 +195,25 @@ watch(() => main.klineLoaded, () => {
 }, {immediate: true})
 
 
+watch(klocal.symbol, () => {
+  loadDataRange()
+})
+
+
 </script>
 
 <template>
   <div class="list-wrap">
-    <div class="head-tags">
-      <el-tag @click="clickMode('non_live')"
-        :effect="allow_modes.includes('non_live') ? 'dark':'light'">回测</el-tag>
-      <el-tag @click="clickMode('live')"
-        :effect="allow_modes.includes('live') ? 'dark':'light'">实时</el-tag>
+    <div class="head-box">
+      <div class="head-tags">
+        <el-tag @click="clickMode('non_live')"
+          :effect="allow_modes.includes('non_live') ? 'dark':'light'">回测</el-tag>
+        <el-tag @click="clickMode('live')"
+          :effect="allow_modes.includes('live') ? 'dark':'light'">实时</el-tag>
+      </div>
+      <div class="head-right">
+        <el-icon size="20px" @click="loadData"><Refresh/></el-icon>
+      </div>
     </div>
     <div class="task-list">
       <div class="item" v-for="(item, index) in cur_list" :key="index"
@@ -235,6 +247,23 @@ watch(() => main.klineLoaded, () => {
 <style scoped lang="scss">
 .list-wrap{
   height: 100%;
+}
+.head-box{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+.head-right{
+  display: flex;
+  height: 100%;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 7px;
+  .el-icon{
+    cursor: pointer;
+    color: var(--el-color-primary)
+  }
 }
 .head-tags{
   padding: 3px 7px;

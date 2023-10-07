@@ -11,6 +11,7 @@ const emit = defineEmits<{
 }>()
 
 const model = reactive<TradeBot>({
+  name: '',
   url: '',
   account: '',
   password: '',

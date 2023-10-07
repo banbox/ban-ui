@@ -77,9 +77,11 @@ function loadVisiableTrades(){
     const out_action = `平${td.short ? "空" : "多"}`
     const in_text = `${in_action} ${td.enter_tag} ${td.leverage}倍
 ${td.strategy}
+${td.enter_price.toFixed(5)}
 花费：${td.enter_cost.toFixed(2)}`
     const out_text = `${out_action} ${td.exit_tag} ${td.leverage}倍
 ${td.strategy}
+${td.exit_price?.toFixed(5)}
 利润：${(td.profit_rate * 100).toFixed(1)}% ${td.profit.toFixed(5)}
 持有：${fmtDuration(td.duration)}`
     return {

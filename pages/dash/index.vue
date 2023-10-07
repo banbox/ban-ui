@@ -79,7 +79,7 @@ onMounted(() => {
         <div class="right-acts">
           <template v-if="counts[item.url]">
             <div class="num">Open: {{counts[item.url].open_num}}</div>
-            <div class="cost">Cost: {{counts[item.url].total_cost.toFixed(4)}}</div>
+            <div class="cost">Cost: {{(counts[item.url].total_cost ?? 0).toFixed(4)}}</div>
           </template>
           <div class="status" :class="[item.avaiable ? 'ok': 'fail']"
                :title="$t(item.avaiable ? 'online':'offline')"/>

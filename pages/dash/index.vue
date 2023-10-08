@@ -84,7 +84,7 @@ onMounted(() => {
           <div class="status" :class="[item.avaiable ? 'ok': 'fail']"
                :title="$t(item.avaiable ? 'online':'offline')"/>
           <el-switch v-model="item.auto_refresh" :title="$t('auto_refresh')"/>
-          <el-icon size="20px" color="#F56C6CFF" @click="delBot(index)"
+          <el-icon size="20px" color="#F56C6CFF" @click.prevent="delBot(index)"
                    :title="$t('delete')"><Delete /></el-icon>
         </div>
       </div>

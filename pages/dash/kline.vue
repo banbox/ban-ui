@@ -22,6 +22,14 @@ store.menu_id = 'kline'
 const trade_gp = 'ban_trades';
 const trade_list = reactive<BanOrder[]>([])
 const symbol = ref('')
+const {pair} = useRoute().query
+
+onMounted(() => {
+  if(pair) {
+    klocal.setSymbolTicker(pair.toString())
+  }
+})
+
 
 async function loadVisiableTrades() {
   if (!main.chart) return

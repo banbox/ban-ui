@@ -5,6 +5,7 @@ import {useCurApi} from "~/composables/dash/api";
 import {PairPerf, PairStgyTf, StgyVer} from "~/composables/dash/types";
 import * as diagnostics_channel from "diagnostics_channel";
 import {useDashStore} from "~/stores/dash";
+import {useLocalePath} from "#i18n";
 
 definePageMeta({
   layout: 'dash',
@@ -13,6 +14,7 @@ definePageMeta({
 const {getApi} = useCurApi()
 const store = useDashStore()
 store.menu_id = 'job'
+const localPath = useLocalePath()
 
 const tab_name = ref('symbol')
 const pairs = reactive<PairPerf[]>([])
@@ -67,6 +69,11 @@ onMounted(() => {
         </el-table-column>
         <el-table-column prop="profit_pct" label="收益" >
           <template #default="scope">{{(scope.row.profit_pct * 100).toFixed(1)}}%</template>
+        </el-table-column>
+        <el-table-column prop="more" label="操作" >
+          <template #default="scope">
+            <el-link :href="localPath(`/dash/kline?pair=${scope.row.pair}`)">K线</el-link>
+          </template>
         </el-table-column>
       </el-table>
     </el-tab-pane>

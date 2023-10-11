@@ -129,7 +129,7 @@ onMounted(() => {
     </el-col>
     <el-col :span="4">
       <el-statistic title="期望盈利/利润" :value="data.expectancy">
-        <template #suffix>/ {{data.expectancy_ratio}}</template>
+        <template #suffix>/ {{data.expectancy_ratio.toFixed(3)}}</template>
       </el-statistic>
     </el-col>
   </el-row>
@@ -157,11 +157,11 @@ onMounted(() => {
     <el-descriptions-item label="第一笔" align="center">{{getDateStr(data.first_trade_timestamp)}}</el-descriptions-item>
     <el-descriptions-item label="最新一笔" align="center">{{getDateStr(data.latest_trade_timestamp)}}</el-descriptions-item>
     <el-descriptions-item label="平均持仓" align="center">{{fmtDuration(data.avg_duration)}}</el-descriptions-item>
-    <el-descriptions-item label="交易量" align="center">{{data.total_cost}}</el-descriptions-item>
+    <el-descriptions-item label="交易量" align="center">{{data.total_cost?.toFixed(5)}}</el-descriptions-item>
 
     <el-descriptions-item label="最佳交易" align="center">{{data.best_pair}}</el-descriptions-item>
     <el-descriptions-item label="最佳利润" align="center">{{(data.best_pair_profit_pct * 100).toFixed(1)}}%</el-descriptions-item>
-    <el-descriptions-item label="最大回撤" align="center">{{data.max_drawdown}}%</el-descriptions-item>
+    <el-descriptions-item label="最大回撤" align="center">{{(data.max_drawdown * 100).toFixed(1)}}%</el-descriptions-item>
     <el-descriptions-item label="最大回撤金额" align="center">{{data.max_drawdown_abs.toFixed(5)}}</el-descriptions-item>
   </el-descriptions>
   <el-descriptions border title="全部订单" :column="4">

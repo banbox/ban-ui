@@ -18,6 +18,7 @@ const banod_list = reactive<BanOrder[]>([])
 const exgod_list = reactive<Record<string, any>[]>([])
 const loading = ref(false)
 const page_size = ref(15)
+const limit_size = ref(30)
 const cur_page = ref(1)
 const banod_num = ref(0)
 const exgod_num = ref(0)
@@ -58,8 +59,12 @@ async function loadData(page: number) {
   data['start_time'] = toUTCStamp(data['start_time'])
   data['stop_time'] = toUTCStamp(data['stop_time'])
   data['source'] = tab_name.value
-  data['limit'] = page_size.value
-  data['offset'] = page_size.value * (page - 1)
+  if(tab_name.value == 'bot') {
+    data['limit'] = page_size.value
+    data['offset'] = page_size.value * (page - 1)
+  }else{
+    data['limit'] = limit_size.value
+  }
   const rsp = await getApi('/orders', data)
   const res = rsp.data ?? []
   if(tab_name.value == 'bot'){
@@ -211,6 +216,9 @@ async function clickCalcProfits(){
       <el-col :span="4">
         <el-form-item label="截止时间" v-if="tab_name == 'bot'">
           <el-input v-model="searchData.stop_time" placeholder="20231012"/>
+        </el-form-item>
+        <el-form-item label="显示个数" v-else>
+          <el-input type="number" v-model="limit_size" />
         </el-form-item>
       </el-col>
       <el-col :span="4">

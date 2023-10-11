@@ -36,27 +36,31 @@ function goPage(path: string){
           <img width="30" src="/logo_w_200.png"/>
         </div>
       </div>
-      <el-menu-item index="1" @click="goPage('/dash/board')">
+      <el-menu-item index="index" @click="goPage('/dash/board')">
         <el-icon><HomeFilled /></el-icon>
         <template #title>首页</template>
       </el-menu-item>
-      <el-menu-item index="2" @click="goPage('/dash/pair_job')">
+      <el-menu-item index="job" @click="goPage('/dash/pair_job')">
         <el-icon><List /></el-icon>
         <template #title>币对 & 策略</template>
       </el-menu-item>
-      <el-menu-item index="3" @click="goPage('/dash/stat')">
+      <el-menu-item index="kline" @click="goPage('/dash/kline')">
+        <el-icon><TrendCharts /></el-icon>
+        <template #title>K线</template>
+      </el-menu-item>
+      <el-menu-item index="stat" @click="goPage('/dash/stat')">
         <el-icon><Calendar /></el-icon>
         <template #title>收益统计</template>
       </el-menu-item>
-      <el-menu-item index="4" @click="goPage('/dash/order')">
+      <el-menu-item index="order" @click="goPage('/dash/order')">
         <el-icon><Memo /></el-icon>
         <template #title>订单</template>
       </el-menu-item>
-      <el-menu-item index="5" @click="goPage('/dash/symbol')">
+      <el-menu-item index="pair" @click="goPage('/dash/symbol')">
         <el-icon><ShoppingTrolley /></el-icon>
         <template #title>交易对管理</template>
       </el-menu-item>
-      <el-menu-item index="6" @click="goPage('/dash/config')">
+      <el-menu-item index="config" @click="goPage('/dash/config')">
         <el-icon><Setting /></el-icon>
         <template #title>配置</template>
       </el-menu-item>
@@ -64,7 +68,7 @@ function goPage(path: string){
 <!--        <el-icon><TrendCharts /></el-icon>-->
 <!--        <template #title>K线</template>-->
 <!--      </el-menu-item>-->
-      <el-menu-item index="8" @click="goPage('/dash/logs')">
+      <el-menu-item index="log" @click="goPage('/dash/logs')">
         <el-icon><Tickets /></el-icon>
         <template #title>日志</template>
       </el-menu-item>
@@ -113,6 +117,8 @@ html, body{
   flex-grow: 1;
   background-color: #f4f6f9;
   overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
 }
 .lay-menu{
   width: 13%;

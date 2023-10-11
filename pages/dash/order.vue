@@ -11,7 +11,7 @@ definePageMeta({
 
 const {getApi, postApi} = useCurApi()
 const store = useDashStore()
-store.menu_id = '4'
+store.menu_id = 'order'
 
 const tab_name = ref('open') //open/his
 const od_list = reactive<BanOrder[]>([])
@@ -19,6 +19,7 @@ const open_num = ref(-1)
 const close_num = ref(-1)
 const loading = ref(false)
 const page_size = ref(15)
+const cur_page = ref(1)
 const ban_od = ref<BanOrder|null>(null)
 const showOdDetail = ref(false)
 const showOpenOrder = ref(false)
@@ -44,6 +45,7 @@ const quoteSymbol = computed(() => {
 })
 
 async function loadData(page: number) {
+  cur_page.value = page
   const data: Record<string, any> = {status: tab_name.value}
   if (tab_name.value == 'his') {
     data['limit'] = page_size.value
@@ -108,6 +110,18 @@ async function doOpenOrder(){
     open_num.value += 1
   }
 }
+
+async function clickCalcProfits(){
+  const rsp = await postApi('/calc_profits', {status: tab_name.value})
+  console.log('calc profits:', rsp)
+  if(rsp.code != 200){
+    ElMessage.error({message: rsp.msg ?? '更新失败'})
+  }
+  else{
+    ElMessage.success({message: `已更新${rsp.num}个订单`})
+    await loadData(cur_page.value)
+  }
+}
 </script>
 
 <template>
@@ -163,9 +177,12 @@ async function doOpenOrder(){
       <el-menu-item index="open">打开的订单<span v-if="open_num >= 0">({{open_num}})</span></el-menu-item>
       <el-menu-item index="his">已平仓<span v-if="close_num >= 0">({{close_num}})</span></el-menu-item>
     </el-menu>
-    <div class="head-btns" v-if="tab_name == 'open'">
-      <el-button type="primary" @click="clickShowOpen">开单</el-button>
-      <el-button type="danger" @click="closeOrder('all')">全部平仓</el-button>
+    <div class="head-btns">
+      <el-button type="primary" @click="clickCalcProfits">更新利润</el-button>
+      <template v-if="tab_name == 'open'">
+        <el-button type="primary" @click="clickShowOpen">开单</el-button>
+        <el-button type="danger" @click="closeOrder('all')">全部平仓</el-button>
+      </template>
     </div>
   </div>
   <el-table :data="od_list">
@@ -199,7 +216,7 @@ async function doOpenOrder(){
     <el-table-column label="操作" class-name="actions" width="150" align="center">
       <template #default="props">
         <el-link @click="showOrder(props.$index)">查看</el-link>
-        <el-link @click="closeOrder(props.row.id.toString())">平仓</el-link>
+        <el-link @click="closeOrder(props.row.id.toString())" v-if="props.row.status != 4">平仓</el-link>
       </template>
     </el-table-column>
   </el-table>

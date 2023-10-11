@@ -10,7 +10,7 @@ definePageMeta({
 
 const {getApi, postApi} = useCurApi()
 const store = useDashStore()
-store.menu_id = '8'
+store.menu_id = 'log'
 const content = reactive<string[]>([])
 
 async function loadData(){

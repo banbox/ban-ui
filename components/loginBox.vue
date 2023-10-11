@@ -212,7 +212,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
 
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
 @import "~/assets/klinebase.scss";
 .login-box{
   display: flex;

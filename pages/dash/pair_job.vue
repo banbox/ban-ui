@@ -12,7 +12,7 @@ definePageMeta({
 
 const {getApi} = useCurApi()
 const store = useDashStore()
-store.menu_id = '2'
+store.menu_id = 'job'
 
 const tab_name = ref('symbol')
 const pairs = reactive<PairPerf[]>([])

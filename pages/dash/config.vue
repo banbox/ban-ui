@@ -10,7 +10,7 @@ definePageMeta({
 
 const {getApi, postApi} = useCurApi()
 const store = useDashStore()
-store.menu_id = '6'
+store.menu_id = 'config'
 const content = ref('')
 
 async function loadData(){

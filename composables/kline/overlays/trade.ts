@@ -1,4 +1,4 @@
-import {OverlayEvent, OverlayTemplate, LineStyle} from "klinecharts";
+import {OverlayEvent, OverlayTemplate} from "klinecharts";
 import {TradeInfo} from "~/composables/kline/coms";
 
 const textStyles = {

@@ -12,7 +12,7 @@ definePageMeta({
 
 const {getApi} = useCurApi()
 const store = useDashStore()
-store.menu_id = '3'
+store.menu_id = 'stat'
 const tab_name = ref('days')  // weeks, months
 const stat_list = reactive<PeriodStat[]>([])
 const tag_stats = reactive<TagStat[]>([])

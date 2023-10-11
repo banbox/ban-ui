@@ -10,7 +10,7 @@ definePageMeta({
 
 const {getApi, postApi} = useCurApi()
 const store = useDashStore()
-store.menu_id = '5'
+store.menu_id = 'pair'
 const tab_name = ref('white')
 const whitelist = reactive<string[]>([])
 const blacklist = reactive<string[]>([])

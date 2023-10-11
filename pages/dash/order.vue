@@ -13,14 +13,15 @@ const {getApi, postApi} = useCurApi()
 const store = useDashStore()
 store.menu_id = 'order'
 
-const tab_name = ref('open') //open/his
-const od_list = reactive<BanOrder[]>([])
-const open_num = ref(-1)
-const close_num = ref(-1)
+const tab_name = ref('bot') //bot/exchange
+const banod_list = reactive<BanOrder[]>([])
+const exgod_list = reactive<Record<string, any>[]>([])
 const loading = ref(false)
 const page_size = ref(15)
 const cur_page = ref(1)
-const ban_od = ref<BanOrder|null>(null)
+const banod_num = ref(0)
+const exgod_num = ref(0)
+const ban_od = ref<Record<string, any>|null>(null)
 const showOdDetail = ref(false)
 const showOpenOrder = ref(false)
 const openingOd = ref(false)
@@ -36,6 +37,13 @@ const openOd = reactive<OpenOrder>({
   strategy: undefined
 })
 
+const searchData = reactive({
+  status: '',
+  symbol: '',
+  start_time: '',
+  stop_time: ''
+})
+
 const quoteSymbol = computed(() => {
   const arr = openOd.pair.split('/')
   if(arr.length !== 2)return ''
@@ -46,18 +54,19 @@ const quoteSymbol = computed(() => {
 
 async function loadData(page: number) {
   cur_page.value = page
-  const data: Record<string, any> = {status: tab_name.value}
-  if (tab_name.value == 'his') {
-    data['limit'] = page_size.value
-    data['offset'] = page_size.value * (page - 1)
-  }
+  const data: Record<string, any> = {...toRaw(searchData)}
+  data['start_time'] = toUTCStamp(data['start_time'])
+  data['stop_time'] = toUTCStamp(data['stop_time'])
+  data['source'] = tab_name.value
+  data['limit'] = page_size.value
+  data['offset'] = page_size.value * (page - 1)
   const rsp = await getApi('/orders', data)
   const res = rsp.data ?? []
-  od_list.splice(0, od_list.length, ...res)
-  if (tab_name.value == 'his') {
-    close_num.value = rsp.total_num
-  } else {
-    open_num.value = od_list.length
+  if(tab_name.value == 'bot'){
+    banod_list.splice(0, banod_list.length, ...res)
+  }
+  else{
+    exgod_list.splice(0, exgod_list.length, ...res)
   }
 }
 
@@ -65,21 +74,18 @@ onMounted(() => {
   loadData(1)
 })
 
-watch(tab_name, () => {
-  loadData(1)
-})
 
 function showOrder(idx: number){
-  console.log('show order:', idx)
-  ban_od.value = od_list[idx]
+  if(tab_name.value == 'bot') {
+    ban_od.value = banod_list[idx]
+  }
+  else{
+    ban_od.value = exgod_list[idx]
+  }
   showOdDetail.value = true
 }
 
 async function closeOrder(order_id: string) {
-  if(open_num.value == 0){
-    ElMessage.error({message: '没有打开的订单'})
-    return
-  }
   try {
     await ElMessageBox.confirm('确定要立刻平仓吗？', '提示')
   } catch (e) {
@@ -103,16 +109,14 @@ async function doOpenOrder(){
   if(rsp.code != 200){
     ElMessage.error({message: rsp.msg ?? '开单失败'})
   }
-  else if(tab_name.value == 'open'){
-    od_list.push((rsp as unknown) as BanOrder)
+  else{
     ElMessage.success({message: '开单成功'})
     showOpenOrder.value = false
-    open_num.value += 1
   }
 }
 
 async function clickCalcProfits(){
-  const rsp = await postApi('/calc_profits', {status: tab_name.value})
+  const rsp = await postApi('/calc_profits', {})
   console.log('calc profits:', rsp)
   if(rsp.code != 200){
     ElMessage.error({message: rsp.msg ?? '更新失败'})
@@ -174,18 +178,49 @@ async function clickCalcProfits(){
   </client-only>
   <div class="page-head">
     <el-menu mode="horizontal" :default-active="tab_name" @select="tab_name = $event">
-      <el-menu-item index="open">打开的订单<span v-if="open_num >= 0">({{open_num}})</span></el-menu-item>
-      <el-menu-item index="his">已平仓<span v-if="close_num >= 0">({{close_num}})</span></el-menu-item>
+      <el-menu-item index="bot">机器人订单</el-menu-item>
+      <el-menu-item index="exchange">交易所订单</el-menu-item>
     </el-menu>
-    <div class="head-btns">
+    <div class="head-btns" v-if="tab_name == 'bot'">
       <el-button type="primary" @click="clickCalcProfits">更新利润</el-button>
-      <template v-if="tab_name == 'open'">
-        <el-button type="primary" @click="clickShowOpen">开单</el-button>
-        <el-button type="danger" @click="closeOrder('all')">全部平仓</el-button>
-      </template>
+      <el-button type="primary" @click="clickShowOpen">开单</el-button>
+      <el-button type="danger" @click="closeOrder('all')">全部平仓</el-button>
     </div>
   </div>
-  <el-table :data="od_list">
+  <el-form :inline="true" :model="searchData">
+    <el-row>
+      <el-col :span="4">
+        <el-form-item label="状态" v-if="tab_name == 'bot'" >
+          <el-select v-model="searchData.status">
+            <el-option value="">不限</el-option>
+            <el-option value="open">开启</el-option>
+            <el-option value="his">已平仓</el-option>
+          </el-select>
+        </el-form-item>
+      </el-col>
+      <el-col :span="4">
+        <el-form-item label="币种" :required="tab_name != 'bot'">
+          <el-input v-model="searchData.symbol"/>
+        </el-form-item>
+      </el-col>
+      <el-col :span="4">
+        <el-form-item label="开始时间" :required="tab_name != 'bot'">
+          <el-input v-model="searchData.start_time" placeholder="20231012"/>
+        </el-form-item>
+      </el-col>
+      <el-col :span="4">
+        <el-form-item label="截止时间" v-if="tab_name == 'bot'">
+          <el-input v-model="searchData.stop_time" placeholder="20231012"/>
+        </el-form-item>
+      </el-col>
+      <el-col :span="4">
+        <el-form-item>
+          <el-button type="primary" @click="loadData(1)">查询</el-button>
+        </el-form-item>
+      </el-col>
+    </el-row>
+  </el-form>
+  <el-table :data="banod_list" v-if="tab_name == 'bot'">
     <el-table-column prop="id" label="ID"/>
     <el-table-column prop="symbol" label="币对"/>
     <el-table-column prop="timeframe" label="时间帧"/>
@@ -200,12 +235,12 @@ async function clickCalcProfits(){
       </template>
     </el-table-column>
     <el-table-column prop="enter_tag" label="入场标签"/>
-    <el-table-column prop="exit_at" label="入场时间" v-if="tab_name == 'his'">
+    <el-table-column prop="exit_at" label="出场时间">
       <template #default="props">
         <span>{{getDateStr(props.row.exit_at)}}</span>
       </template>
     </el-table-column>
-    <el-table-column prop="exit_tag" label="出场标签" v-if="tab_name == 'his'"/>
+    <el-table-column prop="exit_tag" label="出场标签"/>
     <el-table-column prop="leverage" label="杠杆"/>
     <el-table-column prop="profit_rate" label="收益率">
       <template #default="props">{{(props.row.profit_rate * 100).toFixed(1)}}%</template>
@@ -220,8 +255,29 @@ async function clickCalcProfits(){
       </template>
     </el-table-column>
   </el-table>
-  <div class="page-box" v-if="close_num > page_size && tab_name == 'his'">
-    <el-pagination layout="prev, pager, next" :total="close_num" :page-size="page_size" @current-change="loadData"/>
+  <el-table :data="exgod_list" v-else>
+    <el-table-column prop="id" label="订单ID"/>
+    <el-table-column prop="clientOrderId" label="Clent ID"/>
+    <el-table-column prop="symbol" label="币对"/>
+    <el-table-column prop="timestamp" label="时间">
+      <template #default="props">
+        <span>{{getDateStr(props.row.timestamp)}}</span>
+      </template>
+    </el-table-column>
+    <el-table-column prop="side" label="多空"/>
+    <el-table-column prop="price" label="价格"/>
+    <el-table-column prop="amount" label="数量"/>
+    <el-table-column prop="status" label="状态"/>
+    <el-table-column label="操作" class-name="actions" width="150" align="center">
+      <template #default="props">
+        <el-link @click="showOrder(props.$index)">查看</el-link>
+      </template>
+    </el-table-column>
+  </el-table>
+  <div class="page-box">
+    <template v-if="banod_num > page_size && tab_name == 'bot'">
+      <el-pagination layout="prev, pager, next" :total="banod_num" :page-size="page_size" @current-change="loadData"/>
+    </template>
   </div>
 </template>
 

@@ -20,6 +20,7 @@ import kc from "klinecharts"
 import {GetIndFields} from "~/components/kline/inds"
 import {defineEmits, reactive, computed, watch} from "vue";
 import {useKlineStore} from "~/stores/kline";
+import {useKlineLocal} from "~/stores/klineLocal";
 
 const props = defineProps<{
   modelValue: boolean
@@ -38,6 +39,7 @@ const showModal = computed({
   }
 })
 
+const klocal = useKlineLocal()
 const store = useKlineStore()
 const IndFieldsMap = GetIndFields();
 const params = reactive<any[]>([])
@@ -70,7 +72,15 @@ function clickModel(from: string){
       result.push(Number(param))
     }
   })
+  const item = {name: store.editIndName, params: result, pane_id: store.editPaneId}
   store.chart?.overrideIndicator({name: store.editIndName, calcParams: result}, store.editPaneId)
+  const idx = klocal.save_inds.findIndex(ind => ind.name == item.name && ind.pane_id == item.pane_id)
+  if(idx >= 0){
+    klocal.save_inds.splice(idx, 1, item)
+  }
+  else{
+    klocal.save_inds.push(item)
+  }
 }
 
 </script>

@@ -8,9 +8,21 @@ import {useKlineLocal} from "~/stores/klineLocal";
 import {useKlineStore} from "~/stores/kline";
 import {Delete, Refresh} from "@element-plus/icons-vue"
 
+const empty_task = {
+  task_id: 0,
+  live: false,
+  start_ms: 0,
+  stop_ms: 0,
+  pairs: [],
+  strategy: [],
+  tfs: [],
+  order_num: 0,
+  profit_rate: 0
+}
+
 const task_list = reactive<BotTask[]>([])
 const allow_modes = reactive<string[]>(['live', 'non_live'])
-const cur_task = ref(-1)
+const cur_task = reactive<BotTask>({...empty_task})
 const trade_list = reactive<BanOrder[]>([])
 const trade_gp = 'ban_trades';
 const loadingTask = ref(false);
@@ -110,10 +122,8 @@ ${td.exit_price?.toFixed(5)}
  * 如果当前币种有订单，则显示到最新订单。否则显示到任务结束时间。
  */
 function loadDataRange(){
-  if(cur_task.value < 0)return
-  const task = cur_list.value[cur_task.value];
-  if(!task)return;
-  let timeframe = task.tfs[0]
+  if(cur_task.task_id == 0)return
+  let timeframe = cur_task.tfs[0]
   const cur_pair = klocal.symbol.ticker
   const last = trade_list.findLast(od => od.symbol == cur_pair)
   if(last){
@@ -121,7 +131,7 @@ function loadDataRange(){
     main.stop_ms = last.exit_at
   }
   else{
-    main.stop_ms = task.stop_ms
+    main.stop_ms = cur_task.stop_ms
   }
   klocal.setTimeframe(timeframe)
   const tf_msecs = tf_to_secs(timeframe) * 1000;
@@ -137,8 +147,8 @@ async function clickTask(task_idx: number){
   }
   if(loadingTask.value)return
   loadingTask.value = true;
-  cur_task.value = task_idx
   const task = cur_list.value[task_idx];
+  Object.assign(cur_task, task)
   // 删除旧的订单覆盖物
   main.chart?.removeOverlay({groupId: trade_gp})
   // 切换到第一个币种
@@ -159,14 +169,14 @@ async function clickTask(task_idx: number){
 }
 
 function itemRightClick(e: PointerEvent, index: number){
-  cur_task.value = index
+  Object.assign(cur_task, cur_list.value[index])
   menuPos.left = `${e.clientX}px`
   menuPos.top = `${e.clientY}px`
   showItemMenu.value = true
 }
 
 async function delTask() {
-  if (cur_task.value < 0) {
+  if (cur_task.task_id == 0) {
     ElMessage.error({message: '请右击任务删除'})
     return
   }
@@ -175,10 +185,9 @@ async function delTask() {
   } catch (e) {
     return
   }
-  const task = cur_list.value[cur_task.value]
   const rsp = await postApi('/dev/del_task', {task_id: task.task_id})
   if (rsp.code == 200) {
-    cur_task.value = -1
+    Object.assign(cur_task, empty_task)
     const task_num = rsp.total > 0 ? 1:0;
     ElMessage.success({message: `已删除${task_num}个任务共${rsp.total}条记录`})
     await loadData()
@@ -219,7 +228,7 @@ watch(klocal.symbol, () => {
     </div>
     <div class="task-list">
       <div class="item" v-for="(item, index) in cur_list" :key="index"
-          :class="[item.live ? 'live':'', {active: index == cur_task}]" @click="clickTask(index)"
+          :class="[item.live ? 'live':'', {active: item.task_id == cur_task.task_id}]" @click="clickTask(index)"
            @contextmenu.prevent="itemRightClick($event, index)">
         <div class="top">
           <span class="stg" v-if="item.strategy.length == 0">无策略</span>

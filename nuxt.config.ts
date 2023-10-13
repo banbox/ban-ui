@@ -84,6 +84,10 @@ export default defineNuxtConfig({
     }
   },
   routeRules: {
-    '/dash/**': {ssr: false}
+    '/dash/**': {ssr: false},
+    '/api/**': {
+      // 用于开发者以生产模式运行，生产环境不会走这里
+      proxy: { to: `${backendHost}/**`, },
+    }
   }
 })

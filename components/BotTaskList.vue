@@ -92,12 +92,14 @@ ${td.strategy}
 下单：${getDateStr(td.enter_at)}
 入场：${getDateStr(td.enter_create_at)}
 价格：${td.enter_average.toFixed(5)}
+数量：${td.enter_amount.toFixed(6)}
 花费：${td.enter_cost.toFixed(2)}`
     const out_text = `${out_action} ${td.exit_tag} ${td.leverage}倍
 ${td.strategy}
 下单：${getDateStr(td.exit_at)}
 出场：${getDateStr(td.exit_create_at ?? 0)}
 价格：${td.exit_average?.toFixed(5)}
+数量：${td.exit_amount?.toFixed(6)}
 利润：${(td.profit_rate * 100).toFixed(1)}% ${td.profit.toFixed(5)}
 持有：${fmtDuration(td.duration)}`
     return {

@@ -89,19 +89,23 @@ function loadVisiableTrades(){
     const out_action = `平${td.short ? "空" : "多"}`
     const in_text = `${in_action} ${td.enter_tag} ${td.leverage}倍
 ${td.strategy}
-${td.enter_price.toFixed(5)}
+下单：${getDateStr(td.enter_at)}
+入场：${getDateStr(td.enter_create_at)}
+价格：${td.enter_average.toFixed(5)}
 花费：${td.enter_cost.toFixed(2)}`
     const out_text = `${out_action} ${td.exit_tag} ${td.leverage}倍
 ${td.strategy}
-${td.exit_price?.toFixed(5)}
+下单：${getDateStr(td.exit_at)}
+出场：${getDateStr(td.exit_create_at ?? 0)}
+价格：${td.exit_average?.toFixed(5)}
 利润：${(td.profit_rate * 100).toFixed(1)}% ${td.profit.toFixed(5)}
 持有：${fmtDuration(td.duration)}`
     return {
       name: 'trade',
       groupId: trade_gp,
       points: [
-        {timestamp: td.enter_at, value: td.enter_price ?? td.init_price},
-        {timestamp: td.exit_at, value: td.exit_price}
+        {timestamp: td.enter_create_at, value: td.enter_average ?? td.init_price},
+        {timestamp: td.exit_create_at, value: td.exit_average}
       ],
       extendData: {
         line_color: color,

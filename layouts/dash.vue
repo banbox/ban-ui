@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {useDashLocal} from "~/stores/dashLocal";
 import {HomeFilled, Memo, List, Calendar, ShoppingTrolley, Setting, TrendCharts, Tickets,
-  Refresh, Connection, Fold, Expand} from "@element-plus/icons-vue";
+  Refresh, Connection, Fold, Expand, Files} from "@element-plus/icons-vue";
 import {useDashStore} from "~/stores/dash";
 import {useLocalePath} from "#i18n";
 
@@ -55,6 +55,10 @@ function goPage(path: string){
       <el-menu-item index="order" @click="goPage('/dash/order')">
         <el-icon><Memo /></el-icon>
         <template #title>订单</template>
+      </el-menu-item>
+      <el-menu-item index="rebate" @click="goPage('/dash/incomes')">
+        <el-icon><Files /></el-icon>
+        <template #title>账户损益流水</template>
       </el-menu-item>
       <el-menu-item index="pair" @click="goPage('/dash/symbol')">
         <el-icon><ShoppingTrolley /></el-icon>

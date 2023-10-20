@@ -68,12 +68,18 @@ export const makeCloudInds = (params: Record<string, any>[]): IndicatorTemplate[
           const kLineData = kLineDataList[i]
           const x = xAxis.convertToPixel(i)
           const item: InoutData = {dataIndex: i, x, data: kLineData, tags: []}
+          const key_map: Record<string, string> = {}
+          Object.keys(ind).forEach(k => {
+            const arr = k.split(':')
+            key_map[arr[0]] = k
+          })
           my_figures.forEach(fig => {
             if (fig.type == 'inout') {
               const baseVal = fig.baseValue ?? 0
               const color = baseVal >= 0 ? upColor : downColor
-              const price = ind[fig.key]
-              const text = `${fig.key}:${price}`;
+              const ind_key = key_map[fig.key]
+              const price = ind[ind_key]
+              const text = ind_key;
               item.tags.push({price, direction: -baseVal, color, text})
             }
           })

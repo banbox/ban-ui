@@ -67,6 +67,7 @@
   "roc": "Rate of Change (ROC)",
   "pvt": "Price Volume Trend (PVT)",
   "ao": "Awesome Oscillator (AO)",
+  "bigperiodhl": "BigPeriodHL(High/Low of Week)",
   
   "utc": "Coordinated Universal Time (UTC)",
   "honolulu": "(UTC-10) Honolulu",

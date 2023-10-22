@@ -10,6 +10,8 @@ export const formatDate = kc.utils.formatDate
 export const formatBigNumber = kc.utils.formatBigNumber
 const TooltipIconPosition = kc.TooltipIconPosition
 
+const _periods: Record<string, Period> = {}
+
 export type AddDelInd = {
   is_main: boolean,
   ind_name: string,
@@ -60,32 +62,31 @@ export function GetNumberDotOffset(value: number){
   return count;
 }
 
-export function makePeriod(timeframe: string): Period{
+export function makePeriod(timeframe: string): Period {
+  if (_periods[timeframe]) return _periods[timeframe]
   const sep_id = timeframe.length - 1
   const unit = timeframe.substring(sep_id);
   const num = timeframe.substring(0, sep_id);
   const num_val = parseInt(num);
   let timespan = 'minute';
-  if(unit == 'w'){
+  if (unit == 'w') {
     timespan = 'week'
-  }
-  else if(unit == 'd'){
+  } else if (unit == 'd') {
     timespan = 'day'
-  }
-  else if(unit == 'h'){
+  } else if (unit == 'h') {
     timespan = 'hour'
-  }
-  else if(unit == 'm'){
+  } else if (unit == 'm') {
     timespan = 'minute'
-  }
-  else {
+  } else {
     throw new Error(`unsupport period: ${timeframe}`)
   }
   let text = timeframe
-  if(unit != 'm'){
+  if (unit != 'm') {
     text = `${num}${unit.toUpperCase()}`
   }
-  return {multiplier: num_val, timespan, text, timeframe}
+  const secs = tf_to_secs(timeframe)
+  _periods[timeframe] = {multiplier: num_val, timespan, text, timeframe, secs}
+  return _periods[timeframe]
 }
 
 export const AllPeriods: Period[] = [

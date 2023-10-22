@@ -35,6 +35,7 @@ import {getDefaults} from "~/config";
 import {ApiResult} from "~/utils/netio";
 import makeCloudInds from "~/composables/kline/indicators/cloudInds";
 import {addChartBars} from "~/composables/kline/kc_exts";
+import indicators from "~/composables/kline/indicators";
 const {t} = useI18n()
 const route = useRoute()
 const defaults = getDefaults()
@@ -70,6 +71,13 @@ let cloud_ind_cbs: NoParamFunc[] = [];
 const watermark = ref('<img width="432" src="/watermark.png"/>')
 
 const periods = reactive<Period[]>(AllPeriods)
+
+indicators.forEach(o => {
+  if(o.extendData == 'datafeed'){
+    o.extendData = datafeed
+  }
+  kc.registerIndicator(o)
+})
 
 
 function fireCloudIndCbs(){

@@ -19,6 +19,7 @@ export interface Period {
   timespan: string
   text: string
   timeframe: string
+  secs: number
 }
 
 export type PaneInds = {

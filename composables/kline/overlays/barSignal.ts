@@ -13,7 +13,7 @@
  */
 
 import {OverlayFigure, OverlayTemplate} from 'klinecharts'
-import {getInOutFigures} from '../ktools'
+import {getTagFigures} from '../ktools'
 
 const barSignal: OverlayTemplate = {
   name: 'barSignal',
@@ -22,7 +22,7 @@ const barSignal: OverlayTemplate = {
     let {postion, text, bgColor} = overlay.extendData;
     let result: OverlayFigure[] = []
     coordinates.forEach(coord => {
-      result.push(...getInOutFigures(coord, postion, text, bgColor))
+      result.push(...getTagFigures(coord, postion, text, bgColor))
     })
     return result
   }

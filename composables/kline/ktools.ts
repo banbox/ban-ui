@@ -1,6 +1,6 @@
 import kc, {OverlayFigure} from "klinecharts";
 
-export function getInOutFigures(coord: kc.Coordinate, position: 'bottom' | 'top', text: string, color: string): OverlayFigure[]{
+export function getTagFigures(coord: kc.Coordinate, position: 'bottom' | 'top', text: string, color: string): OverlayFigure[]{
   const plusFlag = position === 'bottom' ? 1 : -1;
   const startX = coord.x
   const horzEndX = startX + 200

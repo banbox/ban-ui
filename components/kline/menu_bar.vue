@@ -116,7 +116,6 @@ import {useAuthState} from "~/composables/auth";
 import {useKlineStore} from "~/stores/kline";
 import {Chart} from "klinecharts";
 import {MyDatafeed} from "~/composables/kline/datafeeds";
-import {useKlineChart} from "~/composables/kline/coms";
 
 const period_bar = ref()
 

@@ -4,12 +4,15 @@ import {HomeFilled, Memo, List, Calendar, ShoppingTrolley, Setting, TrendCharts,
   Refresh, Connection, Fold, Expand, Files} from "@element-plus/icons-vue";
 import {useDashStore} from "~/stores/dash";
 import {useLocalePath} from "#i18n";
+import {setTimezone} from "~/composables/dateutil";
 
 const localPath = useLocalePath()
 const local = useDashLocal()
 const store = useDashStore()
 const collapse = ref(false)
 const showAddBot = ref(false)
+
+await setTimezone('UTC', false)
 
 function goPage(path: string){
   return navigateTo(localPath(path))

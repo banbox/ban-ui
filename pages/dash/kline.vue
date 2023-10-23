@@ -5,7 +5,7 @@ import {useCurApi} from "~/composables/dash/api";
 import {useDashStore} from "~/stores/dash";
 import {useKlineLocal} from "~/stores/klineLocal";
 import {useKlineStore} from "~/stores/kline";
-import {TradeInfo} from "~/composables/kline/coms";
+import {TradeInfo} from "~/composables/types";
 import {Chart, OverlayCreate} from "klinecharts";
 
 definePageMeta({

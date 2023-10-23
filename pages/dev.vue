@@ -4,6 +4,7 @@ import {MyDatafeed} from "~/composables/kline/datafeeds";
 import {PairItem} from "~/composables/types";
 import BotTaskList from "~/components/BotTaskList.vue";
 import {useKlineStore} from "~/stores/kline";
+import {setTimezone} from "~/composables/dateutil";
 
 const klocal = useKlineLocal()
 const main = useKlineStore()
@@ -13,6 +14,11 @@ const slide_tabs = reactive<PairItem[]>([
   {label: '市场变动', value: 'max_chg'},
   {label: '任务列表', value: 'task_list'},
 ])
+
+onMounted(() => {
+  setTimezone()
+})
+
 
 function setSlideTab(tab_name: string){
   slide_tab.value = tab_name

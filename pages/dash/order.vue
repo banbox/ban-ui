@@ -1,9 +1,9 @@
 <script setup lang="ts">
 
-import {definePageMeta} from "#imports";
+import {definePageMeta, getDateStr} from "#imports";
 import {useCurApi} from "~/composables/dash/api";
 import {useDashStore} from "~/stores/dash";
-import {BanOrder, OpenOrder} from "~/composables/types";
+import {BanOrder, InoutStatus, OpenOrder, OrderStatus} from "~/composables/types";
 
 definePageMeta({
   layout: 'dash',
@@ -22,10 +22,13 @@ const limit_size = ref(30)
 const cur_page = ref(1)
 const banod_num = ref(0)
 const exgod_num = ref(0)
-const ban_od = ref<Record<string, any>|null>(null)
+const ban_od = ref<BanOrder|null>(null)
+const ex_od = ref<Record<string, any>|null>(null)
 const showOdDetail = ref(false)
+const showExOdDetail = ref(false)
 const showOpenOrder = ref(false)
 const openingOd = ref(false)
+const ex_filter = ref('')
 const openOd = reactive<OpenOrder>({
   pair: '',
   side: 'long',
@@ -66,11 +69,18 @@ async function loadData(page: number) {
     data['limit'] = limit_size.value
   }
   const rsp = await getApi('/orders', data)
-  const res = rsp.data ?? []
+  let res = rsp.data ?? []
+  ex_filter.value = ''
   if(tab_name.value == 'bot'){
     banod_list.splice(0, banod_list.length, ...res)
   }
   else{
+    if(searchData.status){
+      const old_num = res.length
+      const req_valid = searchData.status == 'valid'
+      res = res.filter((od: any) => od.filled)
+      ex_filter.value = `已筛选：${res.length}/${old_num}`
+    }
     exgod_list.splice(0, exgod_list.length, ...res)
   }
 }
@@ -81,13 +91,13 @@ onMounted(() => {
 
 
 function showOrder(idx: number){
-  if(tab_name.value == 'bot') {
-    ban_od.value = banod_list[idx]
-  }
-  else{
-    ban_od.value = exgod_list[idx]
-  }
+  ban_od.value = banod_list[idx]
   showOdDetail.value = true
+}
+
+function showExOrder(idx: number){
+  ex_od.value = exgod_list[idx]
+  showExOdDetail.value = true
 }
 
 async function closeOrder(order_id: string) {
@@ -136,7 +146,52 @@ async function clickCalcProfits(){
 <template>
   <client-only>
     <el-dialog title="订单详情" v-model="showOdDetail">
-      <pre class="od-detail" v-if="ban_od">{{JSON.stringify(ban_od, null, 4)}}</pre>
+      <el-descriptions border :column="2" v-if="ban_od">
+        <el-descriptions-item label="ID" align="center">{{ban_od.id}}</el-descriptions-item>
+        <el-descriptions-item label="币种" align="center">{{ban_od.symbol}}  {{ban_od.sid}}</el-descriptions-item>
+        <el-descriptions-item label="时间周期" align="center">{{ban_od.timeframe}}</el-descriptions-item>
+        <el-descriptions-item label="多空" align="center">{{ban_od.short ? '空': '多'}}</el-descriptions-item>
+        <el-descriptions-item label="杠杆" align="center">{{ban_od.leverage}}</el-descriptions-item>
+        <el-descriptions-item label="策略" align="center">{{ban_od.strategy}}:{{ban_od.stg_ver}}</el-descriptions-item>
+        <el-descriptions-item label="状态" align="center">{{InoutStatus[ban_od.status]}}</el-descriptions-item>
+        <el-descriptions-item label="持仓时间" align="center">{{fmtDuration(ban_od.duration)}}</el-descriptions-item>
+      </el-descriptions>
+      <el-descriptions border title="入场订单" :column="2" v-if="ban_od">
+        <el-descriptions-item label="入场信号时间" align="center">{{getDateStr(ban_od.enter_at)}}(UTC)</el-descriptions-item>
+        <el-descriptions-item label="确认入场时间" align="center">{{getDateStr(ban_od.enter_create_at)}}(UTC)</el-descriptions-item>
+        <el-descriptions-item label="入场标签" align="center">{{ban_od.enter_tag}}</el-descriptions-item>
+        <el-descriptions-item label="入场信号价格" align="center">{{ban_od.init_price.toFixed(7)}}</el-descriptions-item>
+        <el-descriptions-item label="确认入场价格" align="center">{{ban_od.enter_price.toFixed(7)}}</el-descriptions-item>
+        <el-descriptions-item label="入场均价" align="center">{{ban_od.enter_average}}</el-descriptions-item>
+        <el-descriptions-item label="数量" align="center">{{ban_od.enter_amount.toFixed(5)}}</el-descriptions-item>
+        <el-descriptions-item label="已成交数量" align="center">{{ban_od.enter_filled.toFixed(5)}}</el-descriptions-item>
+        <el-descriptions-item label="花费" align="center">{{ban_od.enter_cost.toFixed(5)}}</el-descriptions-item>
+        <el-descriptions-item label="状态" align="center">{{OrderStatus[ban_od.enter_status]}}</el-descriptions-item>
+        <el-descriptions-item label="订单类型" align="center">{{ban_od.enter_order_type}}</el-descriptions-item>
+        <el-descriptions-item label="方向" align="center">{{ban_od.enter_side}}</el-descriptions-item>
+        <el-descriptions-item label="手续费" align="center">{{ban_od.enter_fee_type}}  {{(ban_od.enter_fee * 100).toFixed(3)}}%</el-descriptions-item>
+        <el-descriptions-item label="更新时间" align="center">{{getDateStr(ban_od.enter_update_at)}}(UTC)</el-descriptions-item>
+      </el-descriptions>
+      <el-descriptions border title="出场订单" :column="2" v-if="ban_od && ban_od.exit_tag">
+        <el-descriptions-item label="出场信号时间" align="center">{{getDateStr(ban_od.exit_at)}}(UTC)</el-descriptions-item>
+        <el-descriptions-item label="出场标签" align="center">{{ban_od.exit_tag}}</el-descriptions-item>
+        <template v-if="ban_od.exit_filled">
+          <el-descriptions-item label="确认出场时间" align="center">{{getDateStr(ban_od.exit_create_at)}}(UTC)</el-descriptions-item>
+          <el-descriptions-item label="确认出场价格" align="center">{{getDateStr(ban_od.exit_price?.toFixed(7))}}(UTC)</el-descriptions-item>
+          <el-descriptions-item label="出场均价" align="center">{{ban_od.exit_average?.toFixed(7)}}</el-descriptions-item>
+          <el-descriptions-item label="数量" align="center">{{ban_od.exit_amount?.toFixed(5)}}</el-descriptions-item>
+          <el-descriptions-item label="已成交数量" align="center">{{ban_od.exit_filled?.toFixed(5)}}</el-descriptions-item>
+          <el-descriptions-item label="状态" align="center">{{OrderStatus[ban_od.exit_status]}}</el-descriptions-item>
+          <el-descriptions-item label="订单类型" align="center">{{ban_od.exit_order_type}}</el-descriptions-item>
+          <el-descriptions-item label="方向" align="center">{{ban_od.exit_side}}</el-descriptions-item>
+          <el-descriptions-item label="手续费" align="center">{{ban_od.exit_fee_type}}  {{(ban_od.exit_fee * 100).toFixed(3)}}%</el-descriptions-item>
+          <el-descriptions-item label="更新时间" align="center">{{getDateStr(ban_od.exit_update_at)}}(UTC)</el-descriptions-item>
+        </template>
+      </el-descriptions>
+      <pre class="od-detail" v-if="ban_od && ban_od.info">{{JSON.stringify(ban_od.info, null, 4)}}</pre>
+    </el-dialog>
+    <el-dialog title="订单详情" v-model="showExOdDetail">
+      <pre class="od-detail" v-if="ban_od">{{JSON.stringify(ex_od, null, 4)}}</pre>
     </el-dialog>
     <el-dialog title="手动开单" v-model="showOpenOrder" width="600px">
       <el-form v-model="openOd" label-width="100px" style="margin: 0 30px">
@@ -197,9 +252,16 @@ async function clickCalcProfits(){
       <el-col :span="4">
         <el-form-item label="状态" v-if="tab_name == 'bot'" >
           <el-select v-model="searchData.status">
-            <el-option value="">不限</el-option>
-            <el-option value="open">开启</el-option>
-            <el-option value="his">已平仓</el-option>
+            <el-option value="" label="不限"/>
+            <el-option value="open" label="开启"/>
+            <el-option value="his" label="已平仓"/>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="状态" v-else>
+          <el-select v-model="searchData.status">
+            <el-option value="" label="不限"/>
+            <el-option value="valid" label="有效订单"/>
+            <el-option value="invalid" label="无效订单"/>
           </el-select>
         </el-form-item>
       </el-col>
@@ -226,15 +288,17 @@ async function clickCalcProfits(){
           <el-button type="primary" @click="loadData(1)">查询</el-button>
         </el-form-item>
       </el-col>
+      <el-col :span="4">
+        {{ex_filter}}
+      </el-col>
     </el-row>
   </el-form>
   <el-table :data="banod_list" v-if="tab_name == 'bot'">
     <el-table-column prop="id" label="ID"/>
     <el-table-column prop="symbol" label="币对"/>
-    <el-table-column prop="timeframe" label="时间帧"/>
-    <el-table-column prop="short" label="多空">
+    <el-table-column prop="timeframe" label="周期/多空/杠杆">
       <template #default="props">
-        <span>{{props.row.short ? '空' : '多'}}</span>
+        <span>{{props.row.timeframe}}/{{props.row.short ? '空' : '多'}}/{{props.row.leverage}}</span>
       </template>
     </el-table-column>
     <el-table-column prop="enter_at" label="入场时间">
@@ -243,13 +307,17 @@ async function clickCalcProfits(){
       </template>
     </el-table-column>
     <el-table-column prop="enter_tag" label="入场标签"/>
+    <el-table-column prop="enter_price" label="入场价格">
+      <template #default="props">
+        <span>{{(props.row.enter_average ?? props.row.enter_price ?? props.row.init_price).toFixed(7)}}</span>
+      </template>
+    </el-table-column>
     <el-table-column prop="exit_at" label="出场时间">
       <template #default="props">
         <span>{{getDateStr(props.row.exit_at)}}</span>
       </template>
     </el-table-column>
     <el-table-column prop="exit_tag" label="出场标签"/>
-    <el-table-column prop="leverage" label="杠杆"/>
     <el-table-column prop="profit_rate" label="收益率">
       <template #default="props">{{(props.row.profit_rate * 100).toFixed(1)}}%</template>
     </el-table-column>
@@ -273,6 +341,11 @@ async function clickCalcProfits(){
       </template>
     </el-table-column>
     <el-table-column prop="side" label="多空"/>
+    <el-table-column prop="reduceOnly" label="出入">
+      <template #default="props">
+        <span>{{props.row.reduceOnly ? '平仓' : '开仓'}}</span>
+      </template>
+    </el-table-column>
     <el-table-column prop="price" label="价格"/>
     <el-table-column prop="amount" label="数量"/>
     <el-table-column prop="status" label="状态"/>

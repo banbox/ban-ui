@@ -1,6 +1,6 @@
 import { defineNuxtPlugin } from '#app'
 import mitt from 'mitt'
-import {AddDelInd} from "~/composables/kline/coms";
+import {AddDelInd} from "~/composables/types";
 
 type AppEvents = {
   'set_ind': AddDelInd

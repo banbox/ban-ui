@@ -1,6 +1,6 @@
-import {defineStore, skipHydrate } from "pinia";
+import {defineStore } from "pinia";
 import {ref} from "#imports";
-import {BanInd} from "~/composables/kline/coms";
+import {BanInd} from "~/composables/types";
 import {Chart, Nullable} from "klinecharts";
 import {SymbolInfo} from "~/components/kline/types";
 import {getDefaults} from "~/config";

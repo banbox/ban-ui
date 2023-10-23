@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {definePageMeta, getApi} from "#imports";
+import {definePageMeta, getApi, setTimezone} from "#imports";
 import {useDashLocal} from "~/stores/dashLocal";
 import {useDashStore} from "~/stores/dash";
 import {useI18n} from "vue-i18n";
@@ -56,6 +56,7 @@ async function loadData(bot: TradeBot){
 }
 
 onMounted(() => {
+  setTimezone('UTC', false)
   local.all_bots.forEach(bot => {
     loadData(bot)
   })

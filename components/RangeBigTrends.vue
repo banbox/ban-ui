@@ -6,9 +6,9 @@ import {getApi} from "~/utils/netio";
 import {tf_to_secs, getDateStr, toUTCStamp, get_tz} from "~/composables/dateutil"
 import {
   readableNumber,
-  formatPrecision,
-  TrendItemType
+  formatPrecision
 } from "~/composables/kline/coms";
+import {TrendItemType} from "~/composables/types"
 import {useKlineStore} from "~/stores/kline";
 import {set} from "lodash-unified";
 const title_down = ref(false)

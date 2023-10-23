@@ -1,55 +1,19 @@
-import {Datafeed, Period, SymbolInfo} from "~/components/kline/types";
-import {CandleTooltipCustomCallbackData, CandleStyle, Nullable, Chart} from "klinecharts";
+import {Period, SymbolInfo} from "~/components/kline/types";
+import {CandleTooltipCustomCallbackData, CandleStyle} from "klinecharts";
 import kc from "klinecharts";
+import {tf_to_secs, formatDate} from "~/composables/dateutil";
 import {MyDatafeed} from "~/composables/kline/datafeeds";
 import {useKlineStore} from "~/stores/kline";
 import {ref} from "#imports";
+import {BarArr} from "~/composables/types";
+
 export const formatPrecision = kc.utils.formatPrecision
 export const formatThousands = kc.utils.formatThousands
-export const formatDate = kc.utils.formatDate
 export const formatBigNumber = kc.utils.formatBigNumber
 const TooltipIconPosition = kc.TooltipIconPosition
 
 const _periods: Record<string, Period> = {}
 
-export type AddDelInd = {
-  is_main: boolean,
-  ind_name: string,
-  is_add: boolean
-}
-
-export type TrendItemType = {
-  time: number,
-  start_dt: string,
-  symbol: string,
-  base_s: string,
-  quote_s: string,
-  rate: number,
-  quote_vol: number,
-  vol_text: string
-}
-
-export type BanInd = {
-  name: string,
-  title: string,
-  cloud: boolean,
-  is_main: boolean
-}
-
-/**
- * 用于K线图表上显示的交易信息
- * time/price通过Point传入
- */
-export interface TradeInfo {
-  line_color: string,
-  in_color: string,
-  in_text: string,
-  out_color: string,
-  out_text: string,
-  active?: boolean,
-  selected?: boolean,
-  distance?: number
-}
 
 export function GetNumberDotOffset(value: number){
   value = Math.abs(value)
@@ -232,9 +196,6 @@ export function getThemeStyles(theme: string) {
     }
   }
 }
-
-
-export type BarArr = [number, number, number, number, number, number]
 
 
 export function build_ohlcvs(details: BarArr[], in_msecs: number, tf_msecs: number, last_bar: BarArr | null = null): BarArr[] {

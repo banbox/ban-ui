@@ -7,11 +7,10 @@ dayjs.extend(timezone)
 dayjs.extend(duration)
 import {Period} from "~/components/kline/types";
 import kc from "klinecharts";
-import {formatDate} from "~/composables/kline/coms";
-import {useKlineLocal} from "~/stores/klineLocal";
 const FormatDateType = kc.FormatDateType
+export const formatDate = kc.utils.formatDate
 let tz_applied = false;
-let cur_tz: string|undefined = undefined
+let cur_tz: string = 'UTC'
 
 const timezone_map: Record<string, string> = {
   'Africa/Abidjan': 'utc',
@@ -85,9 +84,8 @@ export function toUTCStamp(date_str: string): number{
       'YYYY-MM-DD', 'YYYY-MM-DD HH:mm', 'YYYY-MM-DD HH:mm:ss'], true)
   }
   if(!result)return 0
-  if(!cur_tz){
-    const store = useKlineLocal()
-    applyTimezone(store.timezone)
+  if(!tz_applied){
+    console.error('local timezone not applied')
   }
   result = result.tz(cur_tz, true)
   return result.valueOf()
@@ -96,10 +94,6 @@ export function toUTCStamp(date_str: string): number{
 export function getDateStr(date_ts: number, template: string = 'YYYY-MM-DD HH:mm:ss',
                            tz: string | undefined = undefined): string{
   if(!date_ts)return '--'
-  if(!tz_applied){
-    const store = useKlineLocal()
-    applyTimezone(store.timezone)
-  }
   let result: dayjs.Dayjs | null = null
   if(date_ts > 1000000000000){
     result = dayjs(date_ts)
@@ -110,8 +104,11 @@ export function getDateStr(date_ts: number, template: string = 'YYYY-MM-DD HH:mm
   if(tz){
     result = result.tz(tz, true)
   }
-  else if(cur_tz){
+  else{
     result = result.tz(cur_tz)
+  }
+  if(!tz_applied){
+    console.error('local timezone not applied')
   }
   return result.format(template)
 }
@@ -242,19 +239,25 @@ export function makeFormatDate(timespan: string) {
   return doFormatDate;
 }
 
-function applyTimezone(timezone: string){
-  if(timezone.indexOf('UTC') >= 0){
-    timezone = 'UTC'
+
+export async function setTimezone(timezone: string|undefined = undefined, save: boolean = true) {
+  if (timezone) {
+    if (timezone == 'Africa/Abidjan' || timezone.toLowerCase().indexOf('utc') >= 0) {
+      timezone = 'UTC'
+    }
   }
+  if (!timezone || save) {
+    const {useKlineLocal} = await import("~/stores/klineLocal")
+    const store = useKlineLocal()
+    timezone = store.timezone
+    if (save) {
+      store.timezone = timezone
+    }
+  }
+  if (!timezone) return
   dayjs.tz.setDefault(timezone)
   cur_tz = timezone
   tz_applied = true
-}
-
-export function setTimezone(timezone: string){
-  const store = useKlineLocal()
-  store.timezone = timezone
-  applyTimezone(timezone)
 }
 
 /**

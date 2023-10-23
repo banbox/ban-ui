@@ -14,7 +14,6 @@ import {translateTimezone, getTimezoneSelectOptions, setTimezone} from "~/compos
 import {useKlineLocal} from "~/stores/klineLocal";
 
 const store = useKlineLocal()
-setTimezone(store.timezone)
 const props = defineProps<{
   modelValue: boolean
 }>()

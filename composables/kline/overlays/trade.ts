@@ -1,5 +1,5 @@
 import {OverlayEvent, OverlayTemplate} from "klinecharts";
-import {TradeInfo} from "~/composables/kline/coms";
+import {TradeInfo} from "~/composables/types";
 
 const textStyles = {
   color: '#ffffff',

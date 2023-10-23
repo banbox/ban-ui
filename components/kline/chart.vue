@@ -20,12 +20,13 @@ import {
   getDefStyles,
   getThemeStyles,
   GetNumberDotOffset,
-  build_ohlcvs, BarArr, AddDelInd, useKlineChart, useKlineObjs
+  build_ohlcvs, useKlineObjs
 } from "~/composables/kline/coms";
 import {adjustFromTo, tf_to_secs, toUTCStamp, getDateStr, makeFormatDate} from "~/composables/dateutil"
 import overlays from '~/composables/kline/overlays'
 import figures from '~/composables/kline/figure'
 import {useAuthState} from "~/composables/auth";
+import {AddDelInd, BarArr} from "~/composables/types"
 import {GetIndDefaults} from "~/components/kline/inds";
 import {useKlineLocal} from "~/stores/klineLocal";
 import {useI18n} from "vue-i18n";

@@ -12,6 +12,7 @@ import {useKlineLocal} from "~/stores/klineLocal";
 import {makePeriod} from "~/composables/kline/coms";
 import {useKlineStore} from "~/stores/kline";
 import {MyDatafeed} from "~/composables/kline/datafeeds";
+import {setTimezone} from "~/composables/dateutil";
 const {exg, symbol, period, ind} = useRoute().query
 
 const klocal = useKlineLocal()
@@ -49,6 +50,7 @@ function loadQueryInds(){
 }
 
 onMounted(() => {
+  setTimezone()
   loadQueryInds()
 })
 

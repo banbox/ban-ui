@@ -13,9 +13,10 @@ const {getApi, postApi} = useCurApi()
 const store = useDashStore()
 store.menu_id = 'order'
 
-const tab_name = ref('bot') //bot/exchange
+const tab_name = ref('bot') //bot/exchange/position
 const banod_list = reactive<BanOrder[]>([])
 const exgod_list = reactive<Record<string, any>[]>([])
+const exgpos_list = reactive<Record<string, any>[]>([])
 const loading = ref(false)
 const page_size = ref(15)
 const limit_size = ref(30)
@@ -27,7 +28,9 @@ const ex_od = ref<Record<string, any>|null>(null)
 const showOdDetail = ref(false)
 const showExOdDetail = ref(false)
 const showOpenOrder = ref(false)
-const openingOd = ref(false)
+const openingOd = ref(false)  // 正在创建订单
+const showCloseExg = ref(false)  // 显示关闭交易所仓位对话框
+const closingExgPos = ref(false)  // 正在关闭交易所仓位
 const ex_filter = ref('')
 const openOd = reactive<OpenOrder>({
   pair: '',
@@ -41,6 +44,17 @@ const openOd = reactive<OpenOrder>({
   strategy: undefined
 })
 
+const closeExgPos = reactive({
+  symbol: '',
+  side: '',
+  init_amount: 0,
+  amount: 0,
+  percent: 100,
+  order_type: '',
+  price: undefined,
+})
+
+
 const searchData = reactive({
   status: '',
   symbol: '',
@@ -48,13 +62,13 @@ const searchData = reactive({
   stop_time: ''
 })
 
-const quoteSymbol = computed(() => {
-  const arr = openOd.pair.split('/')
+function getQuoteCode(symbol: string){
+  const arr = symbol.split('/')
   if(arr.length !== 2)return ''
   let quote = arr[1];
   quote = quote.split('.')[0]
   return quote.split(':')[0]
-})
+}
 
 async function loadData(page: number) {
   cur_page.value = page
@@ -65,7 +79,7 @@ async function loadData(page: number) {
   if(tab_name.value == 'bot') {
     data['limit'] = page_size.value
     data['offset'] = page_size.value * (page - 1)
-  }else{
+  }else if(tab_name.value == 'exchange'){
     data['limit'] = limit_size.value
   }
   const rsp = await getApi('/orders', data)
@@ -74,7 +88,7 @@ async function loadData(page: number) {
   if(tab_name.value == 'bot'){
     banod_list.splice(0, banod_list.length, ...res)
   }
-  else{
+  else if(tab_name.value == 'exchange'){
     if(searchData.status){
       const old_num = res.length
       const req_valid = searchData.status == 'valid'
@@ -83,22 +97,39 @@ async function loadData(page: number) {
     }
     exgod_list.splice(0, exgod_list.length, ...res)
   }
+  else {
+    exgpos_list.splice(0, exgpos_list.length, ...res)
+  }
 }
 
 onMounted(() => {
   loadData(1)
 })
 
-
-function showOrder(idx: number){
-  ban_od.value = banod_list[idx]
-  showOdDetail.value = true
+function onPosAmountChg(percent: number){
+  closeExgPos.amount = parseFloat((closeExgPos.init_amount * percent / 100).toFixed(5))
 }
 
-function showExOrder(idx: number){
-  ex_od.value = exgod_list[idx]
-  showExOdDetail.value = true
+function onTabChange(name: string) {
+  tab_name.value = name
+  if (name == 'position' && !exgpos_list.length) {
+    loadData(1)
+  }
 }
+
+function showOrder(idx: number) {
+  if (tab_name.value == 'bot') {
+    ban_od.value = banod_list[idx]
+    showOdDetail.value = true
+  } else if (tab_name.value == 'exchange') {
+    ex_od.value = exgod_list[idx]
+    showExOdDetail.value = true
+  } else if (tab_name.value == 'position') {
+    ex_od.value = exgpos_list[idx]
+    showExOdDetail.value = true
+  }
+}
+
 
 async function closeOrder(order_id: string) {
   try {
@@ -108,7 +139,44 @@ async function closeOrder(order_id: string) {
   }
   const rsp = await postApi('/forceexit', {order_id})
   const close_num = rsp.close_num ?? 0
-  ElMessage.success({message: `已关闭${close_num}个订单`})
+  ElMessage.success({message: `已关闭${close_num}个仓位`})
+  await loadData(1)
+}
+
+function clickCloseExgPos(index: number){
+  const item = exgpos_list[index]
+  closeExgPos.symbol = item.symbol
+  closeExgPos.amount = item.contracts
+  closeExgPos.side = item.side
+  closeExgPos.init_amount = item.contracts
+  closeExgPos.percent = 100
+  closeExgPos.order_type = 'market'
+  showCloseExg.value = true
+}
+
+/**
+ * 关闭交易所仓位
+ * @param symbol
+ */
+async function closeExgPosition(all: boolean = false){
+  let data = toRaw(closeExgPos)
+  if(all === true) {
+    try {
+      await ElMessageBox.confirm('确定要关闭所有交易所仓位吗？', '提示')
+    } catch (e) {
+      return
+    }
+    data.symbol = 'all'
+  }
+  const rsp = await postApi('/close_pos', data)
+  const close_num = rsp.close_num ?? 0
+  const done_num = rsp.done_num ?? 0
+  let message = `已关闭${close_num}个订单`
+  if (done_num) {
+    message += `，已成交${done_num}个订单`
+  }
+  showCloseExg.value = false
+  ElMessage.success({message})
   await loadData(1)
 }
 
@@ -190,8 +258,8 @@ async function clickCalcProfits(){
       </el-descriptions>
       <pre class="od-detail" v-if="ban_od && ban_od.info">{{JSON.stringify(ban_od.info, null, 4)}}</pre>
     </el-dialog>
-    <el-dialog title="订单详情" v-model="showExOdDetail">
-      <pre class="od-detail" v-if="ban_od">{{JSON.stringify(ex_od, null, 4)}}</pre>
+    <el-dialog title="详情" v-model="showExOdDetail">
+      <pre class="od-detail" v-if="ex_od">{{JSON.stringify(ex_od, null, 4)}}</pre>
     </el-dialog>
     <el-dialog title="手动开单" v-model="showOpenOrder" width="600px">
       <el-form v-model="openOd" label-width="100px" style="margin: 0 30px">
@@ -199,21 +267,21 @@ async function clickCalcProfits(){
           <el-input v-model="openOd.pair" placeholder="请输入监听的币种代码"/>
         </el-form-item>
         <el-form-item prop="side" label="方向">
-          <el-select v-model="openOd.side">
-            <el-option value="long" label="开多" />
-            <el-option value="short" label="开空" />
-          </el-select>
+          <el-radio-group v-model="openOd.side">
+            <el-radio label="long">开多</el-radio>
+            <el-radio label="short">开空</el-radio>
+          </el-radio-group>
         </el-form-item>
         <el-form-item prop="enter_cost" label="名义价值" required>
           <el-input v-model="openOd.enter_cost" type="number">
-            <template #append>{{quoteSymbol}}</template>
+            <template #append>{{getQuoteCode(openOd.pair)}}</template>
           </el-input>
         </el-form-item>
         <el-form-item prop="order_type" label="订单类型">
-          <el-select v-model="openOd.order_type">
-            <el-option value="market" label="市价单" />
-            <el-option value="limit" label="限价单" />
-          </el-select>
+          <el-radio-group v-model="openOd.order_type">
+            <el-radio label="market">市价单</el-radio>
+            <el-radio label="limit">限价单</el-radio>
+          </el-radio-group>
         </el-form-item>
         <el-form-item prop="price" label="价格" v-if="openOd.order_type != 'market'">
           <el-input v-model="openOd.price" type="number"/>
@@ -235,19 +303,49 @@ async function clickCalcProfits(){
         </el-form-item>
       </el-form>
     </el-dialog>
+    <el-dialog title="交易所平仓" v-model="showCloseExg" width="500px">
+      <el-form v-model="closeExgPos" label-width="100px" style="margin: 0 30px">
+        <el-form-item prop="pair" label="交易对" required>
+          <el-input v-model="closeExgPos.symbol" disabled/>
+        </el-form-item>
+        <el-form-item prop="amount" label="平仓数量" required>
+          <el-input v-model="closeExgPos.amount" type="number"/>
+        </el-form-item>
+        <el-form-item label="">
+          <el-slider v-model="closeExgPos.percent" @change="onPosAmountChg"/>
+        </el-form-item>
+        <el-form-item prop="order_type" label="订单类型">
+          <el-radio-group v-model="closeExgPos.order_type">
+            <el-radio label="market">市价单</el-radio>
+            <el-radio label="limit">限价单</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item prop="price" label="价格" v-if="closeExgPos.order_type != 'market'">
+          <el-input v-model="closeExgPos.price" type="number"/>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" :loading="closingExgPos" @click="closeExgPosition">保存</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
   </client-only>
   <div class="page-head">
-    <el-menu mode="horizontal" :default-active="tab_name" @select="tab_name = $event">
+    <el-menu mode="horizontal" :default-active="tab_name" @select="onTabChange">
       <el-menu-item index="bot">机器人订单</el-menu-item>
       <el-menu-item index="exchange">交易所订单</el-menu-item>
+      <el-menu-item index="position">交易所仓位</el-menu-item>
     </el-menu>
     <div class="head-btns" v-if="tab_name == 'bot'">
       <el-button type="primary" @click="clickCalcProfits">更新利润</el-button>
       <el-button type="primary" @click="clickShowOpen">开单</el-button>
       <el-button type="danger" @click="closeOrder('all')">全部平仓</el-button>
     </div>
+    <div class="head-btns" v-if="tab_name == 'position'">
+      <el-button type="primary" @click="loadData(1)">刷新</el-button>
+      <el-button type="danger" @click="closeExgPosition(true)">全部平仓</el-button>
+    </div>
   </div>
-  <el-form :inline="true" :model="searchData">
+  <el-form :inline="true" :model="searchData" v-if="tab_name != 'position'">
     <el-row>
       <el-col :span="4">
         <el-form-item label="状态" v-if="tab_name == 'bot'" >
@@ -331,7 +429,7 @@ async function clickCalcProfits(){
       </template>
     </el-table-column>
   </el-table>
-  <el-table :data="exgod_list" v-else>
+  <el-table :data="exgod_list" v-else-if="tab_name == 'exchange'">
     <el-table-column prop="id" label="订单ID"/>
     <el-table-column prop="clientOrderId" label="Clent ID"/>
     <el-table-column prop="symbol" label="币对"/>
@@ -352,6 +450,30 @@ async function clickCalcProfits(){
     <el-table-column label="操作" class-name="actions" width="150" align="center">
       <template #default="props">
         <el-link @click="showOrder(props.$index)">查看</el-link>
+      </template>
+    </el-table-column>
+  </el-table>
+  <el-table :data="exgpos_list" v-else>
+    <el-table-column prop="symbol" label="币对"/>
+    <el-table-column prop="timestamp" label="时间">
+      <template #default="props">
+        <span>{{getDateStr(props.row.timestamp)}}</span>
+      </template>
+    </el-table-column>
+    <el-table-column prop="side" label="多空"/>
+    <el-table-column prop="reduceOnly" label="出入">
+      <template #default="props">
+        <span>{{props.row.reduceOnly ? '平仓' : '开仓'}}</span>
+      </template>
+    </el-table-column>
+    <el-table-column prop="entryPrice" label="开仓价格"/>
+    <el-table-column prop="notional" label="名义价值"/>
+    <el-table-column prop="leverage" label="杠杆"/>
+    <el-table-column prop="unrealizedPnl" label="未实现盈亏"/>
+    <el-table-column label="操作" class-name="actions" width="150" align="center">
+      <template #default="props">
+        <el-link @click="showOrder(props.$index)">查看</el-link>
+        <el-link @click="clickCloseExgPos(props.$index)">平仓</el-link>
       </template>
     </el-table-column>
   </el-table>

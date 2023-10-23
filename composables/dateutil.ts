@@ -92,22 +92,16 @@ export function toUTCStamp(date_str: string): number{
 }
 
 export function getDateStr(date_ts: number, template: string = 'YYYY-MM-DD HH:mm:ss',
-                           tz: string | undefined = undefined): string{
-  if(!date_ts)return '--'
+                           tz: string | undefined = undefined): string {
+  if (!date_ts) return '--'
   let result: dayjs.Dayjs | null = null
-  if(date_ts > 1000000000000){
+  if (date_ts > 1000000000000) {
     result = dayjs(date_ts)
-  }
-  else{
+  } else {
     result = dayjs.unix(date_ts)
   }
-  if(tz){
-    result = result.tz(tz, true)
-  }
-  else{
-    result = result.tz(cur_tz)
-  }
-  if(!tz_applied){
+  result = result.tz(tz || cur_tz, true)
+  if (!tz_applied) {
     console.error('local timezone not applied')
   }
   return result.format(template)

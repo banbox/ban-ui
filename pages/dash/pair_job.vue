@@ -11,25 +11,23 @@ definePageMeta({
   layout: 'dash',
 })
 
-const {getApi} = useCurApi()
+const {getApi, postApi} = useCurApi()
 const store = useDashStore()
 store.menu_id = 'job'
 const localPath = useLocalePath()
 
 const tab_name = ref('symbol')
-const pairs = reactive<PairPerf[]>([])
 const jobs = reactive<PairStgyTf[]>([])
 const stgy_list = reactive<StgyVer[]>([])
 const show_code = ref(false)
+const isWhitePair = ref(false)
+const showPairList = ref(false)
 const active_stgy = ref('')
 const stgy_content = ref('')
 
 async function loadData(){
-  let rsp = await getApi('/performance')
-  const cur_pairs = rsp.data ?? []
-  pairs.splice(0, pairs.length, ...cur_pairs)
   // 显示job列表
-  rsp = await getApi('/pair_stgs')
+  const rsp = await getApi('/pair_jobs')
   const pjobs = rsp.jobs ?? []
   jobs.splice(0, pjobs.length, ...pjobs)
   // 策略列表
@@ -40,12 +38,25 @@ async function loadData(){
   }
 }
 
-// async function showStgyCode(name: string){
-//   const rsp = await getApi('/strategy/' + name)
-//   stgy_content.value = rsp.data ?? ''
-//   active_stgy.value = name
-//   show_code.value = true
-// }
+function clickPairList(is_white: boolean){
+  showPairList.value = true
+  isWhitePair.value = is_white
+}
+
+function createStrategy(){
+
+}
+
+async function switchChange(job: PairStgyTf, key: string, flag: any){
+  const data = {pair: job.pair, tf: job.tf, stgy: job.stgy, key, val: flag}
+  const rsp = await postApi('/edit_job', data)
+  if(rsp.code != 200){
+    const message = rsp.msg ?? '保存失败'
+    ElMessage({type: 'error', message})
+    return
+  }
+  await loadData()
+}
 
 onMounted(() => {
   loadData()
@@ -58,44 +69,51 @@ onMounted(() => {
     <el-dialog v-model="show_code" :title="active_stgy" width="80%">
       <pre class="stgy-code">{{stgy_content}}</pre>
     </el-dialog>
+    <DashPairList :is_white="isWhitePair" v-model="showPairList"/>
   </client-only>
-  <el-tabs v-model="tab_name">
-    <el-tab-pane name="symbol" label="币对">
-      <el-table :data="pairs">
-        <el-table-column prop="pair" label="币对" />
-        <el-table-column prop="close_num" label="平仓单数" />
-        <el-table-column prop="profit_sum" label="总利润" >
-          <template #default="scope">{{scope.row.profit_sum.toFixed(5)}}</template>
-        </el-table-column>
-        <el-table-column prop="profit_pct" label="收益" >
-          <template #default="scope">{{(scope.row.profit_pct * 100).toFixed(1)}}%</template>
-        </el-table-column>
-        <el-table-column prop="more" label="操作" >
-          <template #default="scope">
-            <el-link :href="localPath(`/dash/kline?pair=${scope.row.pair}`)">K线</el-link>
-          </template>
-        </el-table-column>
-      </el-table>
-    </el-tab-pane>
-    <el-tab-pane name="strategy" label="策略">
-      <el-table :data="stgy_list">
-        <el-table-column prop="name" label="策略" />
-        <el-table-column prop="version" label="版本" />
+  <div class="page-head">
+    <el-menu mode="horizontal" :default-active="tab_name">
+      <el-menu-item index="symbol">交易对</el-menu-item>
+      <el-menu-item index="strategy">策略</el-menu-item>
+    </el-menu>
+    <div class="head-btns" v-if="tab_name == 'symbol'">
+      <el-button type="primary" @click="clickPairList(true)">白名单</el-button>
+      <el-button type="danger" @click="clickPairList(false)">黑名单</el-button>
+    </div>
+    <div class="head-btns" v-else-if="tab_name == 'strategy'">
+      <el-button type="primary" @click="createStrategy">新建策略</el-button>
+    </div>
+  </div>
+  <el-table :data="jobs" v-if="tab_name == 'symbol'">
+    <el-table-column prop="pair" label="币对" />
+    <el-table-column prop="tf" label="周期" width="80" />
+    <el-table-column prop="stgy" label="策略" />
+    <el-table-column prop="switch" label="开关" >
+      <template #default="props">
+        <el-switch :model-value="props.row.open_long" width="50" inline-prompt
+                   active-text="开多" inactive-text="开多" @change="switchChange(props.row, 'open_long', $event)"/>
+        <el-switch :model-value="props.row.open_short" width="50" inline-prompt
+                   active-text="开空" inactive-text="开空" @change="switchChange(props.row, 'open_short', $event)"/>
+        <el-switch :model-value="props.row.close_long" width="50" inline-prompt
+                   active-text="平多" inactive-text="平多" @change="switchChange(props.row, 'close_long', $event)"/>
+        <el-switch :model-value="props.row.close_short" width="50" inline-prompt
+                   active-text="平空" inactive-text="平空" @change="switchChange(props.row, 'close_short', $event)"/>
+        <el-switch :model-value="props.row.exg_stoploss" width="70" inline-prompt
+                   active-text="止损单" inactive-text="止损单" @change="switchChange(props.row, 'exg_stoploss', $event)"/>
+        <el-switch :model-value="props.row.exg_takeprofit" width="70" inline-prompt
+                   active-text="止盈单" inactive-text="止盈单" @change="switchChange(props.row, 'exg_takeprofit', $event)"/>
+      </template>
+    </el-table-column>
+  </el-table>
+  <el-table :data="stgy_list" v-else-if="tab_name == 'strategy'">
+    <el-table-column prop="name" label="策略" />
+    <el-table-column prop="version" label="版本" />
 <!--        <el-table-column label="操作" >-->
 <!--          <template #default="props">-->
 <!--            <el-link @click="showStgyCode(props.row.name)">查看</el-link>-->
 <!--          </template>-->
 <!--        </el-table-column>-->
-      </el-table>
-    </el-tab-pane>
-    <el-tab-pane name="pair_stgy" label="运行任务">
-      <el-table :data="jobs">
-        <el-table-column prop="stgy" label="策略" />
-        <el-table-column prop="pair" label="币对" />
-        <el-table-column prop="tf" label="周期" />
-      </el-table>
-    </el-tab-pane>
-  </el-tabs>
+  </el-table>
 </template>
 
 <style scoped lang="scss">
@@ -103,5 +121,14 @@ onMounted(() => {
   height: 800px;
   max-height: 63vh;
   overflow-y: auto;
+}
+.page-head{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  .el-menu{
+    flex-grow: 1;
+  }
 }
 </style>

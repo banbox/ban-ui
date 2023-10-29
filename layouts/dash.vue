@@ -63,10 +63,6 @@ function goPage(path: string){
         <el-icon><Files /></el-icon>
         <template #title>账户损益流水</template>
       </el-menu-item>
-      <el-menu-item index="pair" @click="goPage('/dash/symbol')">
-        <el-icon><ShoppingTrolley /></el-icon>
-        <template #title>交易对管理</template>
-      </el-menu-item>
       <el-menu-item index="config" @click="goPage('/dash/config')">
         <el-icon><Setting /></el-icon>
         <template #title>配置</template>

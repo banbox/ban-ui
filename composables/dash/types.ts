@@ -71,6 +71,12 @@ export interface PairStgyTf{
   pair: string
   stgy: string
   tf: string
+  open_long: boolean
+  open_short: boolean
+  close_long: boolean
+  close_short: boolean
+  exg_stoploss: boolean
+  exg_takeprofit: boolean
 }
 
 export interface StgyVer{

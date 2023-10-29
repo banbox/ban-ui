@@ -1,27 +1,43 @@
 <script setup lang="ts">
 
-import {ApiResult, definePageMeta} from "#imports";
+import {defineProps} from "@vue/runtime-core";
+import {computed, defineEmits} from "vue";
+import {ApiResult} from "~/utils/netio";
 import {useCurApi} from "~/composables/dash/api";
-import {useDashStore} from "~/stores/dash";
-
-definePageMeta({
-  layout: 'dash',
-})
 
 const {getApi, postApi} = useCurApi()
-const store = useDashStore()
-store.menu_id = 'pair'
-const tab_name = ref('white')
+
+const props = defineProps<{
+  modelValue: boolean,
+  is_white: boolean
+}>()
+
+const emit = defineEmits<{
+  'update:modelValue': [value: boolean]
+}>()
+
+const title = computed(() => {
+  return props.is_white ? '白名单': '黑名单'
+})
+
+
+const showModal = computed({
+  get(){
+    return props.modelValue
+  },
+  set(value){
+    emit('update:modelValue', value)
+  }
+})
+
 const whitelist = reactive<string[]>([])
 const blacklist = reactive<string[]>([])
-const methods = reactive<string[]>([])
 const showInput = ref(false)
 const input_val = ref('')
 const loading = ref(false)
 
 
 function applyResult(rsp: ApiResult){
-  methods.splice(0, methods.length, ...rsp.method)
   blacklist.splice(0, blacklist.length, ...rsp.blacklist)
   whitelist.splice(0, whitelist.length, ...rsp.whitelist)
 }
@@ -37,7 +53,7 @@ onMounted(() => {
 })
 
 const pair_list = computed(() => {
-  return tab_name.value == 'white' ? whitelist : blacklist
+  return props.is_white ? whitelist : blacklist
 })
 
 function onOptionResult(rsp: ApiResult){
@@ -60,7 +76,7 @@ function onOptionResult(rsp: ApiResult){
 async function delItem(tag: string){
   if(loading.value)return
   loading.value = true
-  const data = {for_white: tab_name.value == 'white', deletes: [tag]}
+  const data = {for_white: props.is_white, deletes: [tag]}
   const rsp = await postApi(`/pairlist`, data)
   loading.value = false
   onOptionResult(rsp)
@@ -71,34 +87,26 @@ async function onInputTag(){
   loading.value = true
   showInput.value = false
   if(!input_val.value)return
-  const data = {for_white: tab_name.value == 'white', adds: [input_val.value]}
+  const data = {for_white: props.is_white, adds: [input_val.value]}
   const rsp = await postApi(`/pairlist`, data)
   loading.value = false
   onOptionResult(rsp)
 }
+
 </script>
 
 <template>
-  <el-menu :default-active="tab_name" mode="horizontal" @select="tab_name = $event">
-    <el-menu-item index="white">允许列表</el-menu-item>
-    <el-menu-item index="black">禁止列表</el-menu-item>
-    <el-menu-item index="method">筛选器</el-menu-item>
-  </el-menu>
-  <div class="methods" v-if="tab_name == 'method'">
-    <div class="item" v-for="(item, index) in methods" :key="index">
-      {{item}}
+  <el-dialog v-model="showModal" :title="title" width="600">
+    <div class="pair-list">
+      <el-tag v-for="(item, index) in pair_list" :key="index" closable @close="delItem(item)"
+            :type="is_white ? 'success' : 'danger'">{{item}}</el-tag>
+      <div class="add-box">
+        <el-input v-if="showInput" ref="inputRef" v-model="input_val" size="small"
+                  @keyup.enter="onInputTag" @blur="onInputTag"/>
+        <el-button v-else size="small" @click="showInput = true">添加</el-button>
+      </div>
     </div>
-  </div>
-  <div class="pair-list" v-else>
-    <el-tag v-for="(item, index) in pair_list" :key="index" closable @close="delItem(item)"
-            :type="tab_name == 'white' ? 'success' : 'danger'">{{item}}</el-tag>
-    <div class="add-box">
-      <el-input v-if="showInput" ref="inputRef" v-model="input_val" size="small"
-                @keyup.enter="onInputTag" @blur="onInputTag"/>
-      <el-button v-else size="small" @click="showInput = true">添加</el-button>
-    </div>
-  </div>
-
+  </el-dialog>
 </template>
 
 <style scoped lang="scss">
@@ -113,11 +121,6 @@ async function onInputTag(){
   .add-box{
     width: 100px;
     display: inline-block;
-  }
-}
-.methods{
-  .item{
-    margin: 10px 0;
   }
 }
 </style>

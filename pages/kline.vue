@@ -9,7 +9,7 @@
 
 <script setup lang="ts">
 import {useKlineLocal} from "~/stores/klineLocal";
-import {makePeriod} from "~/composables/kline/coms";
+import {makePeriod, useSymbols} from "~/composables/kline/coms";
 import {useKlineStore} from "~/stores/kline";
 import {MyDatafeed} from "~/composables/kline/datafeeds";
 import {setTimezone} from "~/composables/dateutil";
@@ -17,18 +17,18 @@ const {exg, symbol, period, ind} = useRoute().query
 
 const klocal = useKlineLocal()
 const store = useKlineStore()
+const {loadSymbols} = useSymbols()
+const queryLoaded = ref(false)
 
 
 function loadQueryInds(){
+  if(queryLoaded.value)return
+  queryLoaded.value = true
   let ticker = klocal.symbol.ticker;
   if(typeof symbol === 'string' && symbol){
     ticker = symbol
   }
-  let exchange = klocal.symbol.exchange
-  if(typeof exg === 'string' && exg){
-    exchange = exg
-  }
-  klocal.setSymbol({exchange, ticker, name: ticker, shortName: ticker})
+  klocal.setSymbolTicker(ticker, exg as string|null, false)
   if(typeof period === 'string' && period){
     klocal.setPeriod(makePeriod(period))
   }
@@ -51,6 +51,11 @@ function loadQueryInds(){
 
 onMounted(() => {
   setTimezone()
+  loadSymbols()
+})
+
+watch(() => store.pairs_loading, (loading) => {
+  if(loading)return
   loadQueryInds()
 })
 

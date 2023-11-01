@@ -238,31 +238,21 @@ export function useKlineObjs(){
 }
 
 export function useSymbols() {
-  const all_symbols = reactive<SymbolInfo[]>([])
-  const error = ref(null)
-  const loading = ref(false)
   const main = useKlineStore()
   const {datafeed} = useKlineObjs()
 
-  function doFetch() {
-    loading.value = true
-    error.value = null
-    datafeed.getSymbols().then(res => {
-      all_symbols.splice(0, all_symbols.length, ...res)
-      loading.value = false
-    })
-      .catch(err => {
-        error.value = err
-        loading.value = false
-      })
+  async function loadSymbols() {
+    if (main.pairs_loading || main.all_symbols.length > 0) return
+    main.pairs_loading = true
+    main.pairs_error = ''
+    try {
+      const res = await datafeed.getSymbols()
+      main.all_symbols.splice(0, main.all_symbols.length, ...res)
+    } catch (err) {
+      main.pairs_error = JSON.stringify(err)
+    }
+    main.pairs_loading = false
   }
 
-  doFetch()
-
-  const symbols = computed(() => {
-    if (main.cur_symbols.length) return main.cur_symbols
-    return all_symbols
-  })
-
-  return {symbols, error, loading}
+  return {loadSymbols}
 }

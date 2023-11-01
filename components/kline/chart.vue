@@ -12,7 +12,6 @@ import {
 } from 'klinecharts'
 import kc from 'klinecharts'
 import _ from "lodash"
-import {MyDatafeed} from "~/composables/kline/datafeeds"
 import {PaneInds, Period, SymbolInfo, Datafeed} from '~/components/kline/types'
 import {computed, defineProps, onMounted, onUnmounted, reactive, ref, toRaw, watch} from "vue";
 import {

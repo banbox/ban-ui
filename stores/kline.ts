@@ -1,8 +1,8 @@
 import {defineStore } from "pinia";
 import {ref} from "#imports";
-import {BanInd} from "~/composables/types";
-import {Chart, Nullable} from "klinecharts";
-import {SymbolInfo} from "~/components/kline/types";
+import {type BanInd} from "~/composables/types";
+import {type Chart, type Nullable} from "klinecharts";
+import {type SymbolInfo} from "~/components/kline/types";
 import {getDefaults} from "~/config";
 
 
@@ -23,8 +23,12 @@ export const useKlineStore = defineStore('kline', () => {
   const klineLoaded = ref(1)
   const chart = ref<Nullable<Chart>>(null)
   const loadingChart = ref(false)
+
   // 限制只能查看这些symbols
   const cur_symbols = reactive<SymbolInfo[]>([])
+  const all_symbols = reactive<SymbolInfo[]>([])
+  const pairs_loading = ref(false)
+  const pairs_error = ref<string>('')
 
   const color_short = ref('red')
   const color_long = ref('green')
@@ -56,8 +60,12 @@ export const useKlineStore = defineStore('kline', () => {
     })
   }
 
+  const symbols = computed(() => {
+    return cur_symbols.length ? cur_symbols : all_symbols
+  })
+
   return {chart, loadingChart, showLogin, showDrawBar, modalIndCfg, editPaneId, editIndName, authTFList,
-    fireOhlcv, start_ms, stop_ms, fireKRange, klineLoaded, all_inds, cur_symbols, setCurSymbols,
-    color_short, color_long
+    fireOhlcv, start_ms, stop_ms, fireKRange, klineLoaded, all_inds, cur_symbols, all_symbols, setCurSymbols,
+    color_short, color_long, pairs_loading, pairs_error, symbols
   }
 })

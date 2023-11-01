@@ -63,8 +63,6 @@
 import Icon from "~/components/kline/icon.vue"
 import List from "~/components/kline/list.vue"
 import {defineEmits, defineProps, reactive, ref} from 'vue'
-import {Integer} from "type-fest";
-import {integer} from "vscode-languageserver-types";
 import {Chart, Overlay, OverlayEvent, OverlayMode, OverlayRemove} from "klinecharts";
 import {postApi} from "~/utils/netio";
 import {useAuthState} from "~/composables/auth";
@@ -210,7 +208,7 @@ function startOverlay(value: string){
   })
 }
 
-function clickSubPopover(index: integer, value: string){
+function clickSubPopover(index: number, value: string){
   overlays[index].icon = value;
   startOverlay(value)
   popoverKey.value = '';

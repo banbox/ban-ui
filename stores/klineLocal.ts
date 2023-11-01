@@ -1,10 +1,13 @@
 import {defineStore} from "pinia";
 import {persistedState, ref} from "#imports";
-import {Period, SymbolInfo} from "~/components/kline/types";
-import {reactive, toRaw} from "vue";
+import {type Period, type SymbolInfo} from "~/components/kline/types";
+import {reactive} from "vue";
 import _ from "lodash";
 import {getDefaults} from "~/config";
 import {makePeriod} from "~/composables/kline/coms";
+import {useKlineStore} from "~/stores/kline";
+
+const store = useKlineStore()
 
 const defaults = getDefaults();
 const defStyle = {
@@ -64,13 +67,16 @@ export const useKlineLocal = defineStore('klocal', () => {
     function setSymbol(val: SymbolInfo){
         Object.assign(symbol, val)
     }
-    function setSymbolTicker(ticker: string){
-        Object.assign(symbol, {
-            ...symbol,
-            ticker: ticker,
-            name: ticker,
-            shortName: ticker
-        })
+    function setSymbolTicker(ticker: string, exchange: string|undefined|null = undefined, raise_err: boolean = true) {
+        if (!exchange) {
+            exchange = symbol.exchange
+        }
+        const mats = store.all_symbols.filter(s => s.exchange == exchange && s.ticker == ticker)
+        if (mats.length > 0) {
+            Object.assign(symbol, mats[0])
+        } else if(raise_err) {
+            throw new Error(`no match found: ${exchange}.${ticker}, in ${store.all_symbols.length} symbols`)
+        }
     }
     function setStyleItem(key: string, val: any){
         _.set(chartStyle, key, val)

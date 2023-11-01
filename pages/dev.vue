@@ -5,9 +5,11 @@ import {PairItem} from "~/composables/types";
 import BotTaskList from "~/components/BotTaskList.vue";
 import {useKlineStore} from "~/stores/kline";
 import {setTimezone} from "~/composables/dateutil";
+import {useSymbols} from "~/composables/kline/coms";
 
 const klocal = useKlineLocal()
 const main = useKlineStore()
+const {loadSymbols} = useSymbols()
 
 const slide_tab = ref('max_chg')
 const slide_tabs = reactive<PairItem[]>([
@@ -17,6 +19,7 @@ const slide_tabs = reactive<PairItem[]>([
 
 onMounted(() => {
   setTimezone()
+  loadSymbols()
 })
 
 

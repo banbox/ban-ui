@@ -10,8 +10,8 @@
         </span>
       </template>
     </Input>
-    <List class="klinecharts-pro-symbol-search-modal-list" :loading="loading">
-      <li v-for="symbol in matchSymbols" :key="symbol.name" @click="clickSymbol(symbol)">
+    <List class="klinecharts-pro-symbol-search-modal-list" :loading="main.pairs_loading">
+      <li v-for="symbol in show_list" :key="symbol.name" @click="clickSymbol(symbol)">
         <div>
           <img v-if="symbol.logo" :src="symbol.logo" />
           <span :title="symbol.name">{{symbol.shortName ?? symbol.ticker}}</span>
@@ -28,22 +28,20 @@ import Input from "~/components/kline/input.vue"
 import List from "~/components/kline/list.vue"
 import {defineEmits, defineProps, reactive, ref, computed} from "vue";
 import {Datafeed, SymbolInfo} from "~/components/kline/types";
-import {useSymbols} from "~/composables/kline/coms"
 import {useKlineLocal} from "~/stores/klineLocal";
+import {useKlineStore} from "~/stores/kline";
+import {useSymbols} from "~/composables/kline/coms";
 
 const props = defineProps<{
   modelValue: boolean
 }>()
 
 const keyword = ref('')
+const main = useKlineStore()
 const store = useKlineLocal()
-const {symbols, error, loading} = useSymbols()
+const {loadSymbols} = useSymbols()
 
-const matchSymbols = computed(() => {
-  if(!keyword.value)return symbols.value
-  const search = keyword.value.toUpperCase()
-  return symbols.value.filter(s => s.ticker.includes(search))
-})
+const show_list = reactive<SymbolInfo[]>([])
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
@@ -62,6 +60,20 @@ function clickSymbol(symbol: SymbolInfo){
   showModal.value = false;
   store.setSymbol(symbol)
 }
+
+watch(keyword, async (new_val) => {
+  if (!new_val) {
+    show_list.splice(0, show_list.length, ...main.symbols)
+    return
+  }
+  if (!main.all_symbols.length) {
+    await loadSymbols()
+  }
+  const search = keyword.value.toUpperCase()
+  const res = main.symbols.filter(s => s.ticker.includes(search))
+  show_list.splice(0, show_list.length, ...res)
+})
+
 
 </script>
 

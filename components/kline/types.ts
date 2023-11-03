@@ -1,5 +1,5 @@
 
-import {KLineData, Styles, DeepPartial, OverlayCreate} from 'klinecharts'
+import type {KLineData, Styles, DeepPartial} from 'klinecharts'
 
 export interface SymbolInfo {
   ticker: string

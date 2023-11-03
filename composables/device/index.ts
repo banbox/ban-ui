@@ -1,8 +1,7 @@
 import {useAppConfig, useNuxtApp, useRequestHeaders, useRuntimeConfig} from '#app'
-import type { Device } from './types'
 import {reactive} from "vue";
 import generateFlags from "~/composables/device/generateFlags";
-import {DeviceOptions} from "./types";
+import {type DeviceOptions} from "./types";
 
 export const useDevice = () => {
   const config = useAppConfig().device as DeviceOptions

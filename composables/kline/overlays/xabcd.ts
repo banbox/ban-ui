@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { OverlayTemplate, PolygonAttrs, LineAttrs } from 'klinecharts'
+import type { OverlayTemplate, PolygonAttrs, LineAttrs } from 'klinecharts'
 
 const xabcd: OverlayTemplate = {
   name: 'xabcd',

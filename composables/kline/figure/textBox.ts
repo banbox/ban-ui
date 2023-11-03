@@ -14,7 +14,7 @@
  * rectText不支持多行文本，此组件改动为支持多行文本框
  */
 
-import {Coordinate, RectTextStyle, FigureTemplate, TextAttrs} from 'klinecharts'
+import type {Coordinate, RectTextStyle, FigureTemplate, TextAttrs} from 'klinecharts'
 import kc from 'klinecharts'
 
 const drawRect = kc.utils.drawRect

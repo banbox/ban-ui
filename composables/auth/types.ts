@@ -1,4 +1,4 @@
-import { CookieRef } from '#app'
+import {type CookieRef } from '#app'
 // @ts-ignore
 import type { SessionData } from '#auth'
 

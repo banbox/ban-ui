@@ -1,4 +1,4 @@
-import {IndicatorTemplate} from "klinecharts";
+import type {IndicatorTemplate} from "klinecharts";
 import {postApi} from "#imports";
 import {drawCloudInd} from "~/composables/kline/indicators/common";
 

@@ -1,5 +1,3 @@
-import exp from "constants";
-
 export interface TradeBot{
   url: string
   account: string
@@ -67,16 +65,18 @@ export interface PairPerf{
   close_num: number
 }
 
+export interface FieldArg{
+  field: string
+  val_type: string
+  title: string
+  value: any
+}
+
 export interface PairStgyTf{
   pair: string
   stgy: string
   tf: string
-  open_long: boolean
-  open_short: boolean
-  close_long: boolean
-  close_short: boolean
-  exg_stoploss: boolean
-  exg_takeprofit: boolean
+  args: FieldArg[]
 }
 
 export interface StgyVer{

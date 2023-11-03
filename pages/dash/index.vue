@@ -3,7 +3,7 @@ import {definePageMeta, getApi, setTimezone} from "#imports";
 import {useDashLocal} from "~/stores/dashLocal";
 import {useDashStore} from "~/stores/dash";
 import {useI18n} from "vue-i18n";
-import {BotInfo, TradeBot} from "~/composables/dash/types";
+import {type BotInfo, type TradeBot} from "~/composables/dash/types";
 import {Delete} from "@element-plus/icons-vue";
 import {useLocalePath} from "#i18n";
 import {useApi} from "~/composables/dash/api";

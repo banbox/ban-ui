@@ -5,7 +5,7 @@ import duration from "dayjs/plugin/duration"
 dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.extend(duration)
-import {Period} from "~/components/kline/types";
+import {type Period} from "~/components/kline/types";
 import kc from "klinecharts";
 const FormatDateType = kc.FormatDateType
 export const formatDate = kc.utils.formatDate

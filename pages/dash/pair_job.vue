@@ -2,7 +2,7 @@
 
 import {definePageMeta} from "#imports";
 import {useCurApi} from "~/composables/dash/api";
-import {PairPerf, PairStgyTf, StgyVer} from "~/composables/dash/types";
+import type {PairStgyTf, StgyVer} from "~/composables/dash/types";
 import * as diagnostics_channel from "diagnostics_channel";
 import {useDashStore} from "~/stores/dash";
 import {useLocalePath} from "#i18n";
@@ -24,6 +24,14 @@ const isWhitePair = ref(false)
 const showPairList = ref(false)
 const active_stgy = ref('')
 const stgy_content = ref('')
+const job = reactive<PairStgyTf>({
+  pair: '',
+  stgy: '',
+  tf: '',
+  args: []
+})
+const showJobEdit = ref(false)
+
 
 async function loadData(){
   // 显示job列表
@@ -41,6 +49,20 @@ async function loadData(){
 function clickPairList(is_white: boolean){
   showPairList.value = true
   isWhitePair.value = is_white
+}
+
+function editJobArgs(row: PairStgyTf){
+  Object.assign(job, row)
+  showJobEdit.value = true
+}
+
+function showJobArgs(row: PairStgyTf){
+  const result = []
+  for(let item of row.args){
+    if(!item.value)continue
+    result.push(item.title, ', ')
+  }
+  return result.join('')
 }
 
 function createStrategy(){
@@ -70,6 +92,7 @@ onMounted(() => {
       <pre class="stgy-code">{{stgy_content}}</pre>
     </el-dialog>
     <DashPairList :is_white="isWhitePair" v-model="showPairList"/>
+    <DashEditJob v-model="showJobEdit" :job="job" />
   </client-only>
   <div class="page-head">
     <el-menu mode="horizontal" :default-active="tab_name">
@@ -88,20 +111,14 @@ onMounted(() => {
     <el-table-column prop="pair" label="币对" />
     <el-table-column prop="tf" label="周期" width="80" />
     <el-table-column prop="stgy" label="策略" />
-    <el-table-column prop="switch" label="开关" >
+    <el-table-column prop="info" label="设置" >
       <template #default="props">
-        <el-switch :model-value="props.row.open_long" width="50" inline-prompt
-                   active-text="开多" inactive-text="开多" @change="switchChange(props.row, 'open_long', $event)"/>
-        <el-switch :model-value="props.row.open_short" width="50" inline-prompt
-                   active-text="开空" inactive-text="开空" @change="switchChange(props.row, 'open_short', $event)"/>
-        <el-switch :model-value="props.row.close_long" width="50" inline-prompt
-                   active-text="平多" inactive-text="平多" @change="switchChange(props.row, 'close_long', $event)"/>
-        <el-switch :model-value="props.row.close_short" width="50" inline-prompt
-                   active-text="平空" inactive-text="平空" @change="switchChange(props.row, 'close_short', $event)"/>
-        <el-switch :model-value="props.row.exg_stoploss" width="70" inline-prompt
-                   active-text="止损单" inactive-text="止损单" @change="switchChange(props.row, 'exg_stoploss', $event)"/>
-        <el-switch :model-value="props.row.exg_takeprofit" width="70" inline-prompt
-                   active-text="止盈单" inactive-text="止盈单" @change="switchChange(props.row, 'exg_takeprofit', $event)"/>
+        {{showJobArgs(props.row)}}
+      </template>
+    </el-table-column>
+    <el-table-column prop="action" label="操作" >
+      <template #default="props">
+        <el-link type="primary" @click="editJobArgs(props.row)">修改</el-link>
       </template>
     </el-table-column>
   </el-table>

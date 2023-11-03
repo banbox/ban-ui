@@ -1,9 +1,7 @@
-import {TradeBot} from "~/composables/dash/types";
+import {type TradeBot} from "~/composables/dash/types";
 import {$fetch, FetchError} from "ofetch";
-import {ApiResult} from "~/utils/netio";
+import {type ApiResult} from "~/utils/netio";
 import {useDashLocal} from "~/stores/dashLocal";
-import {ShallowReactive} from "@vue/reactivity";
-import {ComputedRef} from "vue/dist/vue";
 
 export const APIBASE = '/api/v1'
 

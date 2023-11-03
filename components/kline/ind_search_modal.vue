@@ -35,7 +35,7 @@
 import Modal from "~/components/kline/modal.vue"
 import List from "~/components/kline/list.vue"
 import Checkbox from "~/components/kline/checkbox.vue"
-import {PaneInds} from "~/components/kline/types";
+import {type PaneInds} from "~/components/kline/types";
 import {computed, defineEmits, defineProps, reactive, watch} from "vue";
 import kc, {Chart} from "klinecharts";
 import {useKlineLocal} from "~/stores/klineLocal";

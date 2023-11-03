@@ -12,7 +12,7 @@ import {
 } from 'klinecharts'
 import kc from 'klinecharts'
 import _ from "lodash"
-import {PaneInds, Period, SymbolInfo, Datafeed} from '~/components/kline/types'
+import {type PaneInds, Period, SymbolInfo, Datafeed} from '~/components/kline/types'
 import {computed, defineProps, onMounted, onUnmounted, reactive, ref, toRaw, watch} from "vue";
 import {
   AllPeriods,
@@ -25,14 +25,14 @@ import {adjustFromTo, tf_to_secs, toUTCStamp, getDateStr, makeFormatDate} from "
 import overlays from '~/composables/kline/overlays'
 import figures from '~/composables/kline/figure'
 import {useAuthState} from "~/composables/auth";
-import {AddDelInd, BarArr} from "~/composables/types"
+import type {AddDelInd, BarArr} from "~/composables/types"
 import {GetIndDefaults} from "~/components/kline/inds";
 import {useKlineLocal} from "~/stores/klineLocal";
 import {useI18n} from "vue-i18n";
 import {useRoute, useNuxtApp} from "#app";
 import {useKlineStore} from "~/stores/kline";
 import {getDefaults} from "~/config";
-import {ApiResult} from "~/utils/netio";
+import type{ApiResult} from "~/utils/netio";
 import makeCloudInds from "~/composables/kline/indicators/cloudInds";
 import {addChartBars} from "~/composables/kline/kc_exts";
 import indicators from "~/composables/kline/indicators";

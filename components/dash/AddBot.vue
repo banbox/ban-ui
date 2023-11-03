@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {useI18n} from "vue-i18n";
-import {TradeBot} from "~/composables/dash/types";
-import {FormInstance, FormRules} from "element-plus";
+import {type TradeBot} from "~/composables/dash/types";
+import type {FormInstance, FormRules} from "element-plus";
 import {useDashLocal} from "~/stores/dashLocal";
 import {useBotAuth} from "~/composables/dash/auth";
 const {t} = useI18n()

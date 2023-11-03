@@ -1,4 +1,4 @@
-import {Chart, KLineData} from "klinecharts"
+import type {Chart, KLineData} from "klinecharts"
 import kc from "klinecharts"
 const formatValue = kc.utils.formatValue
 

@@ -9,8 +9,7 @@
 <script lang="ts" setup>
 import Modal from "~/components/kline/modal.vue"
 import Select from "~/components/kline/select.vue"
-import {computed, defineProps, reactive, ref} from "vue";
-import {defineEmits} from "vue/dist/vue";
+import {computed, reactive, ref} from "vue";
 import {useI18n} from "vue-i18n"
 import {navigateTo} from "#app";
 import {LocaleObject, useSwitchLocalePath} from "#i18n";

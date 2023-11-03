@@ -1,4 +1,4 @@
-import {RectAttrs, RectTextStyle, TextAttrs} from "klinecharts";
+import type {RectAttrs, RectTextStyle, TextAttrs} from "klinecharts";
 
 export function getRectStartX(attrs: TextAttrs, styles: Partial<RectTextStyle>, textWidth?: number){
   const { size = 12, paddingLeft = 0, paddingTop = 0, paddingRight = 0, paddingBottom = 0 } = styles

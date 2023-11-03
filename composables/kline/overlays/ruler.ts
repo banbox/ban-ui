@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { OverlayTemplate } from 'klinecharts'
+import type { OverlayTemplate } from 'klinecharts'
 import {getArrowLine} from './utils'
 import {useNuxtApp} from "#app";
 

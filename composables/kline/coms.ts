@@ -1,11 +1,10 @@
-import {Period, SymbolInfo} from "~/components/kline/types";
-import {CandleTooltipCustomCallbackData, CandleStyle} from "klinecharts";
+import type {Period, SymbolInfo} from "~/components/kline/types";
+import type {CandleTooltipCustomCallbackData, CandleStyle} from "klinecharts";
 import kc from "klinecharts";
 import {tf_to_secs, formatDate} from "~/composables/dateutil";
 import {MyDatafeed} from "~/composables/kline/datafeeds";
 import {useKlineStore} from "~/stores/kline";
-import {ref} from "#imports";
-import {BarArr} from "~/composables/types";
+import {type BarArr} from "~/composables/types";
 
 export const formatPrecision = kc.utils.formatPrecision
 export const formatThousands = kc.utils.formatThousands

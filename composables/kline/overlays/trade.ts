@@ -1,5 +1,5 @@
-import {OverlayEvent, OverlayTemplate} from "klinecharts";
-import {TradeInfo} from "~/composables/types";
+import type {OverlayEvent, OverlayTemplate} from "klinecharts";
+import type {TradeInfo} from "~/composables/types";
 
 const textStyles = {
   color: '#ffffff',

@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import {OverlayFigure, OverlayTemplate} from 'klinecharts'
+import type {OverlayFigure, OverlayTemplate} from 'klinecharts'
 import {getTagFigures} from '../ktools'
 
 const barSignal: OverlayTemplate = {

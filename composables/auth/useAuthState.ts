@@ -1,12 +1,10 @@
 import { computed } from 'vue'
-import getURL from 'requrl'
-import { joinURL } from 'ufo'
-import {useRequestEvent, useAppConfig} from '#app'
-import {AuthProvider, SessionStatus, UseAuthStateReturn} from './types'
+import {useAppConfig} from '#app'
+import type {AuthProvider, SessionStatus, UseAuthStateReturn} from './types'
 import {useState, watch} from '#imports'
 // @ts-ignore
 import type { SessionData } from '#auth'
-import {DeepRequired} from "ts-essentials";
+import {type DeepRequired} from "ts-essentials";
 import defu from "defu"
 import {useStorage} from "@vueuse/core";
 

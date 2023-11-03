@@ -1,6 +1,7 @@
 <script setup lang="ts">
 
-import {BanOrder, definePageMeta, fmtDuration, tf_to_secs, toUTCStamp} from "#imports";
+import {definePageMeta, fmtDuration, tf_to_secs, toUTCStamp} from "#imports";
+import {BanOrder} from "~/composables/types";
 import {useCurApi} from "~/composables/dash/api";
 import {useDashStore} from "~/stores/dash";
 import {useKlineLocal} from "~/stores/klineLocal";

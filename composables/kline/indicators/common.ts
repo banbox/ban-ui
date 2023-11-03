@@ -1,4 +1,5 @@
-import kc, {IndicatorDrawParams, KLineData, OverlayFigure, OverlayStyle} from "klinecharts";
+import kc from "klinecharts";
+import type {IndicatorDrawParams, KLineData, OverlayStyle} from "klinecharts";
 import {getTagFigures} from "~/composables/kline/ktools";
 const LineType = kc.LineType;
 const PolygonType = kc.PolygonType;
@@ -139,6 +140,9 @@ export function drawFigures({ctx, kLineDataList, indicator, visibleRange, defaul
   return my_figures.length === figures.length
 }
 
+/**
+ * 复制自KlineCharts的同名函数
+ */
 function getDefaultOverlayStyle (): OverlayStyle {
   return {
     point: {
@@ -190,10 +194,21 @@ function getDefaultOverlayStyle (): OverlayStyle {
       dashedValue: [2, 2]
     },
     text: {
-      color: '#1677FF',
+      style: PolygonType.Fill,
+      color: '#FFFFFF',
       size: 12,
       family: 'Helvetica Neue',
-      weight: 'normal'
+      weight: 'normal',
+      borderStyle: LineType.Solid,
+      borderDashedValue: [2, 2],
+      borderSize: 0,
+      borderRadius: 2,
+      borderColor: '#1677FF',
+      paddingLeft: 0,
+      paddingRight: 0,
+      paddingTop: 0,
+      paddingBottom: 0,
+      backgroundColor: 'transparent'
     },
     rectText: {
       style: PolygonType.Fill,

@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { Coordinate, Bounding, LineAttrs } from 'klinecharts'
+import type { Coordinate, Bounding, LineAttrs } from 'klinecharts'
 import kc from "klinecharts"
 
 export function getArrowLine(point1: Coordinate, point2: Coordinate){

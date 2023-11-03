@@ -1,7 +1,7 @@
-import {Datafeed, SymbolInfo, Period, DatafeedWatchCallback, KData, GetKlineArgs} from "~/components/kline/types";
+import type {Datafeed, SymbolInfo, Period, DatafeedWatchCallback, KData, GetKlineArgs} from "~/components/kline/types";
 import {getApi} from "~/utils/netio";
 import {useAppConfig} from "#app";
-import {BarArr} from "~/composables/types";
+import {type BarArr} from "~/composables/types";
 
 export default class MyDatafeed implements Datafeed {
 

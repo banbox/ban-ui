@@ -9,7 +9,6 @@
 import Modal from "~/components/kline/modal.vue"
 import Select from "~/components/kline/select.vue"
 import {computed, defineProps, ref, watch} from "vue";
-import {defineEmits} from "vue/dist/vue";
 import {translateTimezone, getTimezoneSelectOptions, setTimezone} from "~/composables/dateutil";
 import {useKlineLocal} from "~/stores/klineLocal";
 

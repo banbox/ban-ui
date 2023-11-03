@@ -1,6 +1,5 @@
 import {defineStore} from "pinia";
 import {ref} from "#imports";
-import {TradeBot} from "~/composables/dash/types"
 
 
 export const useDashStore = defineStore('dash', () => {

@@ -12,8 +12,7 @@
  * limitations under the License.
  */
 
-import { OverlayTemplate } from 'klinecharts'
-import kc from "klinecharts"
+import type { OverlayTemplate } from 'klinecharts'
 
 import {getArrowLine} from './utils'
 

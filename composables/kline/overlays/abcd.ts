@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import { OverlayTemplate, Coordinate } from 'klinecharts'
+import type { OverlayTemplate, Coordinate } from 'klinecharts'
 
 const abcd: OverlayTemplate = {
   name: 'abcd',

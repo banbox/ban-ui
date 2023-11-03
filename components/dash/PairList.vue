@@ -2,7 +2,7 @@
 
 import {defineProps} from "@vue/runtime-core";
 import {computed, defineEmits} from "vue";
-import {ApiResult} from "~/utils/netio";
+import type {ApiResult} from "~/utils/netio";
 import {useCurApi} from "~/composables/dash/api";
 
 const {getApi, postApi} = useCurApi()

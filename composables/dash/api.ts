@@ -1,6 +1,6 @@
-import {TradeBot} from "~/composables/dash/types";
+import {type TradeBot} from "~/composables/dash/types";
 import {$fetch} from "ofetch";
-import {ApiResult} from "~/utils/netio";
+import {type ApiResult} from "~/utils/netio";
 import _ from "lodash"
 import {useBotAuth, parseApiExc} from "~/composables/dash/auth";
 import {useDashLocal} from "~/stores/dashLocal";

@@ -4,7 +4,7 @@ import {useLocalStorage} from "@vueuse/core";
 import {useDashStore} from "~/stores/dash";
 import {useDashLocal} from "~/stores/dashLocal";
 import {useCurApi} from "~/composables/dash/api";
-import {BotInfo} from "~/composables/dash/types";
+import {type BotInfo} from "~/composables/dash/types";
 import {getUTCStamp} from "~/composables/dateutil";
 import {useLocalePath} from "#i18n";
 

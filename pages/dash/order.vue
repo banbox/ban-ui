@@ -3,7 +3,7 @@
 import {definePageMeta, getDateStr} from "#imports";
 import {useCurApi} from "~/composables/dash/api";
 import {useDashStore} from "~/stores/dash";
-import {BanOrder, InoutStatus, OpenOrder, OrderStatus} from "~/composables/types";
+import type {BanOrder, InoutStatus, OpenOrder, OrderStatus} from "~/composables/types";
 
 definePageMeta({
   layout: 'dash',

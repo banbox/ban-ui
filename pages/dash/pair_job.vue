@@ -110,6 +110,8 @@ onMounted(() => {
   <el-table :data="jobs" v-if="tab_name == 'symbol'">
     <el-table-column prop="pair" label="币对" />
     <el-table-column prop="tf" label="周期" width="80" />
+    <el-table-column prop="price" label="价格" width="80" />
+    <el-table-column prop="od_num" label="订单数" width="80" />
     <el-table-column prop="stgy" label="策略" />
     <el-table-column prop="info" label="设置" >
       <template #default="props">

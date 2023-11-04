@@ -76,6 +76,8 @@ export interface PairStgyTf{
   pair: string
   stgy: string
   tf: string
+  price: number
+  od_num: number
   args: FieldArg[]
 }
 

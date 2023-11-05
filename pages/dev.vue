@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {useKlineLocal} from "~/stores/klineLocal";
 import {MyDatafeed} from "~/composables/kline/datafeeds";
-import {PairItem} from "~/composables/types";
+import type {PairItem} from "~/composables/types";
 import BotTaskList from "~/components/BotTaskList.vue";
 import {useKlineStore} from "~/stores/kline";
 import {setTimezone} from "~/composables/dateutil";

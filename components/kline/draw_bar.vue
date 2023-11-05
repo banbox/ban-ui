@@ -66,7 +66,7 @@ import {defineEmits, defineProps, reactive, ref} from 'vue'
 import {Chart, Overlay, OverlayEvent, OverlayMode, OverlayRemove} from "klinecharts";
 import {postApi} from "~/utils/netio";
 import {useAuthState} from "~/composables/auth";
-import {Period, SymbolInfo} from "~/components/kline/types";
+import type {Period, SymbolInfo} from "~/components/kline/types";
 import {useKlineLocal} from "~/stores/klineLocal";
 import {useKlineStore} from "~/stores/kline";
 

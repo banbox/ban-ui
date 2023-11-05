@@ -1,4 +1,4 @@
-import {Period, SymbolInfo} from "~/components/kline/types";
+import type {Period, SymbolInfo} from "~/components/kline/types";
 
 export const getDefaults = () => {
   return {

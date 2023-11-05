@@ -5,7 +5,7 @@ import List from "~/components/kline/list.vue";
 import {AllPeriods} from "~/composables/kline/coms";
 import {useKlineLocal} from "~/stores/klineLocal";
 import {getDefaults} from "~/config";
-import {Period} from "~/components/kline/types";
+import type {Period} from "~/components/kline/types";
 
 const props = defineProps<{
   modelValue: boolean,

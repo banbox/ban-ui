@@ -109,7 +109,7 @@
 import {computed, defineEmits, onMounted, reactive, ref, watch} from "vue"
 import {defineProps} from "vue";
 import Icon from "~/components/kline/icon"
-import {Period, SymbolInfo} from "~/components/kline/types"
+import type {Period, SymbolInfo} from "~/components/kline/types"
 import {useKlineLocal} from "~/stores/klineLocal";
 import {getDefaults} from "~/config";
 import {useAuthState} from "~/composables/auth";

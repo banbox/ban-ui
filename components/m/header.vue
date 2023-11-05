@@ -11,7 +11,7 @@
 import Select from "~/components/kline/select.vue"
 import {useI18n} from "vue-i18n"
 import {navigateTo} from "#app";
-import {LocaleObject, useSwitchLocalePath} from "#i18n";
+import {type LocaleObject, useSwitchLocalePath} from "#i18n";
 import {reactive, ref} from "vue";
 const {locale, locales} = useI18n()
 

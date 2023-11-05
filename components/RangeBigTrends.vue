@@ -8,7 +8,7 @@ import {
   readableNumber,
   formatPrecision
 } from "~/composables/kline/coms";
-import {TrendItemType} from "~/composables/types"
+import type {TrendItemType} from "~/composables/types"
 import {useKlineStore} from "~/stores/kline";
 import {set} from "lodash-unified";
 const title_down = ref(false)

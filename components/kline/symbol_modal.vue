@@ -27,7 +27,7 @@ import Modal from "~/components/kline/modal.vue"
 import Input from "~/components/kline/input.vue"
 import List from "~/components/kline/list.vue"
 import {defineEmits, defineProps, reactive, ref, computed} from "vue";
-import {Datafeed, SymbolInfo} from "~/components/kline/types";
+import type {Datafeed, SymbolInfo} from "~/components/kline/types";
 import {useKlineLocal} from "~/stores/klineLocal";
 import {useKlineStore} from "~/stores/kline";
 import {useSymbols} from "~/composables/kline/coms";

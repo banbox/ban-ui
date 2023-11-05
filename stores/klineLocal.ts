@@ -7,7 +7,6 @@ import {getDefaults} from "~/config";
 import {makePeriod} from "~/composables/kline/coms";
 import {useKlineStore} from "~/stores/kline";
 
-const store = useKlineStore()
 
 const defaults = getDefaults();
 const defStyle = {
@@ -57,6 +56,8 @@ export const useKlineLocal = defineStore('klocal', () => {
     const dt_stop = ref('20230820')
     const timezone = ref(Intl.DateTimeFormat().resolvedOptions().timeZone)
     const theme = ref('light')
+
+    const store = useKlineStore()
 
     function setPeriod(val: Period){
         Object.assign(period, val)

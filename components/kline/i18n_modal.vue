@@ -12,7 +12,7 @@ import Select from "~/components/kline/select.vue"
 import {computed, reactive, ref} from "vue";
 import {useI18n} from "vue-i18n"
 import {navigateTo} from "#app";
-import {LocaleObject, useSwitchLocalePath} from "#i18n";
+import {type LocaleObject, useSwitchLocalePath} from "#i18n";
 const {locale, locales} = useI18n()
 const props = defineProps<{
   modelValue: boolean

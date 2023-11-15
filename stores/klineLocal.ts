@@ -72,7 +72,8 @@ export const useKlineLocal = defineStore('klocal', () => {
         if (!exchange) {
             exchange = symbol.exchange
         }
-        const mats = store.all_symbols.filter(s => s.exchange == exchange && s.ticker == ticker)
+        const mats = store.all_symbols.filter(
+          s => s.exchange == exchange && (s.ticker == ticker || s.shortName == ticker))
         if (mats.length > 0) {
             Object.assign(symbol, mats[0])
         } else if(raise_err) {
@@ -87,7 +88,7 @@ export const useKlineLocal = defineStore('klocal', () => {
     }
 
     function removeInd(paneId: string, name?: string) {
-        const mat_idx = save_inds.value.findIndex(d =>
+        const mat_idx = save_inds.value.findIndex((d: any) =>
           d.pane_id == paneId && (!name || d.name == name))
         if(mat_idx < 0)return
         save_inds.value.splice(mat_idx, 1)

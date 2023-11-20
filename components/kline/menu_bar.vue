@@ -119,10 +119,13 @@ import {getDefaults} from "~/config";
 import {useAuthState} from "~/composables/auth";
 import {useKlineStore} from "~/stores/kline";
 import {Chart, KLineData} from "klinecharts";
-import Papa from 'papaparse';
 import {makePeriod} from "~/composables/kline/coms";
 import {secs_to_tf} from "~/composables/dateutil";
-
+useHead({
+  script: [
+    {src: `/js/papaparse.min.js`, async: true},
+  ],
+});
 const period_bar = ref()
 
 const props = defineProps<{
@@ -196,7 +199,7 @@ async function loadDataFile(e: any) {
   if (!e.target.files || !e.target.files.length) return
   var file = e.target.files[0]
   const name = file.name.split('.').shift(0)
-  Papa.parse(file, {
+  window.Papa.parse(file, {
     skipEmptyLines: true,
     complete: (data: any) => {
       const karr = (data.data || []).map((data: any) => ({

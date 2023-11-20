@@ -23,10 +23,8 @@
   },
   "dependencies": {
     "@pinia/nuxt": "^0.5.1",
-    "@types/papaparse": "^5.3.11",
     "klinecharts": "^9.5.4",
     "mitt": "^3.0.1",
-    "papaparse": "^5.4.1",
     "pinia": "^2.1.7"
   }
 }

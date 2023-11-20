@@ -340,6 +340,20 @@ async function customLoadKline(){
   main.fireKRange += 1
 }
 
+function loadKdata(klines: KLineData[]){
+  if(!main.chart)return
+  const chartObj: Chart = main.chart!;
+  if (klines.length > 0) {
+    const pricePrec = GetNumberDotOffset(Math.min(klines[0].low, klines[klines.length - 1].low)) + 3
+    chartObj.setPriceVolumePrecision(pricePrec, 0)
+  }
+  chartObj.applyNewData(klines, false)
+  loading = false
+  main.loadingChart = false
+  // 触发K线加载完毕事件
+  main.klineLoaded += 1
+}
+
 function loadSymbolPeriod(symbol_chg: boolean, period_chg: boolean){
   const s = klocal.symbol
   const p = klocal.period
@@ -420,7 +434,7 @@ watch(() => main.fireOhlcv, async () => {
   <div class="kline-body klinecharts-pro" :data-theme="klocal.theme">
     <i class="icon-close klinecharts-pro-load-icon"/>
     <div class="kline-main" :data-right="klocal.showRight">
-      <KlineMenuBar :has-right="hasRight" :custom-load="customLoad"
+      <KlineMenuBar :has-right="hasRight" :custom-load="customLoad" @loadKdata="loadKdata"
         @loadData="customLoadKline"/>
       <div class="klinecharts-pro-content">
         <KlineLoading v-if="main.loadingChart"/>

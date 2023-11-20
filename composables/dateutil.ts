@@ -12,6 +12,12 @@ export const formatDate = kc.utils.formatDate
 let tz_applied = false;
 let cur_tz: string = 'UTC'
 
+const secs_min = 60
+const secs_hour = secs_min * 60
+const secs_day = secs_hour * 24
+const secs_week = secs_day * 7
+const secs_mon = secs_day * 30
+const secs_year = secs_day * 365
 const timezone_map: Record<string, string> = {
   'Africa/Abidjan': 'utc',
   'Pacific/Honolulu': 'honolulu',
@@ -195,6 +201,30 @@ export function tf_to_secs(timeframe?: string): number{
   }
   return scale * amount
 }
+
+
+export function secs_to_tf(secs: number): string{
+  if(secs > secs_year){
+    return `${Math.floor(secs / secs_year)}y`
+  }
+  else if(secs > secs_mon){
+    return `${Math.floor(secs / secs_mon)}M`
+  }
+  else if(secs > secs_week){
+    return `${Math.floor(secs / secs_week)}w`
+  }
+  else if(secs > secs_day){
+    return `${Math.floor(secs / secs_day)}d`
+  }
+  else if(secs > secs_hour){
+    return `${Math.floor(secs / secs_hour)}h`
+  }
+  else if(secs > secs_min){
+    return `${Math.floor(secs / secs_min)}m`
+  }
+  return `${Math.floor(secs)}s`
+}
+
 
 export function makeFormatDate(timespan: string) {
   function doFormatDate(dateTimeFormat: Intl.DateTimeFormat, timestamp: number,

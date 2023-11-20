@@ -17,6 +17,10 @@
         <path d="M192.037 287.953h640.124c17.673 0 32-14.327 32-32s-14.327-32-32-32H192.037c-17.673 0-32 14.327-32 32s14.327 32 32 32zM832.161 479.169H438.553c-17.673 0-32 14.327-32 32s14.327 32 32 32h393.608c17.673 0 32-14.327 32-32s-14.327-32-32-32zM832.161 735.802H192.037c-17.673 0-32 14.327-32 32s14.327 32 32 32h640.124c17.673 0 32-14.327 32-32s-14.327-32-32-32zM319.028 351.594l-160 160 160 160z"/>
       </svg>
     </div>
+    <span class="item" style="padding: 0;margin: 0" v-if="customLoad">
+      <input type="file" ref="file" style="display: none" accept="text/csv" @change="loadDataFile"/>
+      <KlineButton style="width: 60px" @click="$refs.file.click()">打开</KlineButton>
+    </span>
     <div class="symbol" @click="showSymbolModal = true">
       <span>{{showName}}</span>
     </div>
@@ -114,8 +118,10 @@ import {useKlineLocal} from "~/stores/klineLocal";
 import {getDefaults} from "~/config";
 import {useAuthState} from "~/composables/auth";
 import {useKlineStore} from "~/stores/kline";
-import {Chart} from "klinecharts";
-import {MyDatafeed} from "~/composables/kline/datafeeds";
+import {Chart, KLineData} from "klinecharts";
+import Papa from 'papaparse';
+import {makePeriod} from "~/composables/kline/coms";
+import {secs_to_tf} from "~/composables/dateutil";
 
 const period_bar = ref()
 
@@ -124,7 +130,8 @@ const props = defineProps<{
   hasRight: boolean
 }>()
 const emit = defineEmits<{
-  loadData: []
+  loadData: [],
+  loadKdata: [KLineData[]]
 }>()
 const store = useKlineStore()
 const klocal = useKlineLocal()
@@ -154,6 +161,7 @@ const showScreenShotModal = ref(false)
 const showTimezoneModal = ref(false)
 const showI18nModal = ref(false)
 const screenShotUrl = ref('')
+const selFile = ref(null)
 
 onMounted(() => {
   watch(klocal.symbol, (symbol) => {
@@ -181,6 +189,32 @@ function clickPeriod(item: Period){
   //   return
   // }
   klocal.setPeriod(item)
+}
+
+
+async function loadDataFile(e: any) {
+  if (!e.target.files || !e.target.files.length) return
+  var file = e.target.files[0]
+  const name = file.name.split('.').shift(0)
+  Papa.parse(file, {
+    skipEmptyLines: true,
+    complete: (data: any) => {
+      const karr = (data.data || []).map((data: any) => ({
+        timestamp: parseInt(data[0]),
+        open: parseFloat(data[1]),
+        high: parseFloat(data[2]),
+        low: parseFloat(data[3]),
+        close: parseFloat(data[4]),
+        volume: parseFloat(data[5])
+      } as KLineData))
+      klocal.symbol.shortName = name
+      if (karr.length > 1) {
+        const intv_secs = (karr[karr.length - 1].timestamp - karr[0].timestamp) / (karr.length - 1) / 1000
+        klocal.setPeriod(makePeriod(secs_to_tf(intv_secs)))
+      }
+      emit('loadKdata', karr)
+    }
+  })
 }
 
 

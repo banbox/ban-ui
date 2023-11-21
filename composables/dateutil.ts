@@ -230,6 +230,12 @@ export function makeFormatDate(timespan: string) {
   function doFormatDate(dateTimeFormat: Intl.DateTimeFormat, timestamp: number,
                       format: string, type: kc.FormatDateType) {
     switch (timespan) {
+      case 'second': {
+        if (type === FormatDateType.XAxis) {
+          return formatDate(dateTimeFormat, timestamp, 'HH:mm:ss')
+        }
+        return formatDate(dateTimeFormat, timestamp, 'YYYY-MM-DD HH:mm:ss')
+      }
       case 'minute': {
         if (type === FormatDateType.XAxis) {
           return formatDate(dateTimeFormat, timestamp, 'HH:mm')

@@ -15,7 +15,10 @@ export const makeCloudInds = (params: Record<string, any>[]): IndicatorTemplate[
     if (args['figure_tpl'] && args['calcParams']) {
       for (let period of args['calcParams']) {
         const key = args['figure_tpl'].replace(/\{period\}/g, period)
-        const plot_type = args['figure_type'] ?? 'line'
+        var plot_type = args['figure_type']
+        if (!plot_type){
+          plot_type = 'line'
+        }
         figures.push({key, title: `${key.toUpperCase()}: `, type: plot_type})
       }
     }
@@ -27,6 +30,7 @@ export const makeCloudInds = (params: Record<string, any>[]): IndicatorTemplate[
         const params = calcParams;
         const kwargs = extendData;
         const kline = dataList.map(d => [d.timestamp, d.open, d.high, d.low, d.close, d.volume]);
+        if (kline.length == 0){return []}
         const rsp = await postApi('/kline/calc_ind', {name, params, kline, kwargs})
         if (rsp.code != 200 || !rsp.data) {
           console.error('calc ind fail:', rsp)

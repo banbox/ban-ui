@@ -1,6 +1,6 @@
 <template>
   <RegGuide v-model="showRegModal"/>
-  <Modal :title="$t(form_mode)" :width="500" v-model="showModal">
+  <KlineModal :title="$t(form_mode)" :width="500" v-model="showModal">
     <div class="login-box">
       <div class="logo-box">
         <img src="/logo_192.png" alt="logo"/>
@@ -70,20 +70,18 @@
         <el-link target="_blank" :href="aggrement_url">{{$t('user_contract')}}</el-link>
       </div>
     </div>
-  </Modal>
+  </KlineModal>
 </template>
 
 <script setup lang="ts">
-import Modal from "~/components/kline/modal.vue"
 import {Connection, User, Key, Promotion, Message, View, Hide} from "@element-plus/icons-vue";
-import {useAuthState} from "~/composables/auth";
 import {computed, defineEmits, defineProps, reactive, ref, toRaw} from "vue";
 import type {FormRules, FormInstance} from "element-plus";
 import {useI18n} from "vue-i18n";
 const {locale, t} = useI18n()
 const showRegModal = ref(false)
 
-const {authData, authStatus, authToken, authDoing} = useAuthState()
+const {data: authData, setToken, loading: authDoing} = useAuthState();
 interface RegRuleForm{
   binance_uid: number,
   username: string,
@@ -202,7 +200,7 @@ const submitForm = async (formEl: FormInstance | undefined) => {
         err_msg.value = rsp.msg_code ? t(rsp.msg_code): (rsp.msg ?? 'submit fail');
       }else{
         authData.value = rsp.user
-        authToken.value = rsp.token
+        setToken(rsp.token)
         showModal.value = false
         localStorage.setItem('user_id', rsp.user.id)
       }

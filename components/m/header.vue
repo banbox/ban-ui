@@ -2,13 +2,12 @@
   <div class="header">
     <img class="logo" src="/logo_horz.png" alt="logo"/>
     <div class="right-area">
-      <Select :data-source="locales" :value="localeMap[locale]" value_key="name" @change="setLocale($event.code)"/>
+      <KlineSelect :data-source="locales" :value="localeMap[locale]" value_key="name" @change="setLocale($event.code)"/>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import Select from "~/components/kline/select.vue"
 import {useI18n} from "vue-i18n"
 import {navigateTo} from "#app";
 import {type LocaleObject, useSwitchLocalePath} from "#i18n";

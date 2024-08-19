@@ -1,13 +1,11 @@
 <template>
-  <Modal :title="$t('timezone')" :buttons="['close']" :width="400" class="timezone" v-model="showModal">
-    <Select :data-source="timeZoneOpts" :value="$t(timezone_text)" :translate="true"
+  <KlineModal :title="$t('timezone')" :buttons="['close']" :width="400" class="timezone" v-model="showModal">
+    <KlineSelect :data-source="timeZoneOpts" :value="$t(timezone_text)" :translate="true"
             @change="setTimezone($event.key)"/>
-  </Modal>
+  </KlineModal>
 </template>
 
 <script setup lang="ts">
-import Modal from "~/components/kline/modal.vue"
-import Select from "~/components/kline/select.vue"
 import {computed, defineProps, ref, watch} from "vue";
 import {translateTimezone, getTimezoneSelectOptions, setTimezone} from "~/composables/dateutil";
 import {useKlineLocal} from "~/stores/klineLocal";

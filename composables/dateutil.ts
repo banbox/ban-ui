@@ -1,16 +1,11 @@
-import dayjs from "dayjs"
-import utc from "dayjs/plugin/utc"
-import timezone from "dayjs/plugin/timezone"
-import duration from "dayjs/plugin/duration"
-dayjs.extend(utc)
-dayjs.extend(timezone)
-dayjs.extend(duration)
+import {useDayjs} from "#dayjs"
 import {type Period} from "~/components/kline/types";
-import kc from "klinecharts";
+import * as kc from "klinecharts";
 const FormatDateType = kc.FormatDateType
 export const formatDate = kc.utils.formatDate
 let tz_applied = false;
 let cur_tz: string = 'UTC'
+const dayjs = useDayjs()
 
 const secs_min = 60
 const secs_hour = secs_min * 60
@@ -278,7 +273,8 @@ export async function setTimezone(timezone: string|undefined = undefined, save: 
   }
   if (!timezone || save) {
     const {useKlineLocal} = await import("~/stores/klineLocal")
-    const store = useKlineLocal()
+    const store = useKlineLocal();
+
     timezone = store.timezone
     if (save) {
       store.timezone = timezone

@@ -2,19 +2,19 @@
   <div class="klinecharts-pro-drawing-bar">
     <div v-for="(item, index) in overlays" class="item" @blur="popoverKey = ''">
       <span style="width:32px;height:32px" @click="startOverlay(item.icon)">
-        <Icon :name="item.icon" />
+        <KlineIcon :name="item.icon" />
       </span>
       <div class="icon-arrow" @click="clickPopoverKey(item.key)">
         <svg :class="{rotate: item.key === popoverKey}" viewBox="0 0 4 6">
           <path d="M1.07298,0.159458C0.827521,-0.0531526,0.429553,-0.0531526,0.184094,0.159458C-0.0613648,0.372068,-0.0613648,0.716778,0.184094,0.929388L2.61275,3.03303L0.260362,5.07061C0.0149035,5.28322,0.0149035,5.62793,0.260362,5.84054C0.505822,6.05315,0.903789,6.05315,1.14925,5.84054L3.81591,3.53075C4.01812,3.3556,4.05374,3.0908,3.92279,2.88406C3.93219,2.73496,3.87113,2.58315,3.73964,2.46925L1.07298,0.159458Z" stroke="none" stroke-opacity="0"/>
         </svg>
       </div>
-      <List v-if="item.key === popoverKey" class="list">
+      <KlineList v-if="item.key === popoverKey" class="list">
         <li v-for="data in item.list" @click="clickSubPopover(index, data.key)">
-          <Icon :name="data.key"/>
+          <KlineIcon :name="data.key"/>
           <span style="padding-left:8px">{{$t(data.text)}}</span>
         </li>
-      </List>
+      </KlineList>
     </div>
     <div class="item">
       <span style="width:30px;height:30px" @click="startOverlay('ruler')">
@@ -24,49 +24,46 @@
     <span class="split-line"/>
     <div class="item" @blur="popoverKey = ''">
       <span style="width:32px;height:32px" @click="clickMode">
-        <Icon :name="modeIcon" :class="{selected: mode == modeIcon}"/>
+        <KlineIcon :name="modeIcon" :class="{selected: mode == modeIcon}"/>
       </span>
       <div class="icon-arrow" @click="clickPopoverKey('mode')">
         <svg :class="{rotate: popoverKey == 'mode'}" viewBox="0 0 4 6">
           <path d="M1.07298,0.159458C0.827521,-0.0531526,0.429553,-0.0531526,0.184094,0.159458C-0.0613648,0.372068,-0.0613648,0.716778,0.184094,0.929388L2.61275,3.03303L0.260362,5.07061C0.0149035,5.28322,0.0149035,5.62793,0.260362,5.84054C0.505822,6.05315,0.903789,6.05315,1.14925,5.84054L3.81591,3.53075C4.01812,3.3556,4.05374,3.0908,3.92279,2.88406C3.93219,2.73496,3.87113,2.58315,3.73964,2.46925L1.07298,0.159458Z" stroke="none" stroke-opacity="0"/>
         </svg>
       </div>
-      <List v-if="'mode' === popoverKey" class="list">
+      <KlineList v-if="'mode' === popoverKey" class="list">
         <li v-for="data in modes" @click="clickSubMode(data.key)">
-          <Icon :name="data.key"/>
+          <KlineIcon :name="data.key"/>
           <span style="padding-left:8px">{{data.text}}</span>
         </li>
-      </List>
+      </KlineList>
     </div>
     <div class="item">
       <span style="width:32px;height:32px" @click="toggleLock">
-        <Icon v-if="lock" name="lock"/>
-        <Icon v-else name="unlock" />
+        <KlineIcon v-if="lock" name="lock"/>
+        <KlineIcon v-else name="unlock" />
       </span>
     </div>
     <div class="item">
       <span style="width:32px;height:32px" @click="toggleVisiable">
-        <Icon v-if="visiable" name="visible" />
-        <Icon v-else name="invisible" />
+        <KlineIcon v-if="visiable" name="visible" />
+        <KlineIcon v-else name="invisible" />
       </span>
     </div>
     <span class="split-line"/>
     <div class="item">
       <span style="width:32px;height:32px" @click="clickRemove">
-        <Icon name="remove" />
+        <KlineIcon name="remove" />
       </span>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import Icon from "~/components/kline/icon.vue"
-import List from "~/components/kline/list.vue"
 import {defineEmits, defineProps, reactive, ref} from 'vue'
-import {Chart, Overlay, OverlayEvent, OverlayMode, OverlayRemove} from "klinecharts";
+import type {OverlayEvent, OverlayRemove} from "klinecharts";
+import {OverlayMode} from "klinecharts";
 import {postApi} from "~/utils/netio";
-import {useAuthState} from "~/composables/auth";
-import type {Period, SymbolInfo} from "~/components/kline/types";
 import {useKlineLocal} from "~/stores/klineLocal";
 import {useKlineStore} from "~/stores/kline";
 
@@ -79,7 +76,7 @@ const hisLays = reactive<string[]>([])  // 按创建顺序，记录所有overlay
 const selectDraw = ref('')
 const delOverlayIds: string[] = []
 const layIdMap: Record<string, any> = {}
-const {authStatus} = useAuthState()
+const {status: authStatus} = useAuthState()
 const store = useKlineLocal()
 const main = useKlineStore()
 
@@ -258,7 +255,7 @@ function clickRemove(){
 
 
 function editOverlay(overlay: any){
-  if(authStatus.value <= 0 || overlay.groupId !== GROUP_ID)return
+  if(authStatus.value != 'authenticated' || overlay.groupId !== GROUP_ID)return
   const keys = ['extendData', 'groupId', 'id', 'lock', 'mode', 'name', 'paneId', 'points', 'styles',
     'totalStep', 'visible', 'zLevel']
   const data = Object.fromEntries(keys.map(k => [k, overlay[k]]))
@@ -278,7 +275,7 @@ function editOverlay(overlay: any){
 }
 
 function delOverlays(ids: string[]){
-  if(authStatus.value <= 0)return
+  if(authStatus.value != 'authenticated')return
   const ban_ids = ids.map(v => layIdMap[v]).filter(v => v)
   if(!ban_ids.length)return;
   postApi('/kline/del_overlays', {ids: ban_ids}).then(res => {

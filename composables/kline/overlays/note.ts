@@ -1,4 +1,4 @@
-import type {OverlayEvent, OverlayTemplate} from "klinecharts";
+import type {OverlayTemplate} from "klinecharts";
 import type {TradeInfo} from "~/composables/types";
 
 /**

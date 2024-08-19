@@ -1,4 +1,4 @@
-import kc from "klinecharts";
+import * as kc from "klinecharts";
 import type {OverlayFigure} from "klinecharts";
 
 export function getTagFigures(coord: kc.Coordinate, position: 'bottom' | 'top', text: string, color: string): OverlayFigure[]{

@@ -1,6 +1,4 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
-import { resolve, dirname } from 'node:path'
-import { fileURLToPath } from 'url'
 
 const backendHost = process.env.inter_aipp_host || 'http://127.0.0.1:9000'
 const defaultLocale = process.env.NODE_ENV == 'production' ? 'en-US': 'zh-CN'
@@ -8,20 +6,26 @@ const defaultLocale = process.env.NODE_ENV == 'production' ? 'en-US': 'zh-CN'
 
 export default defineNuxtConfig({
   devtools: {enabled: true},
+
   // @ts-ignore
   modules: [
     '@nuxtjs/i18n',
     '@element-plus/nuxt',
     '@pinia/nuxt',
     '@pinia-plugin-persistedstate/nuxt',
-    'nuxt-lodash'
+    'nuxt-lodash',
+    'dayjs-nuxt',
+    '@nuxtjs/device',
+    "@sidebase/nuxt-auth"
   ],
+
   app: {
     head: {
       charset: 'utf-8',
       viewport: 'width=device-width, initial-scale=1',
     }
   },
+
   nitro: {
     devProxy: {
       '/api': {
@@ -31,9 +35,28 @@ export default defineNuxtConfig({
       }
     }
   },
+
+  auth: {
+    isEnabled: true,
+    provider: {
+      type: 'local',
+      endpoints: {
+        signIn: false,
+        signOut: false,
+        signUp: false,
+        getSession: false,
+      }
+    },
+    sessionDataType: {
+      id: 'string | number',
+      userName: 'string'
+    }
+  },
+
   elementPlus: {
     importStyle: 'scss'
   },
+
   lodash: {
     prefix: "_",
     prefixSkip: ["string"],
@@ -45,8 +68,9 @@ export default defineNuxtConfig({
       ["isDate", "isLodashDate"], // => _isLodashDate
     ],
   },
+
   i18n: {
-    strategy: 'prefix',
+    strategy: 'prefix_and_default',
     defaultLocale,
     langDir: 'locales',
     detectBrowserLanguage: {
@@ -60,6 +84,7 @@ export default defineNuxtConfig({
       {code: 'en-US', name: 'English', file: 'en-US.json'},
     ]
   },
+
   piniaPersistedstate: {
     // pinia默认使用cookie进行持久化
     cookieOptions: {
@@ -67,16 +92,31 @@ export default defineNuxtConfig({
     },
     storage: 'cookies'
   },
+
   runtimeConfig:{
     public: {
       gtagId: 'G-FS4QCSW076'  // 谷歌统计
     }
   },
+
   routeRules: {
     '/dash/**': {ssr: false},
     '/api/**': {
       // 用于开发者以生产模式运行，生产环境不会走这里
       proxy: { to: `${backendHost}/**`, },
     }
-  }
+  },
+
+  dayjs: {
+    locales: ['zh-cn', 'en'],
+    defaultLocale: 'zh-cn',
+    plugins: ['relativeTime', 'utc', 'timezone'],
+    defaultTimezone: 'UTC'
+  },
+
+  build: {
+    transpile: ['klinecharts']
+  },
+
+  compatibilityDate: '2024-08-19',
 })

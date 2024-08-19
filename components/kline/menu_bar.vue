@@ -76,16 +76,16 @@
       </template>
     </div>
     <div class='item tools big120' @click="showI18nModal = true">
-      <Icon name="lang"/>
+      <KlineIcon name="lang"/>
     </div>
     <div class='item tools big120' @click="toggleTheme">
-      <Icon name="theme"/>
+      <KlineIcon name="theme"/>
     </div>
     <div class="right-area">
       <client-only>
-        <el-dropdown class="user" v-if="authStatus > 0">
+        <el-dropdown class="user" v-if="authStatus == 'authenticated'">
           <div class='item tools big120'>
-            <Icon name="user"/>
+            <KlineIcon name="user"/>
           </div>
           <template #dropdown>
             <el-dropdown-menu>
@@ -112,13 +112,11 @@
 <script setup lang="ts">
 import {computed, defineEmits, onMounted, reactive, ref, watch} from "vue"
 import {defineProps} from "vue";
-import Icon from "~/components/kline/icon"
 import type {Period, SymbolInfo} from "~/components/kline/types"
 import {useKlineLocal} from "~/stores/klineLocal";
 import {getDefaults} from "~/config";
-import {useAuthState} from "~/composables/auth";
 import {useKlineStore} from "~/stores/kline";
-import {Chart, KLineData} from "klinecharts";
+import type {KLineData} from "klinecharts";
 import {makePeriod} from "~/composables/kline/coms";
 import {secs_to_tf} from "~/composables/dateutil";
 useHead({
@@ -138,7 +136,7 @@ const emit = defineEmits<{
 }>()
 const store = useKlineStore()
 const klocal = useKlineLocal()
-const {authData, authToken, authStatus} = useAuthState()
+const {data: authData, clearToken, status: authStatus} = useAuthState()
 
 function isFullscreen() {
   if(!process.client)return false;
@@ -176,8 +174,8 @@ onMounted(() => {
 })
 
 function exitLogin(){
+  clearToken()
   authData.value = null
-  authToken.value = null
 }
 
 function toggleTheme(){
@@ -187,10 +185,6 @@ function toggleTheme(){
 
 function clickPeriod(item: Period){
   // 允许不登录查看所有数据
-  // if(authStatus.value < 0 && store.authTFList.includes(item.timeframe)){
-  //   store.showLogin = true
-  //   return
-  // }
   klocal.setPeriod(item)
 }
 

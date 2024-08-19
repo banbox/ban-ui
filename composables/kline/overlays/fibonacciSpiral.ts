@@ -13,7 +13,7 @@
  */
 
 import type { OverlayTemplate, registerFigure } from 'klinecharts'
-import kc from "klinecharts"
+import * as kc from "klinecharts"
 
 import { getDistance, getRotateCoordinate, getRayLine } from './utils'
 

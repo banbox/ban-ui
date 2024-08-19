@@ -8,7 +8,7 @@
         </div>
         <div class="content">
           <div class="h5">{{$t('discord_offical')}}</div>
-          <a class="subtext" target="_blank" :href="discord_link">digochain group</a>
+          <a class="subtext" target="_blank" :href="discord_link">banbot group</a>
         </div>
       </div>
       <a target="_blank" class="btn" :href="discord_link">{{$t('go_to')}}</a>

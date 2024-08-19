@@ -12,16 +12,15 @@
         <slot/>
       </div>
       <div v-if="buttons && buttons.length > 0" class="button-container">
-        <Button v-for="item in buttons" :key="item" :type="btn_type(item)" @click.prevent="clickButton(item)">
+        <KlineButton v-for="item in buttons" :key="item" :type="btn_type(item)" @click.prevent="clickButton(item)">
           {{$t(item)}}
-        </Button>
+        </KlineButton>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import Button from "~/components/kline/button.vue"
 import {defineEmits} from "@vue/runtime-core";
 
 

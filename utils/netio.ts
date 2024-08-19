@@ -1,6 +1,5 @@
 import {$fetch, SearchParameters, FetchError} from "ofetch";
 import _ from "lodash"
-import {useAuthState} from "~/composables/auth";
 import {useNuxtApp} from "#app";
 
 export type ApiResult = Record<string, any> & {
@@ -13,7 +12,7 @@ type ApiType = "GET" | "POST" | "PUT" | "HEAD" | "DELETE" | "OPTIONS"
 const requestApi = async function(method: ApiType, url: string,
                                   query?: SearchParameters,
                                   body?: RequestInit["body"] | Record<string, any>): Promise<ApiResult> {
-  const {authToken, authData} = useAuthState()
+  const {token: authToken, data: authData} = useAuthState()
   const {$i18n} = useNuxtApp()
   try {
     const headers: Record<string, any> = {'X-Language': $i18n.locale.value, 'X-Authorization': authToken.value}

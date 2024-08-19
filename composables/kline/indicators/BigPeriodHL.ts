@@ -1,5 +1,5 @@
 import type {IndicatorTemplate} from "klinecharts";
-import kc from "klinecharts";
+import * as kc from "klinecharts";
 import type {Datafeed} from "~/composables/kline/datafeeds";
 import {useKlineLocal} from "~/stores/klineLocal";
 import {makePeriod} from "~/composables/kline/coms";

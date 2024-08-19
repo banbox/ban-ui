@@ -1,12 +1,11 @@
 <template>
   <ul class="klinecharts-pro-list">
-    <Loading v-if="loading"/>
+    <KlineLoading v-if="loading"/>
     <slot v-else/>
   </ul>
 </template>
 
 <script setup lang="ts">
-import Loading from "~/components/kline/loading.vue"
 import {defineProps} from "vue";
 
 const props = defineProps<{

@@ -1,14 +1,12 @@
 <template>
-  <Modal :title="$t('language')" :buttons="['confirm']" :width="400" class="timezone"
+  <KlineModal :title="$t('language')" :buttons="['confirm']" :width="400" class="timezone"
          v-model="showModal" @click="clickModal">
-    <Select :data-source="locales" :value="localeMap[selected]" value_key="name"
+    <KlineSelect :data-source="locales" :value="localeMap[selected]" value_key="name"
             @change="selected = $event.code"/>
-  </Modal>
+  </KlineModal>
 </template>
 
 <script lang="ts" setup>
-import Modal from "~/components/kline/modal.vue"
-import Select from "~/components/kline/select.vue"
 import {computed, reactive, ref} from "vue";
 import {useI18n} from "vue-i18n"
 import {navigateTo} from "#app";

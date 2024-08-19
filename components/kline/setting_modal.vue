@@ -1,28 +1,24 @@
 <template>
-  <Modal :title="$t('language')" :width="660" :buttons="['restore_default']"
+  <KlineModal :title="$t('language')" :width="660" :buttons="['restore_default']"
          v-model="showModal" @click="resetStyle">
     <div class="klinecharts-pro-setting-modal-content">
       <template v-for="(item, index) in options" :key="item.key">
         <span>{{$t(item.text)}}</span>
-        <Select v-if="item.component == 'select'" :data-source="item.dataSource"
+        <KlineSelect v-if="item.component == 'select'" :data-source="item.dataSource"
                 style="width: 120px" :translate="true"
                 :value="$t(kc.utils.formatValue(store.chartStyle, item.key))" @change="update(item.key, $event.key)"/>
-        <Switch v-else-if="item.component == 'switch'" :open="!!kc.utils.formatValue(store.chartStyle, item.key)"
+        <KlineSwitch v-else-if="item.component == 'switch'" :open="!!kc.utils.formatValue(store.chartStyle, item.key)"
                 @change="update(item.key, $event)"/>
       </template>
     </div>
-  </Modal>
+  </KlineModal>
 </template>
 
 <script setup lang="ts">
-import Modal from "~/components/kline/modal.vue"
 import {getOptions} from "~/components/kline/setting_opts";
-import Select from "~/components/kline/select.vue"
-import Switch from "~/components/kline/switch.vue"
 import {computed, defineEmits, defineProps, reactive, watch} from "vue";
-import {Chart, Styles} from "klinecharts";
-import kc from "klinecharts"
-import _ from "lodash"
+import type {Styles} from "klinecharts";
+import * as kc from "klinecharts"
 import {useI18n} from "vue-i18n";
 import {useKlineLocal} from "~/stores/klineLocal";
 import {useKlineStore} from "~/stores/kline";

@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import {computed, defineEmits, defineProps, onMounted, reactive, ref, watch} from "vue";
-import Modal from "~/components/kline/modal.vue"
-import List from "~/components/kline/list.vue";
 import {AllPeriods} from "~/composables/kline/coms";
 import {useKlineLocal} from "~/stores/klineLocal";
 import {getDefaults} from "~/config";
@@ -44,15 +42,15 @@ function clickPeriod(item: Period){
 </script>
 
 <template>
-  <Modal :title="$t('timeframe')" :width="300" v-model="showModal">
-    <List class="all-period">
+  <KlineModal :title="$t('timeframe')" :width="300" v-model="showModal">
+    <KlineList class="all-period">
       <div class="item" v-for="(item, index) in periods"
             :class="{selected: item.timeframe == activeTF}"
             @click="clickPeriod(periods[index])">
         <span>{{item.multiplier}} {{$t(item.timespan)}}</span>
       </div>
-    </List>
-  </Modal>
+    </KlineList>
+  </KlineModal>
 </template>
 
 <style lang="scss">

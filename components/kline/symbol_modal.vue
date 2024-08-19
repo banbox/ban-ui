@@ -1,6 +1,6 @@
 <template>
-  <Modal :title="$t('symbol_search')" :width="460" v-model="showModal">
-    <Input v-model="keyword" class="klinecharts-pro-symbol-search-modal-input"
+  <KlineModal :title="$t('symbol_search')" :width="460" v-model="showModal">
+    <KlineInput v-model="keyword" class="klinecharts-pro-symbol-search-modal-input"
            :placeholder="$t('symbol_code')">
       <template #suffix>
         <span class="suffix">
@@ -9,8 +9,8 @@
           </svg>
         </span>
       </template>
-    </Input>
-    <List class="klinecharts-pro-symbol-search-modal-list" :loading="main.pairs_loading">
+    </KlineInput>
+    <KlineList class="klinecharts-pro-symbol-search-modal-list" :loading="main.pairs_loading">
       <li v-for="symbol in show_list" :key="symbol.name" @click="clickSymbol(symbol)">
         <div>
           <img v-if="symbol.logo" :src="symbol.logo" />
@@ -18,14 +18,11 @@
         </div>
         {{symbol.exchange}}
       </li>
-    </List>
-  </Modal>
+    </KlineList>
+  </KlineModal>
 </template>
 
 <script setup lang="ts">
-import Modal from "~/components/kline/modal.vue"
-import Input from "~/components/kline/input.vue"
-import List from "~/components/kline/list.vue"
 import {defineEmits, defineProps, reactive, ref, computed} from "vue";
 import type {Datafeed, SymbolInfo} from "~/components/kline/types";
 import {useKlineLocal} from "~/stores/klineLocal";

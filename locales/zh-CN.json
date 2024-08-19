@@ -1,5 +1,5 @@
 {
-  "appTitle": "比特币 以太坊 - 交易策略 - Digochain.com",
+  "appTitle": "ban trader",
   "appDescription": "专业的交易机构，为用户免费提供加密货币交易策略信号，为用户提高盈利概率，避免交易风险。",
   "symbol": "交易对",
   "price": "价格",
@@ -183,7 +183,7 @@
   "contact-tip": "下载或更新过程中，如遇问题，请联系客服咨询",
   "discord_offical": "官方Discord",
   "go_to": "前往",
-  "how_open_pc": "如何在PC端打开DigoChain",
+  "how_open_pc": "如何在PC端打开",
   "open_in_pc_tip": "功能更齐全的强大K线工具，支持多账户多平台的API授权交易，实现一站式资产管理。",
   "copy_link_open_pc": "复制后使用电脑打开链接",
   "copy_not_support": "浏览器不支持，请手动复制",
@@ -201,7 +201,7 @@
   "step3_tip": "一切准备就绪！买卖加密货币，设置定投，探索币安产品与服务。",
   "start_using": "开始使用",
 
-  "dash_h1": "欢迎使用DigoChain后台",
+  "dash_h1": "欢迎使用banbot后台",
   "dash_desc": "您可以在这里管理您的交易机器人，所有信息都只保留在浏览器本地，无需担心信息泄露",
   "dash_help": "如果您需要帮助，请",
   "login_bot": "登录机器人",

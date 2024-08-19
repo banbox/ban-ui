@@ -1,6 +1,6 @@
 import type {Period, SymbolInfo} from "~/components/kline/types";
 import type {CandleTooltipCustomCallbackData, CandleStyle} from "klinecharts";
-import kc from "klinecharts";
+import * as kc from "klinecharts";
 import {tf_to_secs, formatDate} from "~/composables/dateutil";
 import {MyDatafeed} from "~/composables/kline/datafeeds";
 import {useKlineStore} from "~/stores/kline";

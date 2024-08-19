@@ -2,6 +2,8 @@
 /public/img
 .idea
 .output.zip
+yarn.lock
+package-lock.json
 
 node_modules
 *.log*

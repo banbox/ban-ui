@@ -1,22 +1,20 @@
 <template>
-  <Modal v-model="showModal" :title="store.editIndName" :buttons="['confirm']" @click="clickModel" :width="360">
+  <KlineModal v-model="showModal" :title="store.editIndName" :buttons="['confirm']" @click="clickModel" :width="360">
     <div class="empty-msg" v-if="!fields.length">
       <div class="text-block">{{$t('no_ind_params')}}</div>
     </div>
     <div class="klinecharts-pro-indicator-setting-modal-content" v-else>
       <template v-for="(d, i) in fields">
         <span>{{$t(d.paramNameKey)}}</span>
-        <Input v-model="params[i]" style="width: '200px'" :precision="d.precision" :min="d.min"/>
+        <KlineInput v-model="params[i]" style="width: '200px'" :precision="d.precision" :min="d.min"/>
       </template>
     </div>
-  </Modal>
+  </KlineModal>
 </template>
 
 <script setup lang="ts">
-import Modal from "~/components/kline/modal.vue"
-import Input from "~/components/kline/input.vue"
-import { Chart, Indicator } from 'klinecharts'
-import kc from "klinecharts"
+import type { Indicator } from 'klinecharts'
+import * as kc from "klinecharts"
 import {GetIndFields} from "~/components/kline/inds"
 import {defineEmits, reactive, computed, watch} from "vue";
 import {useKlineStore} from "~/stores/kline";

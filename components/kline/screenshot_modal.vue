@@ -1,12 +1,11 @@
 <template>
-  <Modal :title="$t('screenshot')" :buttons="['confirm']" :width="540"
+  <KlineModal :title="$t('screenshot')" :buttons="['confirm']" :width="540"
          v-model="showModal" @click="clickModal">
     <img style="width:500px;margin-top: 20px" :src="url"/>
-  </Modal>
+  </KlineModal>
 </template>
 
 <script setup lang="ts">
-import Modal from "~/components/kline/modal.vue"
 import {computed} from "vue";
 
 const props = defineProps<{

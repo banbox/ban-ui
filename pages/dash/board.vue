@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import {definePageMeta, getApi, getDateStr, setTimezone, toUTCStamp} from "#imports";
-import {useLocalStorage} from "@vueuse/core";
 import {useDashStore} from "~/stores/dash";
 import {useDashLocal} from "~/stores/dashLocal";
 import {useCurApi} from "~/composables/dash/api";
 import {type BotInfo} from "~/composables/dash/types";
 import {getUTCStamp} from "~/composables/dateutil";
 import {useLocalePath} from "#i18n";
+import {reactive, ref} from "vue";
 
 definePageMeta({
   layout: 'dash',

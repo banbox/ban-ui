@@ -24,6 +24,9 @@ K线UI工具栏可参考：[AICoin](https://www.aicoin.com/chart/okcoinfutures_b
 尽量使用watch，显示指定依赖。极端情况下，watchEffect收集了不希望监听的依赖，自身执行又会导致依赖对象改变，造成无限循环。  
 **导出组件中的函数供父组件调用**  
 使用`defineExpose`
+**身份认证部分**  
+使用sidebase-auth模块，参考[官方文档](https://auth.sidebase.io/guide/getting-started/introduction)  
+本项目未使用高级功能如login/重定向，仅使用了核心部分`useAuthState`；
 
 # Nuxt 3 配置
 

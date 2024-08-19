@@ -1,16 +1,7 @@
 <script setup lang="ts">
-import {
-  ActionType,
-  Chart,
-  DomPosition,
-  Nullable,
-  PaneOptions,
-  Styles,
-  Indicator,
-  OverlayCreate,
-  KLineData
-} from 'klinecharts'
-import kc from 'klinecharts'
+import type {Chart, Nullable, PaneOptions, Styles, KLineData} from 'klinecharts'
+import {DomPosition, ActionType} from 'klinecharts'
+import * as kc from 'klinecharts'
 import _ from "lodash"
 import type {PaneInds, Period, SymbolInfo, Datafeed} from '~/components/kline/types'
 import {computed, defineProps, onMounted, onUnmounted, reactive, ref, toRaw, watch} from "vue";
@@ -24,7 +15,6 @@ import {
 import {adjustFromTo, tf_to_secs, toUTCStamp, getDateStr, makeFormatDate} from "~/composables/dateutil"
 import overlays from '~/composables/kline/overlays'
 import figures from '~/composables/kline/figure'
-import {useAuthState} from "~/composables/auth";
 import type {AddDelInd, BarArr} from "~/composables/types"
 import {GetIndDefaults} from "~/components/kline/inds";
 import {useKlineLocal} from "~/stores/klineLocal";
@@ -32,7 +22,6 @@ import {useI18n} from "vue-i18n";
 import {useRoute, useNuxtApp} from "#app";
 import {useKlineStore} from "~/stores/kline";
 import {getDefaults} from "~/config";
-import type{ApiResult} from "~/utils/netio";
 import makeCloudInds from "~/composables/kline/indicators/cloudInds";
 import {addChartBars} from "~/composables/kline/kc_exts";
 import indicators from "~/composables/kline/indicators";
@@ -56,7 +45,6 @@ const props = withDefaults(defineProps<ChartProp>(), {
 const klocal = useKlineLocal()
 const main = useKlineStore()
 const {datafeed} = useKlineObjs()
-const {authDoing, authStatus} = useAuthState()
 const chartRef = ref<HTMLElement>()
 const drawBarRef = ref<any>(null)
 const batch_num = ref(500)

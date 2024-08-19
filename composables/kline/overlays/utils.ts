@@ -13,7 +13,7 @@
  */
 
 import type { Coordinate, Bounding, LineAttrs } from 'klinecharts'
-import kc from "klinecharts"
+import * as kc from "klinecharts"
 
 export function getArrowLine(point1: Coordinate, point2: Coordinate){
   const flag = point2.x > point1.x ? 0 : 1

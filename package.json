@@ -11,20 +11,23 @@
   "devDependencies": {
     "@element-plus/nuxt": "^1.0.6",
     "@nuxt/devtools": "latest",
-    "@nuxtjs/i18n": "^8.0.0-rc.5",
+    "@nuxtjs/device": "^3.1.1",
+    "@nuxtjs/i18n": "^8.4.0",
     "@pinia-plugin-persistedstate/nuxt": "^1.2.0",
+    "@sidebase/nuxt-auth": "^0.8.2",
     "@types/node": "^20.6.0",
-    "element-plus": "^2.4.1",
-    "nuxt": "^3.8.0",
+    "dayjs-nuxt": "^2.1.9",
+    "element-plus": "^2.8.0",
+    "nuxt": "^3.12.4",
     "nuxt-lodash": "^2.5.3",
     "requrl": "^3.0.2",
-    "sass": "^1.69.5",
+    "sass": "1.77.6",
     "ts-essentials": "^9.4.1"
   },
   "dependencies": {
-    "@pinia/nuxt": "^0.5.1",
-    "klinecharts": "^9.5.4",
+    "@pinia/nuxt": "^0.5.3",
+    "klinecharts": "^9.8.10",
     "mitt": "^3.0.1",
-    "pinia": "^2.1.7"
+    "pinia": "^2.2.2"
   }
 }

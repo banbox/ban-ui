@@ -1,6 +1,6 @@
 <template>
-  <Modal :title="$t('indicator')" :width="600" v-model="showModal">
-    <Input v-model="keyword" class="klinecharts-pro-symbol-search-modal-input"
+  <KlineModal :title="$t('indicator')" :width="600" v-model="showModal">
+    <KlineInput v-model="keyword" class="klinecharts-pro-symbol-search-modal-input"
            :placeholder="$t('search')">
       <template #suffix>
         <span class="suffix">
@@ -9,7 +9,7 @@
           </svg>
         </span>
       </template>
-    </Input>
+    </KlineInput>
     <div class="res-body">
       <div class="menu-box">
         <div class="item" @click="activeTab = 'local'" :class="{active: activeTab == 'local'}">
@@ -21,26 +21,20 @@
           <span>{{$t('cloud_inds')}}</span>
         </div>
       </div>
-      <List class="klinecharts-pro-ind-box">
+      <KlineList class="klinecharts-pro-ind-box">
         <div class="row" v-for="(item, index) in show_inds" :key="index">
-          <Checkbox :model-value="checked_inds.includes(item.name)" :label="$t(item.title)"
+          <KlineCheckbox :model-value="checked_inds.includes(item.name)" :label="$t(item.title)"
                     @change="toggleInd(item.is_main, item.name, $event)"/>
         </div>
-      </List>
+      </KlineList>
     </div>
-  </Modal>
+  </KlineModal>
 </template>
 
 <script setup lang="ts">
-import Modal from "~/components/kline/modal.vue"
-import List from "~/components/kline/list.vue"
-import Checkbox from "~/components/kline/checkbox.vue"
-import {type PaneInds} from "~/components/kline/types";
 import {computed, defineEmits, defineProps, reactive, watch} from "vue";
-import kc, {Chart} from "klinecharts";
 import {useKlineLocal} from "~/stores/klineLocal";
 import {useNuxtApp} from "#app"
-import Input from "~/components/kline/input.vue";
 import {useI18n} from "vue-i18n";
 const {t} = useI18n()
 import {TakeawayBox, Cloudy} from "@element-plus/icons-vue";

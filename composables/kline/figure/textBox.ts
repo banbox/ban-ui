@@ -15,7 +15,7 @@
  */
 
 import type {Coordinate, RectTextStyle, FigureTemplate, TextAttrs} from 'klinecharts'
-import kc from 'klinecharts'
+import * as kc from 'klinecharts'
 
 const drawRect = kc.utils.drawRect
 const drawText = kc.utils.drawText

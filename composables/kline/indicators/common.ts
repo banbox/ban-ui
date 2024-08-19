@@ -1,4 +1,4 @@
-import kc from "klinecharts";
+import * as kc from "klinecharts";
 import type {IndicatorDrawParams, KLineData, OverlayStyle} from "klinecharts";
 import {getTagFigures} from "~/composables/kline/ktools";
 const LineType = kc.LineType;

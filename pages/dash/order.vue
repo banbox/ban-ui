@@ -57,9 +57,9 @@ const closeExgPos = reactive({
 
 const searchData = reactive({
   status: '',
-  symbol: '',
-  start_time: '',
-  stop_time: ''
+  symbols: '',
+  start_ms: '',
+  stop_ms: ''
 })
 
 function getQuoteCode(symbol: string){
@@ -73,8 +73,8 @@ function getQuoteCode(symbol: string){
 async function loadData(page: number) {
   cur_page.value = page
   const data: Record<string, any> = {...toRaw(searchData)}
-  data['start_time'] = toUTCStamp(data['start_time'])
-  data['stop_time'] = toUTCStamp(data['stop_time'])
+  data['start_ms'] = toUTCStamp(data['start_ms'])
+  data['stop_ms'] = toUTCStamp(data['stop_ms'])
   data['source'] = tab_name.value
   if(tab_name.value == 'bot') {
     data['limit'] = page_size.value
@@ -91,7 +91,6 @@ async function loadData(page: number) {
   else if(tab_name.value == 'exchange'){
     if(searchData.status){
       const old_num = res.length
-      const req_valid = searchData.status == 'valid'
       res = res.filter((od: any) => od.filled)
       ex_filter.value = `已筛选：${res.length}/${old_num}`
     }
@@ -156,11 +155,11 @@ function clickCloseExgPos(index: number){
 
 /**
  * 关闭交易所仓位
- * @param symbol
+ * @param all
  */
 async function closeExgPosition(all: boolean = false){
   let data = toRaw(closeExgPos)
-  if(all === true) {
+  if(all) {
     try {
       await ElMessageBox.confirm('确定要关闭所有交易所仓位吗？', '提示')
     } catch (e) {
@@ -347,35 +346,28 @@ async function clickCalcProfits(){
   </div>
   <el-form :inline="true" :model="searchData" v-if="tab_name != 'position'">
     <el-row>
-      <el-col :span="4">
-        <el-form-item label="状态" v-if="tab_name == 'bot'" >
-          <el-select v-model="searchData.status">
+      <el-col :span="4" v-if="tab_name == 'bot'">
+        <el-form-item label="状态">
+          <el-select v-model="searchData.status" style="width: 100px;">
             <el-option value="" label="不限"/>
             <el-option value="open" label="开启"/>
             <el-option value="his" label="已平仓"/>
           </el-select>
         </el-form-item>
-        <el-form-item label="状态" v-else>
-          <el-select v-model="searchData.status">
-            <el-option value="" label="不限"/>
-            <el-option value="valid" label="有效订单"/>
-            <el-option value="invalid" label="无效订单"/>
-          </el-select>
-        </el-form-item>
       </el-col>
       <el-col :span="4">
         <el-form-item label="币种" :required="tab_name != 'bot'">
-          <el-input v-model="searchData.symbol"/>
+          <el-input v-model="searchData.symbols"/>
         </el-form-item>
       </el-col>
       <el-col :span="4">
         <el-form-item label="开始时间" :required="tab_name != 'bot'">
-          <el-input v-model="searchData.start_time" placeholder="20231012"/>
+          <el-input v-model="searchData.start_ms" placeholder="20231012"/>
         </el-form-item>
       </el-col>
       <el-col :span="4">
         <el-form-item label="截止时间" v-if="tab_name == 'bot'">
-          <el-input v-model="searchData.stop_time" placeholder="20231012"/>
+          <el-input v-model="searchData.stop_ms" placeholder="20231012"/>
         </el-form-item>
         <el-form-item label="显示个数" v-else>
           <el-input type="number" v-model="limit_size" />

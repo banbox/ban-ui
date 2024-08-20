@@ -2,7 +2,6 @@
 import {useI18n} from "vue-i18n";
 import {type TradeBot} from "~/composables/dash/types";
 import type {FormInstance, FormRules} from "element-plus";
-import {useDashLocal} from "~/stores/dashLocal";
 import {useBotAuth} from "~/composables/dash/auth";
 const {t} = useI18n()
 
@@ -13,14 +12,13 @@ const emit = defineEmits<{
 const model = reactive<TradeBot>({
   name: '',
   url: '',
-  account: '',
+  user_name: '',
   password: '',
   auto_refresh: true
 })
 
 const submiting = ref(false)
 const fromRef = ref<HTMLFormElement>()
-const store = useDashLocal()
 const error_msg = ref('')
 
 const {login} = useBotAuth(model)
@@ -53,7 +51,7 @@ const validateRequired = (rule: any, value: any, callback: any) => {
 
 const paperRules = reactive<FormRules<TradeBot>>({
   url: [{validator: validateBotUrl, trigger: 'blur'}],
-  account: [{validator: validateRequired, trigger: 'blur'}],
+  user_name: [{validator: validateRequired, trigger: 'blur'}],
   password: [{validator: validateRequired, trigger: 'blur'}],
 })
 
@@ -70,8 +68,6 @@ const submitForm = async (formEl: FormInstance | undefined) => {
     const res = await login()
     submiting.value = false
     if(res.code == 200){
-      store.all_bots.push(model)
-      store.cur_id = store.all_bots.length - 1
       emit('add', model)
     }
     else if(res.code == 401){
@@ -94,8 +90,8 @@ const submitForm = async (formEl: FormInstance | undefined) => {
       <el-form-item :label="$t('bot_url')" prop="bot_url">
         <el-input req v-model="model.url" :placeholder="url_holder"/>
       </el-form-item>
-      <el-form-item :label="$t('account')" prop="account">
-        <el-input v-model="model.account" :placeholder="$t('input_username')"/>
+      <el-form-item :label="$t('user_name')" prop="user_name">
+        <el-input v-model="model.user_name" :placeholder="$t('input_username')"/>
       </el-form-item>
       <el-form-item :label="$t('password')" prop="password" type="password">
         <el-input v-model="model.password" :placeholder="$t('input_password')"/>

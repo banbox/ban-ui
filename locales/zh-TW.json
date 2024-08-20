@@ -199,5 +199,22 @@
   "step2_tip": "完成身份驗證，確保個人賬戶和交易安全。",
   "reg_step3": "開始交易",
   "step3_tip": "一切準備就緒！買賣加密貨幣，設置定投，探索幣安產品與服務。",
-  "start_using": "開始使用"
+  "start_using": "開始使用",
+
+  "dash_h1": "歡迎使用banbot後台",
+  "dash_desc": "您可以在這裡管理您的交易機器人，所有資訊都只保留在瀏覽器本地，無需擔心資訊外洩",
+  "dash_help": "如果您需要協助，請",
+  "login_bot": "登入機器人",
+  "bot_url": "機器人URL",
+  "user_name": "使用者名稱",
+  "password": "密碼",
+  "account": "帳號",
+  "not_url": "此項目不是有效的url位址",
+  "add_bot_ok": "成功加入機器人",
+  "auto_refresh": "自動刷新",
+  "disable_refresh": "關閉刷新",
+  "delete": "刪除",
+  "online": "線上",
+  "offline": "離線",
+  "confirm_logout_bot": "確定要移除機器人嗎？"
 }

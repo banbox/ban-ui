@@ -198,5 +198,22 @@
   "step2_tip": "Complete the identity verification process to ensure the security of your personal account and transactions.",
   "reg_step3": "Start Trading",
   "step3_tip": "Everything is ready! Buy and sell cryptocurrencies, set up recurring investments, and explore Binance's products and services.",
-  "start_using": "Start Using"
+  "start_using": "Start Using",
+
+  "dash_h1": "Welcome to banbot backend",
+  "dash_desc": "You can manage your trading robot here. All information is only kept locally in the browser, so there is no need to worry about information leakage",
+  "dash_help": "If you need help, please",
+  "login_bot": "Login to the robot",
+  "bot_url": "Robot URL",
+  "user_name": "Username",
+  "password": "Password",
+  "account": "Account",
+  "not_url": "This is not a valid URL address",
+  "add_bot_ok": "Successfully added robot",
+  "auto_refresh": "Auto refresh",
+  "disable_refresh": "Disable refresh",
+  "delete": "Delete",
+  "online": "Online",
+  "offline": "Offline",
+  "confirm_logout_bot": "Are you sure you want to remove the robot?"
 }

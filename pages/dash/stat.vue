@@ -3,7 +3,7 @@
 import {definePageMeta, toUTCStamp} from "#imports";
 import {useCurApi} from "~/composables/dash/api";
 import {useDashStore} from "~/stores/dash";
-import {PairPerf, PeriodStat, TagStat} from "~/composables/dash/types";
+import type {PairPerf, PeriodStat, TagStat} from "~/composables/dash/types";
 import {fmtDuration} from "~/composables/dateutil";
 import {useLocalePath} from "#i18n";
 
@@ -15,7 +15,7 @@ const localPath = useLocalePath()
 const {getApi} = useCurApi()
 const store = useDashStore()
 store.menu_id = 'stat'
-const tab_name = ref('days')  // weeks, months, symbols
+const tab_name = ref('day')  // week, month, symbol
 const stat_list = reactive<PeriodStat[]>([])
 const pair_list = reactive<PairPerf[]>([])
 const exit_tags = reactive<TagStat[]>([])
@@ -40,10 +40,10 @@ const search = reactive<SearchType>({
 })
 
 const tab_labels = [
-    {name: 'days', title: '按天'},
-    {name: 'weeks', title: '按周'},
-    {name: 'months', title: '按月'},
-    {name: 'symbols', title: '按币'},
+    {name: 'day', title: '按天'},
+    {name: 'week', title: '按周'},
+    {name: 'month', title: '按月'},
+    {name: 'symbol', title: '按币'},
 ]
 
 async function loadData() {
@@ -56,7 +56,7 @@ async function loadData() {
   }
   const rsp = await getApi('/performance', data)
   const data_list = rsp.items ?? []
-  if (tab_name.value == 'symbols') {
+  if (tab_name.value == 'symbol') {
     pair_list.splice(0, pair_list.length, ...data_list)
   } else {
     stat_list.splice(0, stat_list.length, ...data_list)
@@ -97,7 +97,7 @@ watch(tab_name, () => {
   <el-menu mode="horizontal" :default-active="tab_name" @select="tab_name = $event">
     <el-menu-item :index="item.name" v-for="item in tab_labels">{{item.title}}</el-menu-item>
   </el-menu>
-  <el-checkbox-group v-model="search.pairs" v-if="tab_name !== 'symbols'">
+  <el-checkbox-group v-model="search.pairs" v-if="tab_name !== 'symbol'">
     <el-checkbox :label="item" v-for="item in all_pairs"/>
   </el-checkbox-group>
   <el-row>
@@ -117,7 +117,7 @@ watch(tab_name, () => {
         </el-form-item>
       </el-col>
   </el-row>
-  <el-table :data="pair_list" v-if="tab_name == 'symbols'">
+  <el-table :data="pair_list" v-if="tab_name == 'symbol'">
     <el-table-column prop="pair" label="币对" />
     <el-table-column prop="close_num" label="平仓单数" />
     <el-table-column prop="profit_sum" label="总利润" >

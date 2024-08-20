@@ -30,6 +30,9 @@ function loginOk(info: TradeBot){
   const message = `${t('add_bot_ok')}：${info.name}`
   ElMessage.success({message})
   showAdd.value = false
+  local.all_bots.forEach(bot => {
+    loadData(bot)
+  })
 }
 
 function clickBot(index: number){
@@ -51,7 +54,7 @@ async function delBot(index: number) {
 
 async function loadData(bot: TradeBot){
   const {getApi} = useApi(bot)
-  const rsp = await getApi('/count')
+  const rsp = await getApi('/open_num')
   counts[bot.url] = (rsp as unknown) as BotCount
 }
 
@@ -74,9 +77,9 @@ onMounted(() => {
       <el-link type="primary" @click="store.showContact = true">{{$t('contact-us')}}</el-link>
     </p>
     <div class="all-bots" v-if="local.all_bots.length > 0">
-      <div class="item" v-for="(item, index) in local.all_bots" :key="index" @click="clickBot(index)"
+      <div class="item" v-for="(item, index) in local.all_bots" :key="index"
         :class="{active: index == local.cur_id}">
-        <div class="title">{{item.name}}</div>
+        <div class="title" @click="clickBot(index)">{{item.name}}</div>
         <div class="right-acts">
           <template v-if="counts[item.url]">
             <div class="num">Open: {{counts[item.url].open_num}}</div>
@@ -85,7 +88,7 @@ onMounted(() => {
           <div class="status" :class="[item.avaiable ? 'ok': 'fail']"
                :title="$t(item.avaiable ? 'online':'offline')"/>
           <el-switch v-model="item.auto_refresh" :title="$t('auto_refresh')"/>
-          <el-icon size="20px" color="#F56C6CFF" @click.prevent="delBot(index)"
+          <el-icon size="20px" color="#F56C6CFF" @click.prevent.stop="delBot(index)"
                    :title="$t('delete')"><Delete /></el-icon>
         </div>
       </div>
@@ -123,7 +126,6 @@ onMounted(() => {
   max-width: 700px;
   border-top: 1px solid var(--el-border-color);
   .item{
-    cursor: pointer;
     height: 50px;
     display: flex;
     flex-direction: row;
@@ -139,6 +141,10 @@ onMounted(() => {
       background-color: #ffffff;
       color: var(--el-color-primary);
       border-bottom: 1px solid var(--el-color-primary);
+    }
+
+    .title{
+      cursor: pointer;
     }
 
     .right-acts{

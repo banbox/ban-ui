@@ -20,12 +20,9 @@ const searchData = reactive({
   account: ''
 })
 const loading = ref(false)
-const page_size = ref(15)
 const limit_size = ref(30)
 const cur_page = ref(1)
 const item_list = reactive<Record<string, any>[]>([])
-const sta_range = ref('')  // 范围
-const sta_total = ref('')  // 总计
 const statt = reactive({
   start_date: '',
   stop_date: '',
@@ -94,7 +91,7 @@ onMounted(() => {
     <el-row>
       <el-col :span="6">
         <el-form-item>
-          <el-select v-model="searchData.intype">
+          <el-select v-model="searchData.intype" style="width: 200px">
             <el-option value="REALIZED_PNL" label="已实现盈亏"/>
             <el-option value="FUNDING_FEE" label="资金费用"/>
             <el-option value="COMMISSION" label="佣金"/>
@@ -139,17 +136,17 @@ onMounted(() => {
     <el-descriptions-item label="总计" align="center">{{statt.assets}}</el-descriptions-item>
   </el-descriptions>
   <el-table :data="item_list">
-    <el-table-column prop="id" label="ID"/>
+    <el-table-column prop="tranId" label="ID"/>
     <el-table-column prop="symbol" label="币对"/>
-    <el-table-column prop="amount" label="金额"/>
-    <el-table-column prop="code" label="资产"/>
-    <el-table-column prop="timestamp" label="时间戳"/>
-    <el-table-column prop="timestamp" label="时间">
+    <el-table-column prop="income" label="金额"/>
+    <el-table-column prop="asset" label="资产"/>
+    <el-table-column prop="time" label="时间戳"/>
+    <el-table-column prop="time" label="时间">
       <template #default="props">
-        <span>{{getDateStr(props.row.timestamp)}}</span>
+        <span>{{getDateStr(props.row.time)}}</span>
       </template>
     </el-table-column>
-    <el-table-column prop="account" label="账户"/>
+    <el-table-column prop="info" label="账户"/>
     <el-table-column prop="tradeId" label="交易ID"/>
   </el-table>
 </template>

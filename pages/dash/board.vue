@@ -21,31 +21,31 @@ const data = reactive<BotInfo>({
   ram_pct: 0,
   last_process: 0,
   allow_trade_at: 0,
-  profit_closed_percent_mean: 0,
-  profit_closed_mean: 0,
-  profit_closed_percent_sum: 0,
-  profit_closed_sum: 0,
-  profit_all_percent_mean: 0,
-  profit_all_mean: 0,
-  profit_all_percent_sum: 0,
-  profit_all_sum: 0,
-  trade_count: 0,
-  closed_trade_count: 0,
-  first_trade_timestamp: 0,
-  latest_trade_timestamp: 0,
+  done_profit_pct_mean: 0,
+  done_profit_mean: 0,
+  done_profit_pct_sum: 0,
+  done_profit_sum: 0,
+  all_profit_pct_mean: 0,
+  all_profit_mean: 0,
+  all_profit_pct_sum: 0,
+  all_profit_sum: 0,
+  order_num: 0,
+  done_order_num: 0,
+  first_od_ts: 0,
+  last_od_ts: 0,
   avg_duration: '',
   best_pair: '',
-  best_pair_profit_pct: 0,
-  winning_trades: 0,
-  losing_trades: 0,
+  best_profit_pct: 0,
+  win_num: 0,
+  loss_num: 0,
   profit_factor: 0,
-  winrate: 0,
+  win_rate: 0,
   expectancy: 0,
   expectancy_ratio: 0,
-  max_drawdown: 0,
-  max_drawdown_abs: 0,
+  max_drawdown_pct: 0,
+  max_drawdown_val: 0,
   total_cost: 0,
-  bot_start_timestamp: 0,
+  bot_start_ms: 0,
 
   balance_total: 0,
   balance_items: [],
@@ -86,8 +86,8 @@ const show_allow_enter = computed(() => {
 })
 
 async function saveAllowEntry(){
-  const delay_secs = delay_hours.value * 3600;
-  const rsp = await postApi('/delay_entry',{delay_secs})
+  const secs = delay_hours.value * 3600;
+  const rsp = await postApi('/delay_entry',{secs})
   if(rsp.code == 200 && rsp.allow_trade_at){
     data.allow_trade_at = rsp.allow_trade_at
     ElMessage.success({message: '设置成功'})
@@ -98,7 +98,7 @@ async function saveAllowEntry(){
 }
 
 const open_num = computed(() => {
-  return data.trade_count - data.closed_trade_count
+  return data.order_num - data.done_order_num
 })
 
 onMounted(() => {
@@ -115,13 +115,13 @@ onMounted(() => {
     </el-col>
     <el-col :span="4">
       <el-statistic title="打开/平仓数量" :value="open_num">
-        <template #suffix>/ {{data.closed_trade_count}}</template>
+        <template #suffix>/ {{ data.done_order_num }}</template>
       </el-statistic>
     </el-col>
     <el-col :span="5">
-      <el-statistic title="盈利/亏损/胜率" :value="data.losing_trades">
-        <template #prefix>{{data.winning_trades}} / </template>
-        <template #suffix>/ {{(data.winrate * 100).toFixed(1)}}%</template>
+      <el-statistic title="盈利/亏损/胜率" :value="data.loss_num">
+        <template #prefix>{{ data.win_num }} /</template>
+        <template #suffix>/ {{ (data.win_rate * 100).toFixed(1) }}%</template>
       </el-statistic>
     </el-col>
     <el-col :span="4">
@@ -143,38 +143,38 @@ onMounted(() => {
       </el-input>
     </el-form-item>
     <el-form-item label="系统信息">
-      <span>CPU： {{data.cpu_pct}}%</span>
-      <span style="margin-left: 30px">内存： {{data.ram_pct}}%</span>
+      <span>CPU： {{data.cpu_pct.toFixed(1)}}%</span>
+      <span style="margin-left: 30px">内存： {{data.ram_pct.toFixed(1)}}%</span>
     </el-form-item>
   </el-form>
   <el-descriptions border :column="2">
     <el-descriptions-item label="市场" align="center">{{data.exchange}}.{{data.market}}</el-descriptions-item>
     <el-descriptions-item label="时间周期" align="center">{{data.run_tfs.join(', ')}}</el-descriptions-item>
-    <el-descriptions-item label="启动时间" align="center">{{getDateStr(data.bot_start_timestamp)}}</el-descriptions-item>
+    <el-descriptions-item label="启动时间" align="center">{{ getDateStr(data.bot_start_ms) }}</el-descriptions-item>
     <el-descriptions-item label="最近活跃时间" align="center">{{getDateStr(data.last_process)}}</el-descriptions-item>
   </el-descriptions>
   <el-descriptions border title="" :column="4">
-    <el-descriptions-item label="第一笔" align="center">{{getDateStr(data.first_trade_timestamp)}}</el-descriptions-item>
-    <el-descriptions-item label="最新一笔" align="center">{{getDateStr(data.latest_trade_timestamp)}}</el-descriptions-item>
+    <el-descriptions-item label="第一笔" align="center">{{ getDateStr(data.first_od_ts) }}</el-descriptions-item>
+    <el-descriptions-item label="最新一笔" align="center">{{ getDateStr(data.last_od_ts) }}</el-descriptions-item>
     <el-descriptions-item label="平均持仓" align="center">{{fmtDuration(data.avg_duration)}}</el-descriptions-item>
     <el-descriptions-item label="交易量" align="center">{{data.total_cost?.toFixed(5)}}</el-descriptions-item>
 
     <el-descriptions-item label="最佳交易" align="center">{{data.best_pair}}</el-descriptions-item>
-    <el-descriptions-item label="最佳利润" align="center">{{(data.best_pair_profit_pct * 100).toFixed(1)}}%</el-descriptions-item>
-    <el-descriptions-item label="最大回撤" align="center">{{(data.max_drawdown * 100).toFixed(1)}}%</el-descriptions-item>
-    <el-descriptions-item label="最大回撤金额" align="center">{{data.max_drawdown_abs.toFixed(5)}}</el-descriptions-item>
+    <el-descriptions-item label="最佳利润" align="center">{{ (data.best_profit_pct * 100).toFixed(1) }}%</el-descriptions-item>
+    <el-descriptions-item label="最大回撤" align="center">{{ (data.max_drawdown_pct * 100).toFixed(1) }}%</el-descriptions-item>
+    <el-descriptions-item label="最大回撤金额" align="center">{{ data.max_drawdown_val.toFixed(5) }}</el-descriptions-item>
   </el-descriptions>
   <el-descriptions border title="全部订单" :column="4">
-    <el-descriptions-item label="平均收益率" align="center">{{data.profit_all_percent_mean.toFixed(1)}}%</el-descriptions-item>
-    <el-descriptions-item label="平均收益" align="center">{{data.profit_all_mean.toFixed(5)}}</el-descriptions-item>
-    <el-descriptions-item label="总收益率" align="center">{{data.profit_all_percent_sum.toFixed(1)}}%</el-descriptions-item>
-    <el-descriptions-item label="总收益" align="center">{{data.profit_all_sum.toFixed(5)}}</el-descriptions-item>
+    <el-descriptions-item label="平均收益率" align="center">{{ data.all_profit_pct_mean.toFixed(1) }}%</el-descriptions-item>
+    <el-descriptions-item label="平均收益" align="center">{{ data.all_profit_mean.toFixed(5) }}</el-descriptions-item>
+    <el-descriptions-item label="总收益率" align="center">{{ data.all_profit_pct_sum.toFixed(1) }}%</el-descriptions-item>
+    <el-descriptions-item label="总收益" align="center">{{ data.all_profit_sum.toFixed(5) }}</el-descriptions-item>
   </el-descriptions>
   <el-descriptions border title="已完成订单" :column="4">
-    <el-descriptions-item label="平均收益率" align="center">{{data.profit_closed_percent_mean.toFixed(1)}}%</el-descriptions-item>
-    <el-descriptions-item label="平均收益" align="center">{{data.profit_closed_mean.toFixed(5)}}</el-descriptions-item>
-    <el-descriptions-item label="总收益率" align="center">{{data.profit_closed_percent_sum.toFixed(1)}}%</el-descriptions-item>
-    <el-descriptions-item label="总收益" align="center">{{data.profit_closed_sum.toFixed(5)}}</el-descriptions-item>
+    <el-descriptions-item label="平均收益率" align="center">{{ data.done_profit_pct_mean.toFixed(1) }}%</el-descriptions-item>
+    <el-descriptions-item label="平均收益" align="center">{{ data.done_profit_mean.toFixed(5) }}</el-descriptions-item>
+    <el-descriptions-item label="总收益率" align="center">{{ data.done_profit_pct_sum.toFixed(1) }}%</el-descriptions-item>
+    <el-descriptions-item label="总收益" align="center">{{ data.done_profit_sum.toFixed(5) }}</el-descriptions-item>
   </el-descriptions>
   <div class="balance">
     <h3>钱包余额</h3>

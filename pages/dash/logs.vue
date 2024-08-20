@@ -14,7 +14,7 @@ store.menu_id = 'log'
 const content = reactive<string[]>([])
 
 async function loadData(){
-  const rsp = await getApi('/logs')
+  const rsp = await getApi('/log')
   content.splice(0, content.length)
   for(const item of rsp.logs){
     content.push(`${getDateStr(item[0])} ${item[1]} ${item[2]} ${item[3]}`)

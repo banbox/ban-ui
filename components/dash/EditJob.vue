@@ -42,7 +42,7 @@ function clickCancel(){
 </script>
 
 <template>
-  <el-dialog v-model="showModal" :title="`编辑:${job.pair}-${job.stgy}`" width="500">
+  <el-dialog v-model="showModal" :title="`编辑:${job.pair}-${job.strategy}`" width="500">
     <el-form label-width="120px">
       <el-form-item v-for="item in job.args" :label="item.title">
         <el-switch v-model="item.value" width="50" inline-prompt v-if="item.val_type == 'bool'"/>

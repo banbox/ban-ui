@@ -1,13 +1,13 @@
 export interface TradeBot{
   url: string
-  account: string
+  user_name: string
   password: string
-  auto_refresh: boolean,
+  auto_refresh: boolean
   name?: string
   avaiable?: boolean
-  last_beat?: number
-  access_token?: string
-  refresh_token?: string
+  token?: string
+  account?: string
+  role?: string
 }
 
 export interface BalanceItem{
@@ -15,6 +15,7 @@ export interface BalanceItem{
   total: number,
   free: number,
   used: number,
+  upol: number,
   total_fiat: number
 }
 
@@ -23,31 +24,31 @@ export interface BotInfo{
   ram_pct: number,
   last_process: number,
   allow_trade_at: number,
-  profit_closed_percent_mean: number
-  profit_closed_mean: number
-  profit_closed_percent_sum: number
-  profit_closed_sum: number
-  profit_all_percent_mean: number
-  profit_all_mean: number
-  profit_all_percent_sum: number
-  profit_all_sum: number
-  trade_count: number
-  closed_trade_count: number
-  first_trade_timestamp?: number
-  latest_trade_timestamp?: number
+  done_profit_pct_mean: number
+  done_profit_mean: number
+  done_profit_pct_sum: number
+  done_profit_sum: number
+  all_profit_pct_mean: number
+  all_profit_mean: number
+  all_profit_pct_sum: number
+  all_profit_sum: number
+  order_num: number
+  done_order_num: number
+  first_od_ts?: number
+  last_od_ts?: number
   avg_duration: string
   best_pair?: string
-  best_pair_profit_pct: number
-  winning_trades: number
-  losing_trades: number
+  best_profit_pct: number
+  win_num: number
+  loss_num: number
   profit_factor: number
-  winrate: number
+  win_rate: number
   expectancy: number
   expectancy_ratio: number
-  max_drawdown: number
-  max_drawdown_abs: number
+  max_drawdown_pct: number
+  max_drawdown_val: number
   total_cost?: number
-  bot_start_timestamp: number
+  bot_start_ms: number
 
   balance_total: number
   balance_items: BalanceItem[]
@@ -74,7 +75,7 @@ export interface FieldArg{
 
 export interface PairStgyTf{
   pair: string
-  stgy: string
+  strategy: string
   tf: string
   price: number
   od_num: number

@@ -10,7 +10,7 @@ export const useDashLocal = defineStore('dashLocal', () => {
   const bot = computed(() => {
     return all_bots.value[cur_id.value] ?? {
       url: '',
-      account: '',
+      user_name: '',
       password: '',
       auto_refresh: false
     }

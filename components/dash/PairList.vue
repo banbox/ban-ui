@@ -30,31 +30,10 @@ const showModal = computed({
   }
 })
 
-const whitelist = reactive<string[]>([])
-const blacklist = reactive<string[]>([])
 const showInput = ref(false)
 const input_val = ref('')
 const loading = ref(false)
 
-
-function applyResult(rsp: ApiResult){
-  blacklist.splice(0, blacklist.length, ...rsp.blacklist)
-  whitelist.splice(0, whitelist.length, ...rsp.whitelist)
-}
-
-
-async function loadData(){
-  const rsp = await getApi(`/pairlist`)
-  applyResult(rsp)
-}
-
-onMounted(() => {
-  loadData()
-})
-
-const pair_list = computed(() => {
-  return props.is_white ? whitelist : blacklist
-})
 
 function onOptionResult(rsp: ApiResult){
   let type = 'success';

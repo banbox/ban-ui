@@ -57,7 +57,7 @@ function resetStyle(){
 </script>
 
 <style scoped lang="scss">
-@import "~/assets/klinebase.scss";
+@import "@/assets/klinebase.scss";
 
 .#{$prefix-cls}-setting-modal-content {
   display: grid;

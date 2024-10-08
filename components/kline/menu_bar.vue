@@ -7,7 +7,6 @@
   <KlineIndCfgModal v-model="store.modalIndCfg" />
   <KlineTimezoneModal v-model="showTimezoneModal"/>
   <KlineI18nModal v-model="showI18nModal"/>
-  <LoginBox v-model="store.showLogin"/>
   <div ref="period_bar" class="klinecharts-pro-period-bar">
     <div class='menu-container'>
       <svg
@@ -93,9 +92,6 @@
             </el-dropdown-menu>
           </template>
         </el-dropdown>
-        <div class="item tools" v-else @click="store.showLogin = true">
-          <span>{{$t('login')}}</span>
-        </div>
       </client-only>
       <div class="item tools big120" v-if="hasRight">
         <svg
@@ -255,7 +251,7 @@ function toggleFullscreen() {
 </script>
 
 <style lang="scss">
-@import "~/assets/klinebase.scss";
+@import "@/assets/klinebase.scss";
 
 .#{$prefix-cls}-period-bar {
   position: relative;

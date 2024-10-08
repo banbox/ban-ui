@@ -56,7 +56,7 @@ let cloud_ind_loaded = false;
 type NoParamFunc = () => void
 let cloud_ind_cbs: NoParamFunc[] = [];
 
-const watermark = ref('<img width="432" src="/watermark.png"/>')
+const watermark = ref('<img width="432" src=""/>')
 
 const periods = reactive<Period[]>(AllPeriods)
 
@@ -436,8 +436,8 @@ watch(() => main.fireOhlcv, async () => {
 </template>
 
 <style lang="scss">
-@import "~/assets/klinebase.scss";
-@import '~/assets/klinefont.css';
+@import "@/assets/klinebase.scss";
+@import '@/assets/klinefont.css';
 body{
   margin: 0;
   min-height: 100vh;

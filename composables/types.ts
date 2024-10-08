@@ -15,6 +15,14 @@ export interface BotTask{
   profit_rate: number
 }
 
+export interface TaskSymbol{
+  symbol: string,
+  start_ms: number,
+  stop_ms: number,
+  order_num: number,
+  tot_profit: number,
+}
+
 export const OrderStatus = [
   '等待执行',
   '部分完成',
@@ -55,7 +63,6 @@ export interface BanOrder extends Record<string, any>{
   enter_id: number
   enter_task_id: number
   enter_inout_id: number
-  enter_symbol: string
   enter_order_type: string
   enter_order_id: string
   enter_side: string
@@ -72,7 +79,6 @@ export interface BanOrder extends Record<string, any>{
   exit_id?: number
   exit_task_id?: number
   exit_inout_id?: number
-  exit_symbol?: string
   exit_order_type?: string
   exit_order_id?: string
   exit_side?: string

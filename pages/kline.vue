@@ -2,7 +2,6 @@
   <KlineChart :has-right="true">
     <div class="kline-slide" v-show="klocal.showRight">
       <TopChange/>
-      <OpinionFlow/>
     </div>
   </KlineChart>
 </template>

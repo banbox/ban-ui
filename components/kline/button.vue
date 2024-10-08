@@ -11,7 +11,7 @@ const props = defineProps<{
 </script>
 
 <style lang="scss">
-@import '~/assets/klinebase.scss';
+@import '@/assets/klinebase.scss';
 
 .#{$prefix-cls}-button {
   display: flex;

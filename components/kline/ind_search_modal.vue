@@ -88,7 +88,7 @@ function toggleInd(is_main: boolean, name: string, val: any){
 </script>
 
 <style lang="scss">
-@import '~/assets/klinebase.scss';
+@import '@/assets/klinebase.scss';
 .#{$prefix-cls}-symbol-search-modal-input{
   margin: 10px 0;
 }

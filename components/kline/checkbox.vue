@@ -36,7 +36,7 @@ const showModal = computed({
 </script>
 
 <style scoped lang="scss">
-@import '~/assets/klinebase.scss';
+@import '@/assets/klinebase.scss';
 
 .#{$prefix-cls}-checkbox {
   display: flex;

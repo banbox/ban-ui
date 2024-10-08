@@ -287,6 +287,12 @@ export function useSymbols() {
     try {
       const res = await datafeed.getSymbols()
       main.all_symbols.splice(0, main.all_symbols.length, ...res)
+      main.all_exgs.clear();
+      main.all_symbols.forEach(s => {
+        if (s.exchange){
+          main.all_exgs.add(s.exchange);
+        }
+      })
     } catch (err) {
       main.pairs_error = JSON.stringify(err)
     }

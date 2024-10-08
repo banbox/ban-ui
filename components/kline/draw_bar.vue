@@ -294,7 +294,7 @@ defineExpose({
 </script>
 
 <style scoped lang="scss">
-@import '~/assets/klinebase.scss';
+@import '@/assets/klinebase.scss';
 
 $gap: 8px;
 

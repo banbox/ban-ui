@@ -75,7 +75,7 @@ watch(keyword, async (new_val) => {
 </script>
 
 <style scoped lang="scss">
-@import '~/assets/klinebase.scss';
+@import '@/assets/klinebase.scss';
 
 .#{$prefix-cls}-symbol-search-modal-input {
   margin: 20px 0 10px 0;

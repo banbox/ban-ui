@@ -62,7 +62,7 @@ function inputChange(e: any, name: string){
 </script>
 
 <style lang="scss">
-@import '~/assets/klinebase.scss';
+@import '@/assets/klinebase.scss';
 
 .#{$prefix-cls}-input {
   display: flex;

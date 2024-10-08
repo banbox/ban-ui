@@ -48,8 +48,8 @@ function setSlideTab(tab_name: string){
 </template>
 
 <style lang="scss">
-@import "~/assets/klinebase.scss";
-@import '~/assets/klinefont.css';
+@import "@/assets/klinebase.scss";
+@import '@/assets/klinefont.css';
 #__nuxt{
   --c-aside-width: 325px;
 }

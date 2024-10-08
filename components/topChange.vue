@@ -157,7 +157,7 @@ function clickRow(row: any){
 </script>
 
 <style scoped lang="scss">
-@import "~/assets/klinebase.scss";
+@import "@/assets/klinebase.scss";
 .top-chg-box{
   padding: 5px 0;
   border: 1px solid var(--klinecharts-pro-border-color);

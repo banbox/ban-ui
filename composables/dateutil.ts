@@ -1,6 +1,7 @@
 import {useDayjs} from "#dayjs"
 import {type Period} from "~/components/kline/types";
 import * as kc from "klinecharts";
+import {string} from "postcss-selector-parser";
 const FormatDateType = kc.FormatDateType
 export const formatDate = kc.utils.formatDate
 let tz_applied = false;
@@ -300,4 +301,12 @@ export function translateTimezone (timezone: string): string {
 
 export function getTimezoneSelectOptions () {
   return Object.entries(timezone_map).map(([key, text]) => ({ key, text }));
+}
+
+export function StampToYMD(dateMs: number) {
+  const date = new Date(dateMs);
+  const year = date.getUTCFullYear().toString();
+  const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+  const day = date.getUTCDate().toString().padStart(2, '0');
+  return `${year}${month}${day}`;
 }

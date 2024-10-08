@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import type {BotTask} from "~/composables/types";
+import type {BotTask, TaskSymbol} from "~/composables/types";
 import type {BanOrder, TradeInfo} from "~/composables/types";
 import type {Chart, OverlayCreate} from "klinecharts";
 import {fmtDuration, tf_to_secs} from "~/composables/dateutil";
 import {useKlineLocal} from "~/stores/klineLocal";
 import {useKlineStore} from "~/stores/kline";
 import {Delete, Refresh} from "@element-plus/icons-vue"
+import Papa from 'papaparse';
+import {useSymbols} from "~/composables/kline/coms";
 
 const empty_task = {
   task_id: 0,
@@ -23,15 +25,20 @@ const task_list = reactive<BotTask[]>([])
 const allow_modes = reactive<string[]>(['live', 'non_live'])
 const cur_task = reactive<BotTask>({...empty_task})
 const trade_list = reactive<BanOrder[]>([])
+const task_symbols = reactive<TaskSymbol[]>([])
+const inputFile = ref<HTMLInputElement>()
 const trade_gp = 'ban_trades';
 const loadingTask = ref(false);
+const showSymbols = ref(false);
 const showItemMenu = ref(false);
+const file_exchange = ref('');
 let loadingOrders = false;
 const menuPos = reactive({
   top: '0px', left: '0px'
 })
 const klocal = useKlineLocal()
 const main = useKlineStore()
+const {loadSymbols} = useSymbols()
 const show_num = 1000
 
 async function loadData(){
@@ -39,7 +46,7 @@ async function loadData(){
   task_list.splice(0, task_list.length, ...(rsp.data ?? []))
 }
 
-const cur_list = computed(() => {
+const cur_tasks = computed(() => {
   if(!allow_modes.length){
     return [] as BotTask[]
   }
@@ -52,15 +59,125 @@ const cur_list = computed(() => {
 
 onMounted(() => {
   loadData()
+  loadSymbols()
 })
 
 function clickMode(mode: string){
+  if (mode == 'file'){
+    inputFile.value?.click()
+    return
+  }
   if(allow_modes.includes(mode)){
     allow_modes.splice(allow_modes.indexOf(mode), 1)
   }
   else {
     allow_modes.push(mode)
   }
+}
+
+function onSelFile(event: any){
+  const file = event.target.files[0];
+  const exg_name = file.name.split('.')[0];
+  if (!main.all_exgs.has(exg_name)){
+    ElMessage.error({message: 'invalid exchange, csv name must be [exchange].[market].csv'})
+    console.error('valid exchanges:', toRaw(main.all_exgs))
+    return;
+  }
+  file_exchange.value = exg_name;
+  Papa.parse(file, {
+    header: true,
+    complete: (res: any) => {
+      trade_list.splice(0, trade_list.length)
+      let group = {} as { [symbol: string]: TaskSymbol }
+      res.data.forEach((r: Record<string, string>) => {
+        if (!r['entAt'])return
+        const entMS = new Date(r['entAt'] + 'Z').getTime()
+        const exitMS = new Date(r['exitAt'] + 'Z').getTime()
+        const entPrice = parseFloat(r['entPrice']);
+        const entAmount = parseFloat(r['entAmount']);
+        const exitAmount = parseFloat(r['exitAmount']);
+        const profit = parseFloat(r['profit'])
+        trade_list.push({
+          id: 0,
+          task_id: -1,
+          symbol: r['symbol'],
+          sid: parseInt(r['sid']),
+          timeframe: r['timeframe'],
+          short: r['direction'] == 'short',
+          status: 4,
+          enter_tag: r['entTag'],
+          init_price: entPrice,
+          quote_cost: parseFloat(r['entCost']),
+          exit_tag: r['exitTag'],
+          leverage: parseFloat(r['leverage']),
+          enter_at: entMS,
+          exit_at: exitMS,
+          strategy: '',
+          stg_ver: 0,
+          profit_rate: parseFloat(r['profitRate']),
+          profit: profit,
+          enter_cost: parseFloat(r['entCost']),
+          duration: 0,
+          enter_id: 0,
+          enter_task_id: 0,
+          enter_inout_id: 0,
+          enter_order_type: '',
+          enter_order_id: '',
+          enter_side: 'buy',
+          enter_create_at: entMS,
+          enter_price: entPrice,
+          enter_average: entPrice,
+          enter_amount: entAmount,
+          enter_filled:  entAmount,
+          enter_status: 2,
+          enter_fee: parseFloat(r['entFee']),
+          enter_fee_type: '',
+          enter_update_at: entMS,
+          info: '',
+          exit_side: 'sell',
+          exit_create_at: exitMS,
+          exit_price: parseFloat(r['exitPrice']),
+          exit_amount: exitAmount,
+          exit_filled: exitAmount,
+          exit_fee: parseFloat(r['exitFee']),
+          exit_update_at: exitMS,
+        })
+        const symbol = r['symbol']
+        if (!group[symbol]){
+          group[symbol] = {
+            symbol: symbol,
+            start_ms: entMS,
+            stop_ms: exitMS,
+            order_num: 1,
+            tot_profit: profit,
+          }
+        }else{
+          const old = group[symbol];
+          old.start_ms = Math.min(old.start_ms, entMS)
+          old.stop_ms = Math.max(old.stop_ms, exitMS)
+          old.order_num += 1
+          old.tot_profit += profit;
+        }
+      })
+      task_symbols.splice(0, task_symbols.length);
+      for (let k in group) {
+        task_symbols.push(group[k])
+      }
+      showSymbols.value = true;
+    }
+  });
+}
+
+function clickSymbol(idx: number){
+  // 删除旧的订单覆盖物
+  main.chart?.removeOverlay({groupId: trade_gp})
+  const item = task_symbols[idx];
+  const cur_pair = item.symbol
+  klocal.setSymbolTicker(cur_pair)
+  klocal.dt_start = StampToYMD(item.start_ms);
+  klocal.dt_stop = StampToYMD(item.stop_ms);
+  trade_list.splice(0, trade_list.length)
+  loadDataRange()
 }
 
 /**
@@ -152,7 +269,7 @@ async function clickTask(task_idx: number){
   }
   if(loadingTask.value)return
   loadingTask.value = true;
-  const task = cur_list.value[task_idx];
+  const task = cur_tasks.value[task_idx];
   Object.assign(cur_task, task)
   // 删除旧的订单覆盖物
   main.chart?.removeOverlay({groupId: trade_gp})
@@ -174,7 +291,7 @@ async function clickTask(task_idx: number){
 }
 
 function itemRightClick(e: PointerEvent, index: number){
-  Object.assign(cur_task, cur_list.value[index])
+  Object.assign(cur_task, cur_tasks.value[index])
   menuPos.left = `${e.clientX}px`
   menuPos.top = `${e.clientY}px`
   showItemMenu.value = true
@@ -222,17 +339,20 @@ watch(klocal.symbol, () => {
   <div class="list-wrap">
     <div class="head-box">
       <div class="head-tags">
+        <input type="file" ref="inputFile" @change="onSelFile" style="display: none"/>
         <el-tag @click="clickMode('non_live')"
           :effect="allow_modes.includes('non_live') ? 'dark':'light'">回测</el-tag>
         <el-tag @click="clickMode('live')"
           :effect="allow_modes.includes('live') ? 'dark':'light'">实时</el-tag>
+        <el-tag @click="clickMode('file')"
+                :effect="allow_modes.includes('file') ? 'dark':'light'">加载</el-tag>
       </div>
       <div class="head-right">
         <el-icon size="20px" @click="loadData"><Refresh/></el-icon>
       </div>
     </div>
-    <div class="task-list">
-      <div class="item" v-for="(item, index) in cur_list" :key="index"
+    <div class="task-list" v-if="!showSymbols">
+      <div class="item" v-for="(item, index) in cur_tasks" :key="index"
           :class="[item.live ? 'live':'', {active: item.task_id == cur_task.task_id}]" @click="clickTask(index)"
            @contextmenu.prevent="itemRightClick($event, index)">
         <div class="top">
@@ -254,6 +374,17 @@ watch(klocal.symbol, () => {
         <div class="action" @click="delTask">
           <el-icon><Delete/></el-icon>
           <span>删除</span>
+        </div>
+      </div>
+    </div>
+    <div class="symbol-list">
+      <div class="item" v-for="(item, index) in task_symbols" :key="index" @click="clickSymbol(index)">
+        <div class="top">
+          <span class="pair">{{item.symbol}}</span>
+        </div>
+        <div class="info">
+          <span class="num">{{item.order_num}}笔</span>
+          <span class="profit">{{(item.tot_profit).toFixed(1)}}</span>
         </div>
       </div>
     </div>
@@ -288,7 +419,7 @@ watch(klocal.symbol, () => {
     cursor: pointer;
   }
 }
-.task-list{
+.task-list, .symbol-list{
   border-left: 1px solid var(--el-color-info-light-7);
   border-top: 1px solid var(--el-color-info-light-7);
   overflow-y: auto;

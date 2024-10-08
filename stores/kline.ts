@@ -7,7 +7,6 @@ import {getDefaults} from "~/config";
 
 
 export const useKlineStore = defineStore('kline', () => {
-  const showLogin = ref(false)
   const showDrawBar = ref(true)
   const modalIndCfg = ref(false)
   const editPaneId = ref('')
@@ -27,6 +26,7 @@ export const useKlineStore = defineStore('kline', () => {
   // 限制只能查看这些symbols
   const cur_symbols = reactive<SymbolInfo[]>([])
   const all_symbols = reactive<SymbolInfo[]>([])
+  const all_exgs = reactive<Set<string>>(new Set())
   const pairs_loading = ref(false)
   const pairs_error = ref<string>('')
 
@@ -64,8 +64,8 @@ export const useKlineStore = defineStore('kline', () => {
     return cur_symbols.length ? cur_symbols : all_symbols
   })
 
-  return {chart, loadingChart, showLogin, showDrawBar, modalIndCfg, editPaneId, editIndName, authTFList,
-    fireOhlcv, start_ms, stop_ms, fireKRange, klineLoaded, all_inds, cur_symbols, all_symbols, setCurSymbols,
-    color_short, color_long, pairs_loading, pairs_error, symbols
+  return {chart, loadingChart, showDrawBar, modalIndCfg, editPaneId, editIndName, authTFList,
+    fireOhlcv, start_ms, stop_ms, fireKRange, klineLoaded, all_inds, cur_symbols, all_symbols, all_exgs,
+    setCurSymbols, color_short, color_long, pairs_loading, pairs_error, symbols
   }
 })

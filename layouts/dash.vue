@@ -32,11 +32,8 @@ function goPage(path: string){
   <el-container class="root-body">
     <el-menu :collapse="collapse" class="lay-menu" :default-active="store.menu_id">
       <div class="user-box">
-        <div class="logo-box" @click="goPage('/dash')" v-if="!collapse">
-          <img width="80" src="/logo_w_200.png"/>
-        </div>
-        <div class="logo-box" v-else>
-          <img width="30" src="/logo_w_200.png"/>
+        <div class="logo-box" @click="goPage('/dash')">
+          <span>Banbot</span>
         </div>
       </div>
       <el-menu-item index="index" @click="goPage('/dash/board')">

@@ -16,10 +16,10 @@ useSeoMeta({
   ogTitle: t('appTitle'),
   description: t('appDescription'),
   ogDescription: t('appDescription'),
-  ogImage: 'https://www.digochain.com/logo_200.png'
+  ogImage: ''
 })
 </script>
 
 <style lang="scss">
-@import "assets/site";
+@import "@/assets/site.scss";
 </style>

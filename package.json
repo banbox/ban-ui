@@ -28,7 +28,6 @@
     "@pinia/nuxt": "^0.5.3",
     "klinecharts": "^9.8.10",
     "mitt": "^3.0.1",
-    "papaparse": "^5.4.1",
     "pinia": "^2.2.2"
   }
 }

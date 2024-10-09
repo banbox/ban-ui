@@ -17,6 +17,7 @@ export interface BotTask{
 
 export interface TaskSymbol{
   symbol: string,
+  timeframe: string,
   start_ms: number,
   stop_ms: number,
   order_num: number,

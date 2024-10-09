@@ -310,7 +310,7 @@ async function customLoadKline(){
   const start_ms = toUTCStamp(klocal.dt_start)
   let stop_ms = toUTCStamp(klocal.dt_stop)
   if(!start_ms || !stop_ms){
-    ElMessageBox.alert('时间无效，请使用：202301011200')
+    await ElMessageBox.alert('时间无效，请使用：202301011200')
     return;
   }
   tf_msecs = tf_to_secs(klocal.period.timeframe) * 1000
@@ -319,7 +319,7 @@ async function customLoadKline(){
     stop_ms = start_ms + tf_msecs * defaults.maxBarNum;
     const stop_str = getDateStr(stop_ms)
     ElMessage({
-      message: `长度${totalNum}, 已截取${defaults.maxBarNum}, 截止时间：${stop_str}`,
+      message: `too long:${totalNum}, cut ${defaults.maxBarNum} to ${stop_str}`,
       type: 'warning',
       duration: 2000
     })

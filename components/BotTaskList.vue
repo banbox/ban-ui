@@ -6,8 +6,12 @@ import {fmtDuration, tf_to_secs} from "~/composables/dateutil";
 import {useKlineLocal} from "~/stores/klineLocal";
 import {useKlineStore} from "~/stores/kline";
 import {Delete, Refresh} from "@element-plus/icons-vue"
-import Papa from 'papaparse';
 import {useSymbols} from "~/composables/kline/coms";
+useHead({
+  script: [
+    {src: `/js/papaparse.min.js`, async: true},
+  ],
+});
 
 const empty_task = {
   task_id: 0,
@@ -84,8 +88,9 @@ function onSelFile(event: any){
     return;
   }
   file_exchange.value = exg_name;
-  Papa.parse(file, {
+  window.Papa.parse(file, {
     header: true,
+    skipEmptyLines: true,
     complete: (res: any) => {
       trade_list.splice(0, trade_list.length)
       let group = {} as { [symbol: string]: TaskSymbol }
@@ -96,8 +101,9 @@ function onSelFile(event: any){
         const entPrice = parseFloat(r['entPrice']);
         const entAmount = parseFloat(r['entAmount']);
         const exitAmount = parseFloat(r['exitAmount']);
-        const profit = parseFloat(r['profit'])
-        trade_list.push({
+        const profit = parseFloat(r['profit']);
+        const exitPrice = parseFloat(r['exitPrice']);
+        const od = {
           id: 0,
           task_id: -1,
           symbol: r['symbol'],
@@ -136,16 +142,24 @@ function onSelFile(event: any){
           info: '',
           exit_side: 'sell',
           exit_create_at: exitMS,
-          exit_price: parseFloat(r['exitPrice']),
+          exit_price: exitPrice,
+          exit_average: exitPrice,
           exit_amount: exitAmount,
           exit_filled: exitAmount,
+          exit_status: 2,
           exit_fee: parseFloat(r['exitFee']),
           exit_update_at: exitMS,
-        })
+        } as BanOrder
+        if (od.short){
+          od.enter_side = 'sell'
+          od.exit_side = 'buy'
+        }
+        trade_list.push(od)
         const symbol = r['symbol']
         if (!group[symbol]){
           group[symbol] = {
             symbol: symbol,
+            timeframe: r['timeframe'],
             start_ms: entMS,
             stop_ms: exitMS,
             order_num: 1,
@@ -163,21 +177,24 @@ function onSelFile(event: any){
       for (let k in group) {
         task_symbols.push(group[k])
       }
+      console.log('load trades from csv done, symbols:', task_symbols.length, ', trades:', trade_list.length)
       showSymbols.value = true;
     }
   });
 }
 
 function clickSymbol(idx: number){
-  // 删除旧的订单覆盖物
+  // 点击品种，修改顶部菜单栏
   main.chart?.removeOverlay({groupId: trade_gp})
   const item = task_symbols[idx];
   const cur_pair = item.symbol
   klocal.setSymbolTicker(cur_pair)
   klocal.dt_start = StampToYMD(item.start_ms);
   klocal.dt_stop = StampToYMD(item.stop_ms);
-  trade_list.splice(0, trade_list.length)
-  loadDataRange()
+  klocal.setTimeframe(item.timeframe)
+  main.stop_ms += item.stop_ms
+  main.start_ms = item.start_ms
+  main.fireOhlcv += 1
 }
 
 /**
@@ -191,34 +208,33 @@ function loadVisiableTrades(){
   if(!dataList.length)return;
   const start_ms = dataList[0].timestamp;
   const stop_ms = dataList[dataList.length - 1].timestamp;
-  const show_trades = trade_list.filter(td => start_ms <= td.enter_at && td.exit_at <= stop_ms);
+  const symbol = klocal.symbol.ticker;
+  const show_trades = trade_list.filter(td => td.symbol == symbol && start_ms <= td.enter_at && td.exit_at <= stop_ms);
   if(!show_trades.length)return;
   chartObj.removeOverlay({groupId: trade_gp})
-  const cur_ols = show_trades.map(td => {
+  show_trades.forEach(td => {
     let color = '#1677FF';
     let exit_color = '#01C5C4';
     if(td.short){
       color = '#FF9600';
       exit_color = '#935EBD';
     }
-    const in_action = `开${td.short ? "空" : "多"}`
-    const out_action = `平${td.short ? "空" : "多"}`
-    const in_text = `${in_action} ${td.enter_tag} ${td.leverage}倍
-${td.strategy}
-下单：${getDateStr(td.enter_at)}
-入场：${getDateStr(td.enter_create_at)}
-价格：${td.enter_average.toFixed(5)}
-数量：${td.enter_amount.toFixed(6)}
-花费：${td.enter_cost.toFixed(2)}`
-    const out_text = `${out_action} ${td.exit_tag} ${td.leverage}倍
-${td.strategy}
-下单：${getDateStr(td.exit_at)}
-出场：${getDateStr(td.exit_create_at ?? 0)}
-价格：${td.exit_average?.toFixed(5)}
-数量：${td.exit_amount?.toFixed(6)}
-利润：${(td.profit_rate * 100).toFixed(1)}% ${td.profit.toFixed(5)}
-持有：${fmtDuration(td.duration)}`
-    return {
+    const in_action = `open ${td.short ? "short" : "long"}`
+    const out_action = `close ${td.short ? "short" : "long"}`
+    const in_text = `${in_action} ${td.enter_tag}
+${td.strategy} lev: ${td.leverage}
+Time: ${getDateStr(td.enter_create_at)}
+Price: ${td.enter_average.toFixed(5)}
+Amount: ${td.enter_amount.toFixed(6)}
+Cost: ${td.enter_cost.toFixed(2)}`
+    const out_text = `${out_action} ${td.exit_tag}
+${td.strategy} lev: ${td.leverage}
+Time: ${getDateStr(td.exit_create_at ?? 0)}
+Price: ${td.exit_average?.toFixed(5)}
+Amount: ${td.exit_amount?.toFixed(6)}
+Cost: ${(td.profit_rate * 100).toFixed(1)}% ${td.profit.toFixed(5)}
+Dura: ${fmtDuration(td.duration)}`
+    chartObj.createOverlay({
       name: 'trade',
       groupId: trade_gp,
       points: [
@@ -232,10 +248,7 @@ ${td.strategy}
         out_color: exit_color,
         out_text: out_text
       } as TradeInfo
-    } as OverlayCreate
-  })
-  cur_ols.forEach(ol => {
-    chartObj.createOverlay(ol)
+    } as OverlayCreate)
   })
 }
 
@@ -243,7 +256,7 @@ ${td.strategy}
  * 设置K线图的时间范围并显示。
  * 如果当前币种有订单，则显示到最新订单。否则显示到任务结束时间。
  */
-function loadDataRange(){
+function loadTaskKline(){
   if(cur_task.task_id == 0)return
   let timeframe = cur_task.tfs[0]
   const cur_pair = klocal.symbol.ticker
@@ -279,7 +292,7 @@ async function clickTask(task_idx: number){
   klocal.setSymbolTicker(cur_pair)
   trade_list.splice(0, trade_list.length)
   // 先加载数据，避免获取订单时间太长
-  loadDataRange()
+  loadTaskKline()
   // 加载任务的所有订单
   const rsp = await getApi('/dev/orders', {task_id: task.task_id})
   const res_ods = (rsp.data || []) as BanOrder[]
@@ -287,7 +300,7 @@ async function clickTask(task_idx: number){
       && td.exit_at && td.exit_price)
   trade_list.splice(0, trade_list.length, ...valid_ods)
   // K线显示到此币种订单的最新时间
-  loadDataRange()
+  loadTaskKline()
 }
 
 function itemRightClick(e: PointerEvent, index: number){
@@ -329,7 +342,7 @@ watch(() => main.klineLoaded, () => {
 
 
 watch(klocal.symbol, () => {
-  loadDataRange()
+  loadTaskKline()
 })
 
 

@@ -69,7 +69,7 @@ onMounted(() => {
 
 <template>
   <div class="main-body">
-    <img src="/logo_200.png">
+    <div>Banbot</div>
     <h1>{{$t('dash_h1')}}</h1>
     <p>{{$t('dash_desc')}}</p>
     <p>
